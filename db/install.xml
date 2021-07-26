@@ -18,14 +18,8 @@
         <FIELD NAME="displaytype" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="display type"/>
         <FIELD NAME="popupheight" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="popup height"/>
         <FIELD NAME="popupwidth" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="popup width"/>
-        <FIELD NAME="embbeded" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="embbeded mode for Mattermost web client" />
         <FIELD NAME="moderatorroles" TYPE="char" LENGTH="255" SEQUENCE="false" NOTNULL="false" COMMENT="Moodle roles in course that will be Mattermost moderators."/>
         <FIELD NAME="userroles" TYPE="char" LENGTH="255" SEQUENCE="false" NOTNULL="false" COMMENT="Moodle roles in course that will be Mattermost user (with normal rights)."/>
-        <FIELD NAME="retentionenabled" TYPE="int" LENGTH="1" SEQUENCE="false" NOTNULL="true" DEFAULT="0" COMMENT="override global message retnetion time"/>
-        <FIELD NAME="overrideglobal" TYPE="int" LENGTH="1" SEQUENCE="false" NOTNULL="true" DEFAULT="0" COMMENT="override global message retnetion time"/>
-        <FIELD NAME="maxage" TYPE="int" LENGTH="10" SEQUENCE="false" NOTNULL="true" DEFAULT="90" COMMENT="maxAge value for retention policy overriding"/>
-        <FIELD NAME="filesonly" TYPE="int" LENGTH="1" SEQUENCE="false" NOTNULL="true" DEFAULT="0" COMMENT="remove only files while deleting messages (retnetion policy)"/>
-        <FIELD NAME="excludepinned" TYPE="int" LENGTH="1" SEQUENCE="false" NOTNULL="true" DEFAULT="0" COMMENT="exclude pinned messages while deleting messages (retnetion policy)"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

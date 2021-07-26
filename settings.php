@@ -26,7 +26,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// require_once($CFG->dirroot.'/mod/mattermost/locallib.php');
 require_once($CFG->libdir . '/enrollib.php');
 // Make sure core is loaded.
 
@@ -67,9 +66,18 @@ if ($ADMIN->fulltree) {
     );
     $settings->add(
         new admin_setting_configtext(
-            'mod_mattermost/oauthservice',
-            get_string('oauthservice', 'mod_mattermost'),
-            get_string('oauthservice_desc', 'mod_mattermost'),
+            'mod_mattermost/authservice',
+            get_string('authservice', 'mod_mattermost'),
+            get_string('authservice_desc', 'mod_mattermost'),
+            null,
+            PARAM_TEXT
+        )
+    );
+    $settings->add(
+        new admin_setting_configtext(
+            'mod_mattermost/authdata',
+            get_string('authdata', 'mod_mattermost'),
+            get_string('authdata_desc', 'mod_mattermost'),
             null,
             PARAM_TEXT
         )
@@ -116,7 +124,7 @@ if ($ADMIN->fulltree) {
         new admin_setting_configtext('mod_mattermost/validationgroupnameregex',
             get_string('validationgroupnameregex', 'mod_mattermost'),
             get_string('validationgroupnameregex_desc', 'mod_mattermost'),
-                '/[^0-9a-zA-Z-_.]/'
+            '/[^0-9a-zA-Z-_.]/'
         )
     );
 
@@ -146,20 +154,18 @@ if ($ADMIN->fulltree) {
         1
     ));
 
-    $settings->add(new admin_setting_configcheckbox(
-        'mod_mattermost/background_restore', get_string('background_restore', 'mod_mattermost'),
+    $settings->add(new admin_setting_configcheckbox('mod_mattermost/background_restore',
+        get_string('background_restore', 'mod_mattermost'),
         get_string('background_restore_desc', 'mod_mattermost'),
         1
     ));
-
-    // $settings->add(new admin_setting_configcheckbox(
-    //     'mod_mattermost/background_synchronize', get_string('background_synchronize', 'mod_mattermost'),
-    //     get_string('background_synchronize_desc', 'mod_mattermost'),
-    //     1
-    // ));
-
-    $settings->add(new admin_setting_configcheckbox(
-        'mod_mattermost/background_user_update', get_string('background_user_update', 'mod_mattermost'),
+    $settings->add(new admin_setting_configcheckbox('mod_mattermost/background_synchronize',
+        get_string('background_synchronize', 'mod_mattermost'),
+        get_string('background_synchronize_desc', 'mod_mattermost'),
+        1
+    ));
+    $settings->add(new admin_setting_configcheckbox('mod_mattermost/background_user_update',
+        get_string('background_user_update', 'mod_mattermost'),
         get_string('background_user_update_desc', 'mod_mattermost'),
         1
     ));
