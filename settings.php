@@ -48,8 +48,7 @@ $ADMIN->add('modmattermostfolder', new admin_externalpage(
 
 if ($ADMIN->fulltree) {
     $settings->add(
-        new admin_setting_configtext(
-            'mod_mattermost/instanceurl',
+        new admin_setting_configtext('mod_mattermost/instanceurl',
             get_string('instanceurl', 'mod_mattermost'),
             get_string('instanceurl_desc', 'mod_mattermost'),
             null,
@@ -57,29 +56,30 @@ if ($ADMIN->fulltree) {
         )
     );
     $settings->add(
-        new admin_setting_configpasswordunmask(
-            'mod_mattermost/secret',
+        new admin_setting_configpasswordunmask('mod_mattermost/secret',
             get_string('secret', 'mod_mattermost'),
             get_string('secret_desc', 'mod_mattermost'),
             ''
         )
     );
+
+    $authservices = array('ldap', 'saml');
     $settings->add(
-        new admin_setting_configtext(
-            'mod_mattermost/authservice',
+        new admin_setting_configselect('mod_mattermost/authservice',
             get_string('authservice', 'mod_mattermost'),
             get_string('authservice_desc', 'mod_mattermost'),
-            null,
-            PARAM_TEXT
+            'ldap',
+            $authservices
         )
     );
+
+    $authdata = array('email', 'username');
     $settings->add(
-        new admin_setting_configtext(
-            'mod_mattermost/authdata',
+        new admin_setting_configselect('mod_mattermost/authdata',
             get_string('authdata', 'mod_mattermost'),
             get_string('authdata_desc', 'mod_mattermost'),
-            null,
-            PARAM_TEXT
+            'email',
+            $authdata
         )
     );
     $settings->add(
@@ -91,26 +91,26 @@ if ($ADMIN->fulltree) {
     );
 
 
-    // $rolesoptions = role_fix_names(get_all_roles(), null, ROLENAME_ORIGINALANDSHORT, true);
-    // $editingteachers = get_archetype_roles('editingteacher');
-    // $student = get_archetype_roles('student');
-    // $settings->add(
-    //     new admin_setting_configmultiselect('mod_mattermost/defaultmoderatorroles',
-    //         get_string('defaultmoderatorroles', 'mod_mattermost'),
-    //         get_string('defaultmoderatorroles_desc', 'mod_mattermost'),
-    //         array_keys($editingteachers),
-    //         $rolesoptions
-    //     )
-    // );
+    $rolesoptions = role_fix_names(get_all_roles(), null, ROLENAME_ORIGINALANDSHORT, true);
+    $editingteachers = get_archetype_roles('editingteacher');
+    $student = get_archetype_roles('student');
+    $settings->add(
+        new admin_setting_configmultiselect('mod_mattermost/defaultchanneladminroles',
+            get_string('defaultchanneladminroles', 'mod_mattermost'),
+            get_string('defaultchanneladminroles_desc', 'mod_mattermost'),
+            array_keys($editingteachers),
+            $rolesoptions
+        )
+    );
 
-    // $settings->add(
-    //     new admin_setting_configmultiselect('mod_mattermost/defaultuserroles',
-    //         get_string('defaultuserroles', 'mod_mattermost'),
-    //         get_string('defaultuserroles_desc', 'mod_mattermost'),
-    //         array_keys($student),
-    //         $rolesoptions
-    //     )
-    // );
+    $settings->add(
+        new admin_setting_configmultiselect('mod_mattermost/defaultuserroles',
+            get_string('defaultuserroles', 'mod_mattermost'),
+            get_string('defaultuserroles_desc', 'mod_mattermost'),
+            array_keys($student),
+            $rolesoptions
+        )
+    );
 
     $settings->add(
         new admin_setting_configcheckbox('mod_mattermost/create_user_account_if_not_exists',
@@ -128,26 +128,26 @@ if ($ADMIN->fulltree) {
         )
     );
 
-    // $enabledenrolmentplugins = enrol_get_plugins(true);
-    // $enabledenrolmentplugins = array_keys($enabledenrolmentplugins);
-    // array_walk($enabledenrolmentplugins,
-    //     function(&$value, $key){
-    //         $value = 'enrol_'.$value;
-    //     }
-    // );
-    // $enabledenrolmentplugins = array_combine($enabledenrolmentplugins, $enabledenrolmentplugins);
-    // $default = array(
-    //     'enrol_flatfile' => 'enrol_flatfile',
-    //     'enrol_cohort' => 'enrol_cohort'
-    // );
-    // $settings->add(
-    //     new admin_setting_configmultiselect('mod_mattermost/background_enrolment_task',
-    //         get_string('background_enrolment_task', 'mod_mattermost'),
-    //         get_string('background_enrolment_task_desc', 'mod_mattermost'),
-    //         $default,
-    //         $enabledenrolmentplugins
-    //     )
-    // );
+    $enabledenrolmentplugins = enrol_get_plugins(true);
+    $enabledenrolmentplugins = array_keys($enabledenrolmentplugins);
+    array_walk($enabledenrolmentplugins,
+        function(&$value, $key){
+            $value = 'enrol_'.$value;
+        }
+    );
+    $enabledenrolmentplugins = array_combine($enabledenrolmentplugins, $enabledenrolmentplugins);
+    $default = array(
+        'enrol_flatfile' => 'enrol_flatfile',
+        'enrol_cohort' => 'enrol_cohort'
+    );
+    $settings->add(
+        new admin_setting_configmultiselect('mod_mattermost/background_enrolment_task',
+            get_string('background_enrolment_task', 'mod_mattermost'),
+            get_string('background_enrolment_task_desc', 'mod_mattermost'),
+            $default,
+            $enabledenrolmentplugins
+        )
+    );
     $settings->add(new admin_setting_configcheckbox('mod_mattermost/background_add_instance',
         get_string('background_add_instance', 'mod_mattermost'),
         get_string('background_add_instance_desc', 'mod_mattermost'),
