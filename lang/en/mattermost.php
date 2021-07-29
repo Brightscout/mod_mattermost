@@ -27,6 +27,16 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Mattermost';
 
+$string['description'] = 'Module interfacing Mattermost and Moodle';
+$string['modulename'] = 'Mattermost';
+$string['modulenameplural'] = 'Mattermost';
+$string['modulename_help'] = 'Adding this activity to a Moodle course will create a private channel in Rocket.Chat and push Moodle users associated to this activity as members of this newly created channel.
+
+The list of members will then be kept up to date.
+
+It will be possible to access to this Rocket.Chat channel directly from Moodle or through any Rocket.Chat client.
+
+Module restrictions through avaibility  are not available at the moment.';
 $string['modulename_link'] = 'mod/mattermost';
 $string['name'] = 'Instance name (in the course)';
 
@@ -41,8 +51,10 @@ $string['authservice'] = 'Mattermost auth service';
 $string['authservice_desc'] = 'Auth service used in Mattermost (one of "ldap" or "saml")';
 $string['authdata'] = 'Mattermost auth data';
 $string['authdata_desc'] = 'Service-specific authentication data, such as email address.';
-$string['groupnametoformat'] = 'Formatted group name';
-$string['groupnametoformat_desc'] = 'String format {$a->parameter} is possible with the following parameters : moodleid, moodleshortname, moodlefullname, moduleid, modulemoodleid (unique whitin all your possible moodle), courseid, courseshortname, coursefullname';
+$string['channelnametoformat'] = 'Formatted channel name';
+$string['channelnametoformat_desc'] = 'String format {$a->parameter} is possible with the following parameters : moodleid, moodleshortname, moodlefullname, moduleid, modulemoodleid (unique whitin all your possible moodle), courseid, courseshortname, coursefullname';
+$string['channelgroupnametoformat'] = 'Formatted channel group name';
+$string['channelgroupnametoformat_desc'] = 'String format {$a->parameter} is possible with the following parameters : channelname, groupname';
 $string['defaultchanneladminroles'] = 'Mattermost channel admins';
 $string['defaultchanneladminroles_desc'] = 'Moodle roles in course that will be Mattermost channel admins';
 $string['defaultuserroles'] = 'Mattermost users.';
@@ -51,8 +63,6 @@ $string['create_user_account_if_not_exists'] = 'Create Mattermost user account';
 $string['create_user_account_if_not_exists_desc'] = 'While enrolling user, create Mattermost corresponding user account(username), if it does not exist';
 $string['validationgroupnameregex'] = 'Mattermost group validation name regular expression to remove invalid characters';
 $string['validationgroupnameregex_desc'] = 'Moodle will replace every unauthorized caracters by _. This regexp is the exact negation of the Mattermost server one concerning group name validation';
-$string['background_enrolment_task'] = 'Pass user enrolment/unenrolments to remote Mattermost as background tasks.';
-$string['background_enrolment_task_desc'] = 'This is to solve performance issue while enrolling large amounts of users.</br>This will prevent the enroller to wait on course enrolment page while enrolling/unenrolling large amount of users.</br>Choice of enrol cohort and flatfile, if enabled, are strongly advised';
 $string['background_add_instance'] = 'Pass Mattermost enrolments to background task while creating a new module instance';
 $string['background_add_instance_desc'] = 'This will prevent waiting of the module creation page';
 $string['background_restore'] = 'Pass Mattermost enrolments to background task while dupplicating a mattermost modules';
@@ -62,4 +72,8 @@ $string['background_synchronize_desc'] = 'This occurs after a course or a Matter
 $string['background_user_update'] = 'Pass Mattermost enrolments to background task while updating user informations such as activation/deactivation.';
 $string['background_user_update_desc'] = 'Pass Mattermost enrolments to background task while updating user informations such as activation/deactivation.';
 
-
+$string['errorintestwhileconnection'] = 'Error while testing connection';
+$string['testerrorcode'] = 'Error code : {$a}';
+$string['testerrormessage'] = 'Error message :</br>{$a}';
+$string['connectiontestresult'] = 'Connection test result';
+$string['connection-success'] = 'Connection succesfully established';
