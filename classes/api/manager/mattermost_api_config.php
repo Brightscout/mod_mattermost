@@ -32,28 +32,28 @@ class mattermost_api_config {
     private $authdata;
 
     /**
-     * @return mixed
+     * @return string
      */
     public function get_instanceurl() {
         return $this->instanceurl;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function get_secret() {
         return $this->secret;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function get_authservice() {
         return $this->authservice;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function get_authdata() {
         return $this->authdata;
@@ -68,6 +68,7 @@ class mattermost_api_config {
             if (empty($config->secret)) {
                 print_error('Mattermost secret is empty');
             }
+            // TODO : Add checks for authservice and authdata
             $this->instanceurl = $config->instanceurl;
             $this->secret = $config->secret;
             $this->authservice = $config->authservice;

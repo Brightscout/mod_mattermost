@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * mattermost rest client class
+ * mattermost rest-client class
  *
  * @package     mod_mattermost
  * @copyright   2020 Manoj <manoj@brightscout.com>
