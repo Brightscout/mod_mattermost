@@ -30,11 +30,11 @@ $string['pluginname'] = 'Mattermost';
 $string['description'] = 'Module interfacing Mattermost and Moodle';
 $string['modulename'] = 'Mattermost';
 $string['modulenameplural'] = 'Mattermost';
-$string['modulename_help'] = 'Adding this activity to a Moodle course will create a private channel in Rocket.Chat and push Moodle users associated to this activity as members of this newly created channel.
+$string['modulename_help'] = 'Adding this activity to a Moodle course will create a private channel in Mattermost and push Moodle users associated to this activity as members of this newly created channel.
 
 The list of members will then be kept up to date.
 
-It will be possible to access to this Rocket.Chat channel directly from Moodle or through any Rocket.Chat client.
+It will be possible to access to this Mattermost channel directly from Moodle or through any Mattermost client.
 
 Module restrictions through avaibility  are not available at the moment.';
 $string['modulename_link'] = 'mod/mattermost';
@@ -56,13 +56,15 @@ $string['channelnametoformat_desc'] = 'String format {$a->parameter} is possible
 $string['channelgroupnametoformat'] = 'Formatted channel group name';
 $string['channelgroupnametoformat_desc'] = 'String format {$a->parameter} is possible with the following parameters : channelname, groupname';
 $string['defaultchanneladminroles'] = 'Mattermost channel admins';
+$string['channeladminroles'] = 'Moodle roles in course that will be Mattermost channel admins';
 $string['defaultchanneladminroles_desc'] = 'Moodle roles in course that will be Mattermost channel admins';
 $string['defaultuserroles'] = 'Mattermost users.';
+$string['userroles'] = 'Moodle roles in course that will be Mattermost users (with normal user rights)';
 $string['defaultuserroles_desc'] = 'Moodle roles in course that will be Mattermost users (with normal user rights)';
 $string['create_user_account_if_not_exists'] = 'Create Mattermost user account';
 $string['create_user_account_if_not_exists_desc'] = 'While enrolling user, create Mattermost corresponding user account(username), if it does not exist';
-$string['validationgroupnameregex'] = 'Mattermost group validation name regular expression to remove invalid characters';
-$string['validationgroupnameregex_desc'] = 'Moodle will replace every unauthorized caracters by _. This regexp is the exact negation of the Mattermost server one concerning group name validation';
+$string['validationchannelnameregex'] = 'Mattermost group validation name regular expression to remove invalid characters';
+$string['validationchannelnameregex_desc'] = 'Moodle will replace every unauthorized caracters by _. This regexp is the exact negation of the Mattermost server one concerning group name validation';
 $string['background_add_instance'] = 'Pass Mattermost enrolments to background task while creating a new module instance';
 $string['background_add_instance_desc'] = 'This will prevent waiting of the module creation page';
 $string['background_restore'] = 'Pass Mattermost enrolments to background task while dupplicating a mattermost modules';
@@ -77,3 +79,12 @@ $string['testerrorcode'] = 'Error code : {$a}';
 $string['testerrormessage'] = 'Error message :</br>{$a}';
 $string['connectiontestresult'] = 'Connection test result';
 $string['connection-success'] = 'Connection succesfully established';
+
+$string['displaysection'] = 'Display settings';
+$string['rolessection'] = 'Roles definition settings';
+$string['displaytype'] = 'Display type';
+$string['displaynew'] = 'Display in new window';
+$string['displaypopup'] = 'Display in popup window';
+$string['displaycurrent'] = 'Display in current window';
+$string['popupheight'] = 'Pop-up height';
+$string['popupwidth'] = 'Pop-up width';

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Library of interface functions and constants.
+ * Plugin internal classes, functions and constants are defined here.
  *
  * @package     mod_mattermost
  * @copyright   2020 Manoj <manoj@brightscout.com>
@@ -23,29 +23,28 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_mattermost\tools;
+
 defined('MOODLE_INTERNAL') || die();
 
-use mod_mattermost\api\manager\mattermost_api_manager;
-use \mod_mattermost\tools\mod_mattermost_tools;
+class mod_mattermost_tools {
+    /** Display new window */
+    const DISPLAY_NEW = 1;
+    /** Display in curent window */
+    const DISPLAY_CURRENT = 2;
+    /** Display in popup */
+    const DISPLAY_POPUP = 3;
 
-/**
- * Return if the plugin supports $feature.
- *
- * @param string $feature Constant representing theadd feature.
- * @return true | null True if the feature is supported, null otherwise.
- */
-function mattermost_supports($feature) {
-    if (!$feature) {
-        return null;
+    /**
+     * Construct display options.
+     * @return array
+     * @throws coding_exception
+     */
+    public static function get_display_options() {
+        $options = array();
+        $options[self::DISPLAY_NEW] = get_string('displaynew', 'mod_mattermost');
+        $options[self::DISPLAY_CURRENT] = get_string('displaycurrent', 'mod_mattermost');
+        $options[self::DISPLAY_POPUP] = get_string('displaypopup', 'mod_mattermost');
+        return $options;
     }
-    $features = array(
-        (string) FEATURE_IDNUMBER => true,
-        (string) FEATURE_GROUPS => true,
-        (string) FEATURE_GROUPINGS => true,
-        (string) FEATURE_SHOW_DESCRIPTION => true,
-    );
-    if (isset($features[(string) $feature])) {
-        return $features[$feature];
-    }
-    return null;
 }
