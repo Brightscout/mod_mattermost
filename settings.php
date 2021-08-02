@@ -63,30 +63,37 @@ if ($ADMIN->fulltree) {
         )
     );
 
-    $authservices = array('ldap', 'saml');
+    $authservices = array('LDAP' => 'ldap', 'SAML' => 'saml');
     $settings->add(
         new admin_setting_configselect('mod_mattermost/authservice',
             get_string('authservice', 'mod_mattermost'),
             get_string('authservice_desc', 'mod_mattermost'),
-            'ldap',
-            $authservices
+            $authservices['LDAP'],
+            array_keys($authservices)
         )
     );
 
-    $authdata = array('email', 'username');
+    $authdata = array('Email' => 'email', 'Username' => 'username');
     $settings->add(
         new admin_setting_configselect('mod_mattermost/authdata',
             get_string('authdata', 'mod_mattermost'),
             get_string('authdata_desc', 'mod_mattermost'),
-            'email',
-            $authdata
+            $authdata['Email'],
+            array_keys($authdata)
         )
     );
     $settings->add(
-        new admin_setting_configtext('mod_mattermost/groupnametoformat',
-            get_string('groupnametoformat', 'mod_mattermost'),
-            get_string('groupnametoformat_desc', 'mod_mattermost'),
+        new admin_setting_configtext('mod_mattermost/channelnametoformat',
+            get_string('channelnametoformat', 'mod_mattermost'),
+            get_string('channelnametoformat_desc', 'mod_mattermost'),
             '{$a->moodleid}_{$a->courseshortname}_{$a->moduleid}'
+        )
+    );
+    $settings->add(
+        new admin_setting_configtext('mod_mattermost/channelgroupnametoformat',
+            get_string('channelgroupnametoformat', 'mod_mattermost'),
+            get_string('channelgroupnametoformat_desc', 'mod_mattermost'),
+            '{$a->courseshortname}_{$a->groupname}'
         )
     );
 
@@ -128,26 +135,6 @@ if ($ADMIN->fulltree) {
         )
     );
 
-    $enabledenrolmentplugins = enrol_get_plugins(true);
-    $enabledenrolmentplugins = array_keys($enabledenrolmentplugins);
-    array_walk($enabledenrolmentplugins,
-        function(&$value, $key){
-            $value = 'enrol_'.$value;
-        }
-    );
-    $enabledenrolmentplugins = array_combine($enabledenrolmentplugins, $enabledenrolmentplugins);
-    $default = array(
-        'enrol_flatfile' => 'enrol_flatfile',
-        'enrol_cohort' => 'enrol_cohort'
-    );
-    $settings->add(
-        new admin_setting_configmultiselect('mod_mattermost/background_enrolment_task',
-            get_string('background_enrolment_task', 'mod_mattermost'),
-            get_string('background_enrolment_task_desc', 'mod_mattermost'),
-            $default,
-            $enabledenrolmentplugins
-        )
-    );
     $settings->add(new admin_setting_configcheckbox('mod_mattermost/background_add_instance',
         get_string('background_add_instance', 'mod_mattermost'),
         get_string('background_add_instance_desc', 'mod_mattermost'),
