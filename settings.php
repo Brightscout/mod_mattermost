@@ -93,7 +93,7 @@ if ($ADMIN->fulltree) {
         new admin_setting_configtext('mod_mattermost/channelgroupnametoformat',
             get_string('channelgroupnametoformat', 'mod_mattermost'),
             get_string('channelgroupnametoformat_desc', 'mod_mattermost'),
-            '{$a->channelname}_{$a->groupname}'
+            '{$a->courseshortname}_{$a->groupname}'
         )
     );
 
