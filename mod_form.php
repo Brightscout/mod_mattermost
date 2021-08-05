@@ -24,6 +24,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+
 use \mod_mattermost\tools\mod_mattermost_tools;
 
 require_once($CFG->dirroot . '/course/moodleform_mod.php');
@@ -32,10 +33,10 @@ require_once($CFG->dirroot . '/course/moodleform_mod.php');
 /**
  * Module instance settings form.
  *
- * @package    mod_mattermost
- * @author
- * @copyright  2020 ESUP-Portail {@link https://www.esup-portail.org/}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     mod_mattermost
+ * @copyright   2020 Manoj <manoj@brightscout.com>
+ * @author      Manoj <manoj@brightscout.com>
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_mattermost_mod_form extends moodleform_mod
 {
@@ -167,7 +168,8 @@ class mod_mattermost_mod_form extends moodleform_mod
         $this->add_action_buttons();
     }
 
-    public function data_postprocessing($data) {
+    public function data_postprocessing($data)
+    {
         $data->moderatorroles = is_array($data->moderatorroles) ? implode(',', $data->moderatorroles) : $data->moderatorroles;
         $data->userroles = is_array($data->userroles) ? implode(',', $data->userroles) : $data->userroles;
         // Funtion get data return null when checkbox is not checked.
@@ -178,7 +180,8 @@ class mod_mattermost_mod_form extends moodleform_mod
      * @param string $formattedrole
      * @param array $rolesoptions
      */
-    protected function format_roles($roleids, $rolesoptions) {
+    protected function format_roles($roleids, $rolesoptions)
+    {
         $i = 1;
         $formattedrole = '';
         foreach (array_filter(explode(',', $roleids)) as $moderatorroleid) {
@@ -191,7 +194,8 @@ class mod_mattermost_mod_form extends moodleform_mod
         return $formattedrole;
     }
 
-    function validation($data, $files) {
+    function validation($data, $files)
+    {
         global $COURSE, $DB, $CFG;
         $errors = parent::validation($data, $files);
     }
