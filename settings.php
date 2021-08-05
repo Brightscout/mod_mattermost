@@ -128,9 +128,9 @@ if ($ADMIN->fulltree) {
     );
 
     $settings->add(
-        new admin_setting_configtext('mod_mattermost/validationgroupnameregex',
-            get_string('validationgroupnameregex', 'mod_mattermost'),
-            get_string('validationgroupnameregex_desc', 'mod_mattermost'),
+        new admin_setting_configtext('mod_mattermost/validationchannelnameregex',
+            get_string('validationchannelnameregex', 'mod_mattermost'),
+            get_string('validationchannelnameregex_desc', 'mod_mattermost'),
             '/[^0-9a-zA-Z-_.]/'
         )
     );

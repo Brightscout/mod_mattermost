@@ -24,7 +24,6 @@
  */
 
 namespace mod_mattermost\client;
-use Exception;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -63,10 +62,9 @@ class mattermost_rest_client {
         $response = $curl->post($url, $options);
         $info = $curl->get_info();
 
-        if(!empty($info['http_code']) && $info['http_code'] != 200){
-            $json_response = json_decode($response);
+        if(!$this->success($info)){
             debugging('Unexpected response from the Mattermost server, HTTP code:' . $info['http_code'], DEBUG_DEVELOPER);
-            throw new Exception($json_response ? $json_response['error'] : $response, $info['http_code']);
+            throw new MattermostException($response, $info['http_code']);
         }
         return true;
     }
@@ -75,4 +73,7 @@ class mattermost_rest_client {
         return $url.'?secret='.$this->secret;
     }
 
+    private function success($info) {
+        return !empty($info['http_`code']) && $info['http_code'] == 200;
+    }
  }
