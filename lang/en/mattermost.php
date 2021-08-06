@@ -47,6 +47,8 @@ $string['instanceurl'] = 'Mattermost instance url';
 $string['instanceurl_desc'] = 'Mattermost instance URL (ex: https://mm.moodle.com)';
 $string['secret'] = 'Mattermost webhook secret';
 $string['secret_desc'] = 'Mattermost associated webhook secret';
+$string['teamslugname'] = 'Mattermost team slug name';
+$string['teamslugname_desc'] = 'Slug name for the Mattermost team with which Moodle will be integrated';
 $string['authservice'] = 'Mattermost auth service';
 $string['authservice_desc'] = 'Auth service used in Mattermost (one of "ldap" or "saml")';
 $string['authdata'] = 'Mattermost auth data';
@@ -88,3 +90,8 @@ $string['displaypopup'] = 'Display in popup window';
 $string['displaycurrent'] = 'Display in current window';
 $string['popupheight'] = 'Pop-up height';
 $string['popupwidth'] = 'Pop-up width';
+
+$string['channelcreationerror'] = "Error while creating Mattermost remote channel";
+$string['mattermost:candefineroles'] = 'Can define roles to apply in Mattermost\'s private channels';
+$string['joinmattermost'] = 'Join Mattermost session';
+$string['mmchannelerror'] = 'Remote Mattermost channel can\'t be retrieved. Please contact your system administrator. Error code {$a}.';

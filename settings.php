@@ -62,6 +62,14 @@ if ($ADMIN->fulltree) {
             ''
         )
     );
+    $settings->add(
+        new admin_setting_configtext('mod_mattermost/teamslugname',
+            get_string('teamslugname', 'mod_mattermost'),
+            get_string('teamslugname_desc', 'mod_mattermost'),
+            null,
+            PARAM_RAW
+        )
+    );
 
     $authservices = array('LDAP' => 'ldap', 'SAML' => 'saml');
     $settings->add(

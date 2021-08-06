@@ -2,7 +2,7 @@
 namespace mod_mattermost\client;
 use Exception;
 
-class MattermostException extends Exception {
+class mattermost_exception extends Exception {
 	public function __construct($response, $code = 0, Exception $previous = null) {
 		$message = '';
 		if (is_string($response)) {

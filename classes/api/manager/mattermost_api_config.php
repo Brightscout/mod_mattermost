@@ -28,6 +28,7 @@ namespace mod_mattermost\api\manager;
 class mattermost_api_config {
     private $instanceurl;
     private $secret;
+    private $teamslugname;
     private $authservice;
     private $authdata;
 
@@ -43,6 +44,13 @@ class mattermost_api_config {
      */
     public function get_secret() {
         return $this->secret;
+    }
+
+    /**
+     * @return string
+     */
+    public function get_teamslugname() {
+        return $this->teamslugname;
     }
 
     /**
@@ -68,9 +76,13 @@ class mattermost_api_config {
             if (empty($config->secret)) {
                 print_error('Mattermost secret is empty');
             }
+            if (empty($config->teamslugname)) {
+                print_error('Mattermost team slug name is empty');
+            }
             // TODO : Add checks for authservice and authdata
             $this->instanceurl = $config->instanceurl;
             $this->secret = $config->secret;
+            $this->teamslugname = $config->teamslugname;
             $this->authservice = $config->authservice;
             $this->authdata = $config->authdata;
         }
