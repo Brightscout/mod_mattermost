@@ -79,7 +79,7 @@ class mattermost_api_config {
             if (empty($config->teamslugname)) {
                 print_error('Mattermost team slug name is empty');
             }
-            // TODO : Add checks for authservice and authdata
+            // TODO : Add checks for authservice and authdata.
             $this->instanceurl = $config->instanceurl;
             $this->secret = $config->secret;
             $this->teamslugname = $config->teamslugname;

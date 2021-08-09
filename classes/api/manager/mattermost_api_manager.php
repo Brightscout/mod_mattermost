@@ -41,7 +41,7 @@ class mattermost_api_manager{
     public function get_team_slugname() {
         return $this->mattermostapiconfig->get_teamslugname();
     }
-    
+
     public function __construct($instanceurl = null, $secret = null) {
         $this->mattermostapiconfig = new mattermost_api_config();
         $this->client = new mattermost_rest_client(
@@ -56,9 +56,9 @@ class mattermost_api_manager{
     }
 
     public function create_mattermost_channel($name) {
-        try{
+        try {
             return $this->client->create_channel($name);
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             self::moodle_debugging_message('', $e, DEBUG_ALL);
             print_error($e->getMessage());
         }

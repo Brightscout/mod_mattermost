@@ -37,14 +37,12 @@ require_once($CFG->dirroot . '/course/moodleform_mod.php');
  * @copyright  2020 ESUP-Portail {@link https://www.esup-portail.org/}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_mattermost_mod_form extends moodleform_mod
-{
+class mod_mattermost_mod_form extends moodleform_mod {
 
     /**
      * Defines forms elements
      */
-    public function definition()
-    {
+    public function definition() {
         global $CFG, $DB;
         $mform = $this->_form;
         // General Section.
@@ -167,9 +165,10 @@ class mod_mattermost_mod_form extends moodleform_mod
         $this->add_action_buttons();
     }
 
-    public function data_postprocessing($data)
-    {
-        $data->channeladminroles = is_array($data->channeladminroles) ? implode(',', $data->channeladminroles) : $data->channeladminroles;
+    public function data_postprocessing($data) {
+        $data->channeladminroles = is_array($data->channeladminroles) ?
+            implode(',', $data->channeladminroles) :
+            $data->channeladminroles;
         $data->userroles = is_array($data->userroles) ? implode(',', $data->userroles) : $data->userroles;
     }
 
@@ -177,8 +176,7 @@ class mod_mattermost_mod_form extends moodleform_mod
      * @param string $formattedrole
      * @param array $rolesoptions
      */
-    protected function format_roles($roleids, $rolesoptions)
-    {
+    protected function format_roles($roleids, $rolesoptions) {
         $i = 1;
         $formattedrole = '';
         foreach (array_filter(explode(',', $roleids)) as $channeladminroleid) {
@@ -191,8 +189,7 @@ class mod_mattermost_mod_form extends moodleform_mod
         return $formattedrole;
     }
 
-    function validation($data, $files)
-    {
+    protected function validation($data, $files) {
         global $COURSE, $DB, $CFG;
         $errors = parent::validation($data, $files);
     }

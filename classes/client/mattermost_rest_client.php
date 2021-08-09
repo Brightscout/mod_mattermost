@@ -27,44 +27,39 @@ namespace mod_mattermost\client;
 
 defined('MOODLE_INTERNAL') || die();
 
-class mattermost_rest_client
-{
+class mattermost_rest_client {
 
     const MATTERMOST_PLUGIN_ID = 'com.mattermost.moodle-sync';
-    private $base_url;
-    private $plugin_url;
-    private $plugin_api_url;
+    private $baseurl;
+    private $pluginurl;
+    private $pluginapiurl;
     private $secret;
-    private $team_slugname;
+    private $teamslugname;
 
-    public function __construct($instance_url, $secret, $team_slugname)
-    {
-        $this->base_url = $instance_url;
-        $this->plugin_url = $this->base_url . '/plugins/' . static::MATTERMOST_PLUGIN_ID;
-        $this->plugin_api_url = $this->plugin_url . '/api/v1';
+    public function __construct($instanceurl, $secret, $teamslugname) {
+        $this->baseurl = $instanceurl;
+        $this->pluginurl = $this->baseurl . '/plugins/' . static::MATTERMOST_PLUGIN_ID;
+        $this->pluginapiurl = $this->pluginurl . '/api/v1';
         $this->secret = $secret;
-        $this->team_slugname = $team_slugname;
+        $this->teamslugname = $teamslugname;
     }
 
-    public function test_connection()
-    {
-        return $this->doPost($this->plugin_api_url . '/test');
+    public function test_connection() {
+        return $this->doPost($this->pluginapiurl . '/test');
     }
 
-    public function create_channel($channel_name)
-    {
-        $channel = $this->doPost(
-            $this->plugin_api_url . '/channels',
+    public function create_channel($channelname) {
+        $channel = $this->do_post(
+            $this->pluginapiurl . '/channels',
             array(
-                'name' => $channel_name,
-                'team_name' => $this->team_slugname
+                'name' => $channelname,
+                'team_name' => $this->teamslugname
             )
         );
         return $channel['id'];
     }
 
-    private function doGet($url, $headers = [])
-    {
+    private function do_get($url, $headers = []) {
         $curl = new \curl();
 
         $options = [
@@ -91,8 +86,7 @@ class mattermost_rest_client
     /**
      * @return mixed
      */
-    private function doPost($url, $payload = null, $headers = [])
-    {
+    private function do_post($url, $payload = null, $headers = []) {
         $curl = new \curl();
 
         $options = [
@@ -116,19 +110,17 @@ class mattermost_rest_client
             throw new mattermost_exception($response, $info['http_code']);
         }
 
-        $json_response = json_decode($response, true);
-        return $json_response ? $json_response : $response;
+        $jsonresponse = json_decode($response, true);
+        return $jsonresponse ? $jsonresponse : $response;
     }
 
-    private function add_secret_to_url($url)
-    {
+    private function add_secret_to_url($url) {
         $url .= (stripos($url, '?') !== false) ? '&' : '?';
         $url .= http_build_query(['secret' => $this->secret], '', '&');
         return $url;
     }
 
-    private function success($info)
-    {
+    private function success($info) {
         return !empty($info['http_code']) && $info['http_code'] >= 200 && $info['http_code'] < 300;
     }
 }

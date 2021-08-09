@@ -49,14 +49,7 @@ require_login($course, true, $cm);
 
 $modulecontext = context_module::instance($cm->id);
 
-// TODO: add events
-// $event = \mod_mattermost\event\course_module_viewed::create(array(
-//     'objectid' => $moduleinstance->id,
-//     'context' => $modulecontext
-// ));
-// $event->add_record_snapshot('course', $course);
-// $event->add_record_snapshot('mattermost', $moduleinstance);
-// $event->trigger();
+// TODO: add event trigger for course_module_viewed.
 
 $PAGE->set_url('/mod/mattermost/view.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($moduleinstance->name));

@@ -73,24 +73,15 @@ function mattermost_add_instance($moduleinstance, $mform = null) {
     $course = $DB->get_record('course', array('id' => $moduleinstance->course));
     $channelname = mattermost_tools::mattermost_channel_name($cmid, $course);
     $mattermostapimanager = new mattermost_api_manager();
-    try{
+    try {
         $moduleinstance->mattermostid = $mattermostapimanager->create_mattermost_channel($channelname);
         if (is_null($moduleinstance->mattermostid)) {
             print_error('an error occured while creating Mattermost channel');
         }
         $id = $DB->insert_record('mattermost', $moduleinstance);
-        // TODO: Add user enrolment logic
-        // Force creator if current user has a role for this instance.
-        // $moderatorrolesids = array_filter(explode(',', $moduleinstance->moderatorroles));
-        // $userrolesids = array_filter(explode(',', $moduleinstance->userroles));
-        // $forcecreator = mod_mattermost_tools::has_rocket_chat_user_role($userrolesids, $USER, context_course::instance($course->id))
-        //     || mod_mattermost_tools::has_rocket_chat_moderator_role($moderatorrolesids, $USER, context_course::instance($course->id));
-        // mod_mattermost_tools::enrol_all_concerned_users_to_mattermost_group(
-        //     $moduleinstance,
-        //     get_config('mod_mattermost', 'background_add_instance'),
-        //     $forcecreator);
+        // TODO: Add user enrolment logic.
         return $id;
-    }catch(Exception $e) {
+    } catch(Exception $e) {
         print_error($e->getMessage());
     }
     
@@ -114,9 +105,7 @@ function mattermost_update_instance($moduleinstance, $mform = null) {
     $return = $DB->update_record('mattermost', $moduleinstance);
     if ($return) {
         $mattermostapimanager = new mattermost_api_manager();
-        // TODO: Add synchronize channel members logic
-        // mattermost_tools::synchronize_channel_members($mattermost->mattermostid,
-        //     get_config('mod_mattermost', 'background_synchronize'));
+        // TODO: Add synchronize channel members logic.
     }
     return $return;
 }
@@ -134,16 +123,7 @@ function mattermost_delete_instance($id) {
     if (!$mattermost) {
         return false;
     }
-    // TODO: Add delete mattermost channel logic
-    // Treat remote Mattermost remote private channel depending of.
-    // $mattermostapimanager = new mattermost_api_manager();
-    // list(, $caller) = debug_backtrace(false);
-    // if ((\tool_recyclebin\course_bin::is_enabled() && $caller['function'] == 'course_delete_module')
-    //     || (\tool_recyclebin\category_bin::is_enabled() && $caller['function'] == 'remove_course_contents')) {
-    //     $mattermostapimanager->archive_mattermost_channel($mattermost->mattermostid);
-    // } else {
-    //     $mattermostapimanager->delete_mattermost_channel($mattermost->mattermostid);
-    // }
+    // TODO: Add delete mattermost channel logic.
     $DB->delete_records('mattermost', array('id' => $id));
 
     return true;

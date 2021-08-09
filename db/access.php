@@ -17,7 +17,7 @@
 /**
  * Plugin capabilities are defined here.
  *
- * 
+ *
  * @package     mod_mattermost
  * @category    access
  * @author Manoj <manoj@brightscout.com>
