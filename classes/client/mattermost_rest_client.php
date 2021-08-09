@@ -53,7 +53,13 @@ class mattermost_rest_client
 
     public function create_channel($channel_name)
     {
-        $channel = $this->doPost($this->plugin_api_url . '/channels?team_name=' . $this->team_slugname, array('name' => $channel_name));
+        $channel = $this->doPost(
+            $this->plugin_api_url . '/channels',
+            array(
+                'name' => $channel_name,
+                'team_name' => $this->team_slugname
+            )
+        );
         return $channel['id'];
     }
 
