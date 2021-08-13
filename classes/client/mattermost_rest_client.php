@@ -19,7 +19,7 @@
  *
  * @package     mod_mattermost
  * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author Manoj <manoj@brightscout.com>
+ * @author      Manoj <manoj@brightscout.com>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -45,7 +45,7 @@ class mattermost_rest_client {
     }
 
     public function test_connection() {
-        return $this->doPost($this->pluginapiurl . '/test');
+        return $this->do_post($this->pluginapiurl . '/test');
     }
 
     public function create_channel($channelname) {
@@ -57,6 +57,29 @@ class mattermost_rest_client {
             )
         );
         return $channel['id'];
+    }
+
+    public function create_user($user) {
+        return $this->do_post(
+            $this->pluginapiurl . '/users',
+            $user
+        );
+    }
+
+    public function get_user_by_email($email) {
+        return $this->do_get($this->pluginapiurl . '/users/' . $email);
+    }
+
+    public function add_user_to_channel($channelid, $payload) {
+        return $this->do_post($this->pluginapiurl . '/channels/' . $channelid . '/members', $payload);
+    }
+
+    public function update_channel_member_roles($channelid, $payload) {
+        return $this->do_patch($this->pluginapiurl . '/channels/' . $channelid . '/members/roles', $payload);
+    }
+
+    public function remove_user_from_channel($channelid, $userid) {
+        return $this->do_delete($this->pluginapiurl . '/channels/' . $channelid . '/members/'. $userid);
     }
 
     private function do_get($url, $headers = []) {
@@ -80,7 +103,8 @@ class mattermost_rest_client {
             throw new mattermost_exception($response, $info['http_code']);
         }
 
-        return $response;
+        $jsonresponse = json_decode($response, true);
+        return $jsonresponse ? $jsonresponse : $response;
     }
 
     /**
@@ -103,6 +127,62 @@ class mattermost_rest_client {
             $payload = json_encode($payload);
         }
         $response = $curl->post($url, $payload, $options);
+        $info = $curl->get_info();
+
+        if (!$this->success($info)) {
+            debugging('Unexpected response from the Mattermost server, HTTP code:' . $info['http_code'], DEBUG_DEVELOPER);
+            throw new mattermost_exception($response, $info['http_code']);
+        }
+
+        $jsonresponse = json_decode($response, true);
+        return $jsonresponse ? $jsonresponse : $response;
+    }
+
+    /**
+     * @return mixed
+     */
+    private function do_patch($url, $payload = null, $headers = []) {
+        $curl = new \curl();
+
+        $options = [
+            'CURLOPT_RETURNTRANSFER' => true,
+            'CURLOPT_TIMEOUT' => 30,
+            'CURLOPT_HTTPHEADER' => array(
+                'Content-Type: application/json',
+                ...$headers
+            ),
+        ];
+
+        $url = $this->add_secret_to_url($url);
+        if ($payload) {
+            $payload = json_encode($payload);
+        }
+        $response = $curl->patch($url, $payload, $options);
+        $info = $curl->get_info();
+
+        if (!$this->success($info)) {
+            debugging('Unexpected response from the Mattermost server, HTTP code:' . $info['http_code'], DEBUG_DEVELOPER);
+            throw new mattermost_exception($response, $info['http_code']);
+        }
+
+        $jsonresponse = json_decode($response, true);
+        return $jsonresponse ? $jsonresponse : $response;
+    }
+
+    private function do_delete($url, $headers = []) {
+        $curl = new \curl();
+
+        $options = [
+            'CURLOPT_RETURNTRANSFER' => true,
+            'CURLOPT_TIMEOUT' => 30,
+            'CURLOPT_HTTPHEADER' => [
+                'Content-Type: application/json',
+                ...$headers
+            ],
+        ];
+
+        $url = $this->add_secret_to_url($url);
+        $response = $curl->delete($url, null, $options);
         $info = $curl->get_info();
 
         if (!$this->success($info)) {

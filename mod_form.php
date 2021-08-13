@@ -189,7 +189,7 @@ class mod_mattermost_mod_form extends moodleform_mod {
         return $formattedrole;
     }
 
-    protected function validation($data, $files) {
+    public function validation($data, $files) {
         global $COURSE, $DB, $CFG;
         $errors = parent::validation($data, $files);
     }

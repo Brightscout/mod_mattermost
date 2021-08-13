@@ -20,7 +20,7 @@
  * @package     mod_mattermost
  * @category    string
  * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author Manoj <manoj@brightscout.com>
+ * @author      Manoj <manoj@brightscout.com>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later */
 
 defined('MOODLE_INTERNAL') || die();
@@ -95,3 +95,4 @@ $string['channelcreationerror'] = "Error while creating Mattermost remote channe
 $string['mattermost:candefineroles'] = 'Can define roles to apply in Mattermost\'s private channels';
 $string['joinmattermost'] = 'Join Mattermost session';
 $string['mmchannelerror'] = 'Remote Mattermost channel can\'t be retrieved. Please contact your system administrator. Error code {$a}.';
+$string['mattermost_nickname'] = '{$a->firstname} {$a->lastname}';

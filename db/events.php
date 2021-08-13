@@ -15,43 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin capabilities are defined here.
- *
+ * Plugin event observers are registered here.
  *
  * @package     mod_mattermost
- * @category    access
+ * @category    event
+ * @copyright   2020 Manoj <manoj@brightscout.com>
  * @author      Manoj <manoj@brightscout.com>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = [
+$observers = array(
 
-    'mod/mattermost:view' => [
-        'captype' => 'view',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => [
-            'guest' => CAP_ALLOW,
-            'user' => CAP_ALLOW,
-        ],
-    ],
-    'mod/mattermost:addinstance' => [
-        'riskbitmask' => RISK_XSS,
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => [
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW,
-        ],
-        'clonepermissionsfrom' => 'moodle/course:manageactivities',
-    ],
-    'mod/mattermost:candefineroles' => [
-        'riskbitmask' => RISK_XSS,
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => [
-            'manager' => CAP_ALLOW,
-        ],
-    ],
-];
+    array(
+        'eventname' => '\core\event\role_assigned',
+        'callback' => '\mod_mattermost\observers::role_assigned',
+    ),
+    array(
+        'eventname' => '\core\event\role_unassigned',
+        'callback' => '\mod_mattermost\observers::role_unassigned',
+    )
+);

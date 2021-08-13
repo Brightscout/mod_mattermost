@@ -19,7 +19,7 @@
  *
  * @package     mod_mattermost
  * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author Manoj <manoj@brightscout.com>
+ * @author      Manoj <manoj@brightscout.com>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -78,8 +78,24 @@ function mattermost_add_instance($moduleinstance, $mform = null) {
         if (is_null($moduleinstance->mattermostid)) {
             print_error('An error occured while creating Mattermost channel');
         }
+
+        // TODO: Make API for archiving a channel
+        // if (!$moduleinstance->visible || !$moduleinstance->visibleoncoursepage) {
+        //     $channel = $mattermostapimanager->archive_mattermost_channel($moduleinstance->mattermostid);
+        // }
+
         $id = $DB->insert_record('mattermost', $moduleinstance);
-        // TODO: Add user enrolment logic.
+
+        // Force creator if current user has a role for this instance.
+        $channeladminrolesids = array_filter(explode(',', $moduleinstance->channeladminroles));
+        $userrolesids = array_filter(explode(',', $moduleinstance->userroles));
+        $coursecontext = context_course::instance($course->id);
+        $forcecreator = mattermost_tools::has_mattermost_user_role($userrolesids, $USER, $coursecontext->id)
+            || mattermost_tools::has_mattermost_channeladmin_role($channeladminrolesids, $USER, $coursecontext->id);
+        mattermost_tools::enrol_all_concerned_users_to_mattermost_channel(
+            $moduleinstance,
+            get_config('mod_mattermost', 'background_add_instance'),
+            $forcecreator);
         return $id;
     } catch(Exception $e) {
         print_error($e->getMessage());
@@ -117,7 +133,6 @@ function mattermost_update_instance($moduleinstance, $mform = null) {
  * @return bool True if successful, false on failure.
  */
 function mattermost_delete_instance($id) {
-    file_put_contents('/var/www/html/moodle/log.txt', $id.PHP_EOL, FILE_APPEND);
     global $DB;
     $mattermost = $DB->get_record('mattermost', array('id' => $id));
     if (!$mattermost) {
