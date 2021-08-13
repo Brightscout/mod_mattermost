@@ -71,12 +71,12 @@ function mattermost_add_instance($moduleinstance, $mform = null) {
     $moduleinstance->timemodified = $moduleinstance->timecreated;
     $cmid       = $moduleinstance->coursemodule;
     $course = $DB->get_record('course', array('id' => $moduleinstance->course));
-    $channelname = mattermost_tools::mattermost_channel_name($cmid, $course);
+    $channelname = mattermost_tools::get_mattermost_channel_name($cmid, $course);
     $mattermostapimanager = new mattermost_api_manager();
     try {
         $moduleinstance->mattermostid = $mattermostapimanager->create_mattermost_channel($channelname);
         if (is_null($moduleinstance->mattermostid)) {
-            print_error('an error occured while creating Mattermost channel');
+            print_error('An error occured while creating Mattermost channel');
         }
         $id = $DB->insert_record('mattermost', $moduleinstance);
         // TODO: Add user enrolment logic.

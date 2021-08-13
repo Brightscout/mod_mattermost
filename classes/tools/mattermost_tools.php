@@ -53,7 +53,7 @@ class mattermost_tools {
         return $options;
     }
 
-    public static function mattermost_channel_name($cmid, $course) {
+    public static function get_mattermost_channel_name($cmid, $course) {
         global $CFG, $SITE;
         $formatarguments = new stdClass();
         $formatarguments->moodleshortname = $SITE->shortname;

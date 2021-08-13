@@ -19,7 +19,7 @@
  *
  * @package     mod_mattermost
  * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author Manoj <manoj@brightscout.com>
+ * @author      Manoj <manoj@brightscout.com>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -33,8 +33,8 @@ require_once($CFG->dirroot . '/course/moodleform_mod.php');
  * Module instance settings form.
  *
  * @package    mod_mattermost
- * @author
- * @copyright  2020 ESUP-Portail {@link https://www.esup-portail.org/}
+ * @author     Manoj <manoj@brightscout.com>
+ * @copyright  2020 Manoj <manoj@brightscout.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_mattermost_mod_form extends moodleform_mod {

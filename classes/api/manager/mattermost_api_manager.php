@@ -59,7 +59,8 @@ class mattermost_api_manager{
         try {
             return $this->client->create_channel($name);
         } catch (Exception $e) {
-            self::moodle_debugging_message('', $e, DEBUG_ALL);
+            self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
+            // TODO: Find alternative for print_error
             print_error($e->getMessage());
         }
     }
@@ -70,9 +71,9 @@ class mattermost_api_manager{
      */
     public static function moodle_debugging_message($message, $e, $level = DEBUG_DEVELOPER) {
         if (!empty($message)) {
-            debugging($message."\n"."Rocket.chat api Error ".$e->getCode()." : ".$e->getMessage(), $level);
+            debugging($message."\n"."Mattermost api Error ".$e->getCode()." : ".$e->getMessage(), $level);
         } else {
-            debugging("Rocket.chat api Error ".$e->getCode()." : ".$e->getMessage(), DEBUG_DEVELOPER);
+            debugging("Mattermost api Error ".$e->getCode()." : ".$e->getMessage(), DEBUG_DEVELOPER);
         }
     }
 }
