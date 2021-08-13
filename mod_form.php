@@ -19,13 +19,12 @@
  *
  * @package     mod_mattermost
  * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author Manoj <manoj@brightscout.com>
+ * @author      Manoj <manoj@brightscout.com>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
-
-use \mod_mattermost\tools\mod_mattermost_tools;
+use \mod_mattermost\tools\mattermost_tools;
 
 require_once($CFG->dirroot . '/course/moodleform_mod.php');
 
@@ -33,19 +32,17 @@ require_once($CFG->dirroot . '/course/moodleform_mod.php');
 /**
  * Module instance settings form.
  *
- * @package     mod_mattermost
- * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author      Manoj <manoj@brightscout.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    mod_mattermost
+ * @author     Manoj <manoj@brightscout.com>
+ * @copyright  2020 Manoj <manoj@brightscout.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_mattermost_mod_form extends moodleform_mod
-{
+class mod_mattermost_mod_form extends moodleform_mod {
 
     /**
      * Defines forms elements
      */
-    public function definition()
-    {
+    public function definition() {
         global $CFG, $DB;
         $mform = $this->_form;
         // General Section.
@@ -72,7 +69,7 @@ class mod_mattermost_mod_form extends moodleform_mod
             get_string('displaysection', 'mod_mattermost')
         );
         $mform->setExpanded('displaysection');
-        $options = mod_mattermost_tools::get_display_options();
+        $options = mattermost_tools::get_display_options();
 
         $mform->addElement(
             'select',
@@ -89,7 +86,7 @@ class mod_mattermost_mod_form extends moodleform_mod
                 'popupwidth',
                 'displaytype',
                 'noteq',
-                mod_mattermost_tools::DISPLAY_POPUP
+                mattermost_tools::DISPLAY_POPUP
             );
         }
 
@@ -101,7 +98,7 @@ class mod_mattermost_mod_form extends moodleform_mod
                 'popupheight',
                 'displaytype',
                 'noteq',
-                mod_mattermost_tools::DISPLAY_POPUP
+                mattermost_tools::DISPLAY_POPUP
             );
         }
 
@@ -168,34 +165,31 @@ class mod_mattermost_mod_form extends moodleform_mod
         $this->add_action_buttons();
     }
 
-    public function data_postprocessing($data)
-    {
-        $data->moderatorroles = is_array($data->moderatorroles) ? implode(',', $data->moderatorroles) : $data->moderatorroles;
+    public function data_postprocessing($data) {
+        $data->channeladminroles = is_array($data->channeladminroles) ?
+            implode(',', $data->channeladminroles) :
+            $data->channeladminroles;
         $data->userroles = is_array($data->userroles) ? implode(',', $data->userroles) : $data->userroles;
-        // Funtion get data return null when checkbox is not checked.
-        $data->embbeded = !property_exists($data, 'embbeded') ? 0 : $data->embbeded;
     }
 
     /**
      * @param string $formattedrole
      * @param array $rolesoptions
      */
-    protected function format_roles($roleids, $rolesoptions)
-    {
+    protected function format_roles($roleids, $rolesoptions) {
         $i = 1;
         $formattedrole = '';
-        foreach (array_filter(explode(',', $roleids)) as $moderatorroleid) {
+        foreach (array_filter(explode(',', $roleids)) as $channeladminroleid) {
             if ($i > 1) {
                 $formattedrole .= ',';
             }
-            $formattedrole .= $rolesoptions[$moderatorroleid];
+            $formattedrole .= $rolesoptions[$channeladminroleid];
             $i++;
         }
         return $formattedrole;
     }
 
-    function validation($data, $files)
-    {
+    protected function validation($data, $files) {
         global $COURSE, $DB, $CFG;
         $errors = parent::validation($data, $files);
     }

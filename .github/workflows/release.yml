@@ -1,0 +1,45 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+
+jobs:
+  release:
+    name: Build and Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+
+      - name: Prepare release metadata
+        id: prepare_release_metadata
+        run: |
+          echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: Build Plugin
+        id: build
+        run: |
+          make build VERSION=${{ steps.prepare_release_metadata.outputs.VERSION }}
+          echo ::set-output name=BUNDLE_NAME::$(cd dist; ls *.zip)
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token does not need to be defined, it is available by default.
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/${{ steps.build.outputs.BUNDLE_NAME }}
+          asset_name: ${{ steps.build.outputs.BUNDLE_NAME }}
+          asset_content_type: application/gzip
+          
