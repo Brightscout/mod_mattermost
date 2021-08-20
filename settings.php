@@ -127,19 +127,41 @@ if ($ADMIN->fulltree) {
         )
     );
 
-    $settings->add(
-        new admin_setting_configcheckbox('mod_mattermost/create_user_account_if_not_exists',
-            get_string('create_user_account_if_not_exists', 'mod_mattermost'),
-            get_string('create_user_account_if_not_exists_desc', 'mod_mattermost'),
-            1
-        )
-    );
+    // TODO: Investigate if this is really worth adding
+    // $settings->add(
+    //     new admin_setting_configcheckbox('mod_mattermost/create_user_account_if_not_exists',
+    //         get_string('create_user_account_if_not_exists', 'mod_mattermost'),
+    //         get_string('create_user_account_if_not_exists_desc', 'mod_mattermost'),
+    //         1
+    //     )
+    // );
 
     $settings->add(
         new admin_setting_configtext('mod_mattermost/validationchannelnameregex',
             get_string('validationchannelnameregex', 'mod_mattermost'),
             get_string('validationchannelnameregex_desc', 'mod_mattermost'),
             '/[^0-9a-zA-Z-_.]/'
+        )
+    );
+
+    $enabledenrolmentplugins = enrol_get_plugins(true);
+    $enabledenrolmentplugins = array_keys($enabledenrolmentplugins);
+    array_walk($enabledenrolmentplugins,
+        function(&$value, $key){
+            $value = 'enrol_'.$value;
+        }
+    );
+    $enabledenrolmentplugins = array_combine($enabledenrolmentplugins, $enabledenrolmentplugins);
+    $default = array(
+        'enrol_flatfile' => 'enrol_flatfile',
+        'enrol_cohort' => 'enrol_cohort'
+    );
+    $settings->add(
+        new admin_setting_configmultiselect('mod_mattermost/background_enrolment_task',
+            get_string('background_enrolment_task', 'mod_mattermost'),
+            get_string('background_enrolment_task_desc', 'mod_mattermost'),
+            $default,
+            $enabledenrolmentplugins
         )
     );
 

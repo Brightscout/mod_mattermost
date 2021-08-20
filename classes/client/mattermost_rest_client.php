@@ -59,7 +59,7 @@ class mattermost_rest_client {
         return $channel['id'];
     }
 
-    public function create_user($user) {
+    public function get_or_create_user($user) {
         return $this->do_post(
             $this->pluginapiurl . '/users',
             $user
@@ -82,7 +82,21 @@ class mattermost_rest_client {
         return $this->do_delete($this->pluginapiurl . '/channels/' . $channelid . '/members/'. $userid);
     }
 
-    private function do_get($url, $headers = []) {
+    public function get_channel_members($channelid, $page, $perpage) {
+        return $this->do_get(
+            $this->pluginapiurl . '/channels/' . $channelid . '/members',
+            array(
+                'page' => $page,
+                'per_page' => $perpage
+            )
+        );
+    }
+
+    public function update_mattermost_user($userid, $payload) {
+        return $this->do_patch($this->pluginapiurl . '/users/' . $userid, $payload);
+    }
+
+    private function do_get($url, $params = [], $headers = []) {
         $curl = new \curl();
 
         $options = [
@@ -94,7 +108,7 @@ class mattermost_rest_client {
             ],
         ];
 
-        $params = ['secret' => $this->secret];
+        $params['secret'] = $this->secret;
         $response = $curl->get($url, $params, $options);
         $info = $curl->get_info();
 

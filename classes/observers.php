@@ -25,7 +25,6 @@
 
 namespace mod_mattermost;
 
-// use mod_mattermost\api\manager\mattermost_api_manager;
 use mod_mattermost\tools\mattermost_tools;
 
 defined('MOODLE_INTERNAL') || die();
@@ -54,7 +53,28 @@ class observers {
                     || ($context->contextlevel == CONTEXT_MODULE
                         && mattermost_tools::is_module_a_mattermost_instance($cm->id))
                 ) {
-                    mattermost_tools::role_assign($coursecontext->instanceid, $roleid, $moodleuser, $context);
+                    $backenrolmentsmethods = array_filter(
+                        explode(',', get_config('mod_mattermost', 'background_enrolment_task'))
+                    );
+                    $component = empty($event->other['component']) ? 'enrol_manual' : $event->other['component'];
+                    if (in_array($component, $backenrolmentsmethods)) {
+                        $contextobject = new \stdClass();
+                        $contextobject->contextlevel = $context->contextlevel;
+                        $contextobject->id = $context->id;
+                        $contextobject->instanceid = $context->instanceid;
+                        $taskenrolment = new \mod_mattermost\task\enrol_role_assign();
+                        $taskenrolment->set_custom_data(
+                            array(
+                                'courseid' => $coursecontext->instanceid,
+                                'roleid' => $roleid,
+                                'moodleuser' => $moodleuser,
+                                'context' => $contextobject
+                            )
+                        );
+                        \core\task\manager::queue_adhoc_task($taskenrolment);
+                    } else {
+                        mattermost_tools::role_assign($coursecontext->instanceid, $roleid, $moodleuser, $context);
+                    }
                 }
             }
         }
@@ -81,8 +101,61 @@ class observers {
                         && mattermost_tools::course_has_mattermost_module_instances($coursecontext->instanceid))
                     || ($context->contextlevel == CONTEXT_MODULE && mattermost_tools::is_module_a_mattermost_instance($cm->id))
                 ) {
-                    mattermost_tools::role_unassign($coursecontext->instanceid, $roleid, $moodleuser, $context);
+                    $backenrolmentsmethods = array_filter(
+                        explode(',', get_config('mod_mattermost', 'background_enrolment_task'))
+                    );
+                    $component = empty($event->other['component']) ? 'enrol_manual' : $event->other['component'];
+                    if (in_array($component, $backenrolmentsmethods)) {
+                        $contextobject = new \stdClass();
+                        $contextobject->contextlevel = $context->contextlevel;
+                        $contextobject->id = $context->id;
+                        $contextobject->instanceid = $context->instanceid;
+                        $taskunenrolment = new \mod_mattermost\task\enrol_role_unassign();
+                        $taskunenrolment->set_custom_data(
+                            array(
+                                'courseid' => $coursecontext->instanceid,
+                                'roleid' => $roleid,
+                                'moodleuser' => $moodleuser,
+                                'context' => $contextobject
+                            )
+                        );
+                        \core\task\manager::queue_adhoc_task($taskunenrolment);
+                    } else {
+                        mattermost_tools::role_unassign($coursecontext->instanceid, $roleid, $moodleuser, $context);
+                    }
                 }
+            }
+        }
+    }
+
+    public static function user_updated(\core\event\user_updated $event) {
+        global $DB;
+        $user = $DB->get_record('user' , array('id' => $event->objectid));
+        if (!$user) {
+            print_error('user not found on user_updated event in mod_mattermost');
+        }
+        $backgrounduserupdate = get_config('mod_mattermost', 'background_user_update');
+        if ($user->suspended || $user->deleted) {
+            
+            if ($backgrounduserupdate) {
+                $taskunenrol = new \mod_mattermost\task\unenrol_user_everywhere();
+                $taskunenrol->set_custom_data(
+                    array('userid' => $user->id)
+                );
+                \core\task\manager::queue_adhoc_task($taskunenrol);
+            } else {
+                mattermost_tools::unenrol_user_everywhere($user->id);
+            }
+        } else {
+            if ($backgrounduserupdate) {
+                $taskenrol = new \mod_mattermost\task\synchronize_user_everywhere();
+                $taskenrol->set_custom_data(
+                    array('userid' => $user->id)
+                );
+                \core\task\manager::queue_adhoc_task($taskenrol);
+            } else {
+                // mattermost_tools::update_user($user->id);
+                mattermost_tools::synchronize_user_enrolments($user->id);
             }
         }
     }

@@ -27,12 +27,15 @@ namespace mod_mattermost\api\manager;
 
 use Exception;
 use mod_mattermost\client\mattermost_rest_client;
+use moodle_exception;
 
 defined('MOODLE_INTERNAL') || die();
 
 class mattermost_api_manager{
     const AUTHSERVICES = array('ldap', 'saml');
     const AUTHDATA = array('email', 'username');
+    const MATTERMOST_CHANNEL_ADMIN_ROLE = "channel_admin";
+    const MATTERMOST_CHANNEL_MEMBER_ROLE = "channel_user";
 
     private $mattermostapiconfig;
     private $client;
@@ -81,100 +84,152 @@ class mattermost_api_manager{
     }
 
     public function enrol_user_to_channel($channelid, $moodleuser, $ischanneladmin = false, &$user=null) {
-        $createusermode = get_config('mod_mattermost', 'create_user_account_if_not_exists');
+        global $DB;
+
+        $mattermostuser = $DB->get_record('mattermostxusers', array('moodleuserid' => $moodleuser->id));
+        // TODO: Look into adding this setting in the future
+        // $createusermode = get_config('mod_mattermost', 'create_user_account_if_not_exists');
+        
         try {
-            $user = $this->client->get_user_by_email($moodleuser->email);
+            $user = $this->get_or_create_user($moodleuser, $mattermostuser);
+            file_put_contents('/var/www/html/moodle/log.txt', 'enrolled user '.print_r($user, true).PHP_EOL, FILE_APPEND);
+            $DB->insert_record('mattermostxusers', array(
+                'moodleuserid' => $moodleuser->id,
+                'mattermostuserid' => $user['id'],
+            ));
         } catch (Exception $e) {
             self::moodle_debugging_message(
-                "User $moodleuser->username doesn't already exist.",
+                "User $moodleuser->username was not succesfully created.",
                 $e);
-        }
-
-        if ($createusermode && !$user) {
-            try {
-                $user = $this->create_user($moodleuser);
-            } catch (Exception $e) {
-                self::moodle_debugging_message(
-                    "User $moodleuser->username was not succesfully created.",
-                    $e);
-            }
-        }
-
-        if (!$user) {
-            return false;
         }
 
         try {
             $payload = array('user_id' => $user['id']);
             if ($ischanneladmin) {
-                $payload['role'] = 'channel_admin';
+                $payload['role'] = static::MATTERMOST_CHANNEL_ADMIN_ROLE;
             }
             $this->client->add_user_to_channel($channelid, $payload);
         } catch (Exception $e) {
             self::moodle_debugging_message("User $moodleuser->username not added to remote Mattermost channel", $e);
         }
-        return true;
+        return $user;
     }
 
-    public function create_user($moodleuser) {
-        $mattermostuserinfos = array();
+    public function get_or_create_user($moodleuser, $mattermostuser) {
+        $mattermostuserinfo = array();
         
         $authservice = get_config('mod_mattermost', 'authservice');
-        $mattermostuserinfos['auth_service'] = static::AUTHSERVICES[$authservice];
+        $mattermostuserinfo['auth_service'] = static::AUTHSERVICES[$authservice];
 
         $authdata = get_config('mod_mattermost', 'authdata');
         if ($authdata == 0) {
-            $mattermostuserinfos['auth_data'] = $moodleuser->email;
+            $mattermostuserinfo['auth_data'] = $moodleuser->email;
         } else if ($authdata == 1) {
-            $mattermostuserinfos['auth_data'] =  $moodleuser->username;
+            $mattermostuserinfo['auth_data'] =  $moodleuser->username;
         }
 
-        $mattermostuserinfos['nickname'] = get_string('mattermost_nickname', 'mod_mattermost', $moodleuser);
-        $mattermostuserinfos['email'] = $moodleuser->email;
-        $mattermostuserinfos['username'] = $moodleuser->username;
-        $mattermostuserinfos['first_name'] = $moodleuser->firstname;
-        $mattermostuserinfos['last_name'] = $moodleuser->lastname;
-        $mattermostuserinfos['team_name'] = $this->get_team_slugname();
+        if($mattermostuser) {
+            $mattermostuserinfo['id'] = $mattermostuser->mattermostuserid;
+        }
+        $mattermostuserinfo['nickname'] = get_string('mattermost_nickname', 'mod_mattermost', $moodleuser);
+        $mattermostuserinfo['email'] = $moodleuser->email;
+        $mattermostuserinfo['username'] = $moodleuser->username;
+        $mattermostuserinfo['first_name'] = $moodleuser->firstname;
+        $mattermostuserinfo['last_name'] = $moodleuser->lastname;
+        $mattermostuserinfo['team_name'] = $this->get_team_slugname();
 
 
-        return $this->client->create_user($mattermostuserinfos);
+        return $this->client->get_or_create_user($mattermostuserinfo);
     }
 
-    public function revoke_channeladmin_role_in_channel($channelid, $moodleuser) {
+    public function update_user($moodleuser, $mattermostuser) {
+        if (!$mattermostuser) {
+            throw new moodle_exception('mmusernotfounderror', 'mod_mattermost', '');
+        }
+
+        $mattermostuserinfo = array();
+        $mattermostuserinfo['nickname'] = get_string('mattermost_nickname', 'mod_mattermost', $moodleuser);
+        $mattermostuserinfo['email'] = $moodleuser->email;
+        $mattermostuserinfo['username'] = $moodleuser->username;
+        $mattermostuserinfo['first_name'] = $moodleuser->firstname;
+        $mattermostuserinfo['last_name'] = $moodleuser->lastname;
         try {
-            $user = $this->client->get_user_by_email($moodleuser->email);
+            $this->client->update_mattermost_user($mattermostuser->mattermostuserid, $mattermostuserinfo);
         } catch (Exception $e) {
-            self::moodle_debugging_message(
-                "User $moodleuser->username doesn't already exist.",
-                $e);
+            self::moodle_debugging_message("User $moodleuser->username could not be updated. Error: " . $e->getMessage(), $e, DEBUG_DEVELOPER);
+        }
+    }
+
+    /** 
+     * @param $channelid
+     * @param $moodleuser
+     * @param bool $updatetochanneladmin
+    */
+    public function update_role_in_channel($channelid, $moodleuser, $updatetochanneladmin) {
+        global $DB;
+    
+        $mattermostuser = $DB->get_record('mattermostxusers', array('moodleuserid' => $moodleuser->id));
+        if(!$mattermostuser) {
+            throw new moodle_exception('mmusernotfounderror', 'mod_mattermost', '');
         }
 
         try {
             $payload = array(
-                'user_id' => $user['id'],
-                'role' => 'channel_user'
+                'user_id' => $mattermostuser->mattermostuserid,
+                'role' => $updatetochanneladmin ? static::MATTERMOST_CHANNEL_ADMIN_ROLE : static::MATTERMOST_CHANNEL_MEMBER_ROLE,
             );
             $this->client->update_channel_member_roles($channelid, $payload);
         } catch (Exception $e) {
-            self::moodle_debugging_message("User $moodleuser->username not added to remote Mattermost channel", $e);
+            self::moodle_debugging_message("Role not updated for user $moodleuser->username in remote Mattermost channel", $e);
         }
         return false;
     }
 
-    public function unenrol_user_from_channel($channelid, $moodleuser) {
-        try {
-            $user = $this->client->get_user_by_email($moodleuser->email);
-        } catch (Exception $e) {
-            self::moodle_debugging_message(
-                "User $moodleuser->username doesn't already exist.",
-                $e);
+    public function unenrol_user_from_channel($channelid, $moodleuser, $mattermostchannelmember = null) {
+        global $DB;
+    
+        if($moodleuser) {
+            $mattermostuser = $DB->get_record('mattermostxusers', array('moodleuserid' => $moodleuser->id));
+        }else if($mattermostchannelmember) {
+            $mattermostuser = $DB->get_record('mattermostxusers', array(
+                'mattermostuserid' => $mattermostchannelmember['user_id'] ?? $mattermostchannelmember['id']
+            ));
+        }
+
+        if(!$mattermostuser) {
+            throw new moodle_exception('mmusernotfounderror', 'mod_mattermost', '');
         }
 
         try {
-            $this->client->remove_user_from_channel($channelid, $user['id']);
+            $this->client->remove_user_from_channel($channelid, $mattermostuser->mattermostuserid);
         } catch (Exception $e) {
-            self::moodle_debugging_message("User $moodleuser->username not added to remote Mattermost channel", $e);
+            $username = $moodleuser ? $moodleuser->username : $mattermostchannelmember['username'];
+            self::moodle_debugging_message("User $username not added to remote Mattermost channel", $e);
         }
         return false;
+    }
+
+    public function get_enriched_channel_members($channelid) {
+        $enrichedmembers = array();
+        $page = 0;
+        $perpage = 60;
+        
+        try {
+            do {
+                $members = $this->client->get_channel_members($channelid, $page, $perpage);
+                if ($members && is_array($members)) {
+                    foreach ($members as $member) {
+                        $enrichedmembers[$member['email']] = $member;
+                    }
+                }
+                $page += 1;
+            } while($members && is_array($members) && count($members) == $perpage);
+        } catch (Exception $e) {
+            self::moodle_debugging_message(
+                "Error while retrieving channel members",
+                $e);
+        }
+        
+        return $enrichedmembers;
     }
 }

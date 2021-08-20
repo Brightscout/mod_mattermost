@@ -13,31 +13,22 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
- * Plugin event observers are registered here.
- *
+ * adhoc task file file
  * @package     mod_mattermost
- * @category    event
+ * @category    observer
  * @copyright   2020 Manoj <manoj@brightscout.com>
  * @author      Manoj <manoj@brightscout.com>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_mattermost\task;
+
 defined('MOODLE_INTERNAL') || die();
 
-$observers = array(
-
-    array(
-        'eventname' => '\core\event\role_assigned',
-        'callback' => '\mod_mattermost\observers::role_assigned',
-    ),
-    array(
-        'eventname' => '\core\event\role_unassigned',
-        'callback' => '\mod_mattermost\observers::role_unassigned',
-    ),
-    array(
-        'eventname' => '\core\event\user_updated',
-        'callback' => '\mod_mattermost\observers::user_updated',
-    ),
-);
+class unenrol_user_everywhere extends \core\task\adhoc_task {
+    public function execute() {
+        $data = $this->get_custom_data();
+        \mod_mattermost\tools\mattermost_tools::unenrol_user_everywhere($data->userid);
+    }
+}

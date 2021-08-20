@@ -94,7 +94,7 @@ function mattermost_add_instance($moduleinstance, $mform = null) {
             || mattermost_tools::has_mattermost_channeladmin_role($channeladminrolesids, $USER, $coursecontext->id);
         mattermost_tools::enrol_all_concerned_users_to_mattermost_channel(
             $moduleinstance,
-            get_config('mod_mattermost', 'background_add_instance'),
+            (boolean)get_config('mod_mattermost', 'background_add_instance'),
             $forcecreator);
         return $id;
     } catch(Exception $e) {
@@ -120,8 +120,8 @@ function mattermost_update_instance($moduleinstance, $mform = null) {
     $mattermost = $DB->get_record('mattermost', array('id' => $moduleinstance->id));
     $return = $DB->update_record('mattermost', $moduleinstance);
     if ($return) {
-        $mattermostapimanager = new mattermost_api_manager();
-        // TODO: Add synchronize channel members logic.
+        mattermost_tools::synchronize_channel_members($mattermost->mattermostid,
+            (boolean)get_config('mod_mattermost', 'background_synchronize'));
     }
     return $return;
 }
