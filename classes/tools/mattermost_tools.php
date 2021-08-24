@@ -421,7 +421,6 @@ class mattermost_tools {
         }
         // Remove remaining Mattermost members no more enrolled in course.
         foreach ($mattermostmembers as $mattermostmember) {
-            if($mattermostmember['username'] == "manojmalik35") continue;
             $mattermostapimanager->unenrol_user_from_channel($mattermostid, null, $mattermostmember);
         }
     }
