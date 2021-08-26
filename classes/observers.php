@@ -15,21 +15,24 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 /**
  * observers file
- * @package     mod_mattermost
- * @category    observer
- * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author      Manoj <manoj@brightscout.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ * @package   mod_mattermost
+ * @category  observer
+ * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @author    Manoj <manoj@brightscout.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 
 namespace mod_mattermost;
 
 use mod_mattermost\tools\mattermost_tools;
+use moodle_exception;
 
 defined('MOODLE_INTERNAL') || die();
 
-class observers {
+class observers
+{
 
     public static function role_assigned(\core\event\role_assigned $event) {
         global $DB;
@@ -39,7 +42,8 @@ class observers {
             $moodleuser = $DB->get_record('user', array('id' => $userid));
             $roleid = $event->objectid;
             if (($context->contextlevel == CONTEXT_COURSE || $context->contextlevel == CONTEXT_MODULE)
-                && is_enrolled($context, $moodleuser->id)) {
+                && is_enrolled($context, $moodleuser->id)
+            ) {
                 $coursecontext = null;
                 if ($context->contextlevel == CONTEXT_COURSE) {
                     $coursecontext = $context;
@@ -47,11 +51,10 @@ class observers {
                     $cm = $DB->get_record('course_modules', array('id' => $context->instanceid));
                     $coursecontext = \context_course::instance($cm->course);
                 }
-                if (
-                    ($context->contextlevel == CONTEXT_COURSE
-                        && mattermost_tools::course_has_mattermost_module_instances($coursecontext->instanceid))
+                if (($context->contextlevel == CONTEXT_COURSE
+                    && mattermost_tools::course_has_mattermost_module_instances($coursecontext->instanceid))
                     || ($context->contextlevel == CONTEXT_MODULE
-                        && mattermost_tools::is_module_a_mattermost_instance($cm->id))
+                    && mattermost_tools::is_module_a_mattermost_instance($cm->id))
                 ) {
                     $backenrolmentsmethods = array_filter(
                         explode(',', get_config('mod_mattermost', 'background_enrolment_task'))
@@ -88,7 +91,7 @@ class observers {
             $moodleuser = $DB->get_record('user', array('id' => $userid));
             $roleid = $event->objectid;
             $cm = null;
-            if ( ($context->contextlevel == CONTEXT_COURSE || $context->contextlevel == CONTEXT_MODULE)) {
+            if (($context->contextlevel == CONTEXT_COURSE || $context->contextlevel == CONTEXT_MODULE)) {
                 $coursecontext = null;
                 if ($context->contextlevel == CONTEXT_COURSE) {
                     $coursecontext = $context;
@@ -96,9 +99,8 @@ class observers {
                     $cm = $DB->get_record('course_modules', array('id' => $context->instanceid));
                     $coursecontext = \context_course::instance($cm->course);
                 }
-                if (
-                    ($context->contextlevel == CONTEXT_COURSE
-                        && mattermost_tools::course_has_mattermost_module_instances($coursecontext->instanceid))
+                if (($context->contextlevel == CONTEXT_COURSE
+                    && mattermost_tools::course_has_mattermost_module_instances($coursecontext->instanceid))
                     || ($context->contextlevel == CONTEXT_MODULE && mattermost_tools::is_module_a_mattermost_instance($cm->id))
                 ) {
                     $backenrolmentsmethods = array_filter(
@@ -130,13 +132,13 @@ class observers {
 
     public static function user_updated(\core\event\user_updated $event) {
         global $DB;
-        $user = $DB->get_record('user' , array('id' => $event->objectid));
+        $user = $DB->get_record('user', array('id' => $event->objectid));
         if (!$user) {
-            print_error('user not found on user_updated event in mod_mattermost');
+            throw new moodle_exception('usernotfoundonupdationerror', 'mod_mattermost');
         }
         $backgrounduserupdate = get_config('mod_mattermost', 'background_user_update');
         if ($user->suspended || $user->deleted) {
-            
+
             if ($backgrounduserupdate) {
                 $taskunenrol = new \mod_mattermost\task\unenrol_user_everywhere();
                 $taskunenrol->set_custom_data(
@@ -154,7 +156,7 @@ class observers {
                 );
                 \core\task\manager::queue_adhoc_task($taskenrol);
             } else {
-                // mattermost_tools::update_user($user->id);
+                // TODO: Add call for update user here.
                 mattermost_tools::synchronize_user_enrolments($user->id);
             }
         }

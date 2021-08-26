@@ -17,10 +17,10 @@
 /**
  * The main mod_mattermost configuration form.
  *
- * @package     mod_mattermost
- * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author      Manoj <manoj@brightscout.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_mattermost
+ * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @author    Manoj <manoj@brightscout.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -32,12 +32,13 @@ require_once($CFG->dirroot . '/course/moodleform_mod.php');
 /**
  * Module instance settings form.
  *
- * @package    mod_mattermost
- * @author     Manoj <manoj@brightscout.com>
- * @copyright  2020 Manoj <manoj@brightscout.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_mattermost
+ * @author    Manoj <manoj@brightscout.com>
+ * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_mattermost_mod_form extends moodleform_mod {
+class mod_mattermost_mod_form extends moodleform_mod
+{
 
     /**
      * Defines forms elements
@@ -174,7 +175,7 @@ class mod_mattermost_mod_form extends moodleform_mod {
 
     /**
      * @param string $formattedrole
-     * @param array $rolesoptions
+     * @param array  $rolesoptions
      */
     protected function format_roles($roleids, $rolesoptions) {
         $i = 1;

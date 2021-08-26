@@ -17,11 +17,11 @@
 /**
  * Plugin event observers are registered here.
  *
- * @package     mod_mattermost
- * @category    event
- * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author      Manoj <manoj@brightscout.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_mattermost
+ * @category  event
+ * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @author    Manoj <manoj@brightscout.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();

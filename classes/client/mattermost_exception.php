@@ -17,25 +17,26 @@
 /**
  * mattermost exception class
  *
- * @package     mod_mattermost
- * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author      Manoj <manoj@brightscout.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_mattermost
+ * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @author    Manoj <manoj@brightscout.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace mod_mattermost\client;
 use Exception;
 
-class mattermost_exception extends Exception {
-	public function __construct($response, $code = 0, Exception $previous = null) {
-		$message = '';
-		if (is_string($response)) {
-			$message = strip_tags($response);
-		} else {
+class mattermost_exception extends Exception
+{
+    public function __construct($response, $code = 0, Exception $previous = null) {
+        $message = '';
+        if (is_string($response)) {
+            $message = strip_tags($response);
+        } else {
             $response = json_decode($response);
-			$message = isset($response->error) ? $response->error : $response->message;
-			$code = $code || $response->code;
-		}
-		parent::__construct($message, $code, $previous);
-	}
+            $message = isset($response->error) ? $response->error : $response->message;
+            $code = $code || $response->code;
+        }
+        parent::__construct($message, $code, $previous);
+    }
 }

@@ -17,15 +17,18 @@
 /**
  * mattermost api config class
  *
- * @package     mod_mattermost
- * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author      Manoj <manoj@brightscout.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_mattermost
+ * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @author    Manoj <manoj@brightscout.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace mod_mattermost\api\manager;
 
-class mattermost_api_config {
+use moodle_exception;
+
+class mattermost_api_config
+{
     private $instanceurl;
     private $secret;
     private $teamslugname;
@@ -71,13 +74,13 @@ class mattermost_api_config {
         if (is_null($this->instanceurl)) {
             $config = get_config('mod_mattermost');
             if (empty($config->instanceurl)) {
-                print_error('Mattermost instance url is empty');
+                throw new moodle_exception('mminstanceurlmissingerror', 'mod_mattermost');
             }
             if (empty($config->secret)) {
-                print_error('Mattermost secret is empty');
+                throw new moodle_exception('mmsecretmissingerror', 'mod_mattermost');
             }
             if (empty($config->teamslugname)) {
-                print_error('Mattermost team slug name is empty');
+                throw new moodle_exception('mmteamslugnamemissingerror', 'mod_mattermost');
             }
             // TODO : Add checks for authservice and authdata.
             $this->instanceurl = $config->instanceurl;
@@ -87,5 +90,4 @@ class mattermost_api_config {
             $this->authdata = $config->authdata;
         }
     }
-
 }

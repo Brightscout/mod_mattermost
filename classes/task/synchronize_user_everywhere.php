@@ -15,22 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 /**
  * adhoc task file file
- * @package     mod_mattermost
- * @category    observer
- * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author      Manoj <manoj@brightscout.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ * @package   mod_mattermost
+ * @category  observer
+ * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @author    Manoj <manoj@brightscout.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace mod_mattermost\task;
 
 defined('MOODLE_INTERNAL') || die();
 
-class synchronize_user_everywhere extends \core\task\adhoc_task {
+class synchronize_user_everywhere extends \core\task\adhoc_task
+{
     public function execute() {
         $data = $this->get_custom_data();
-        // TODO: Add call for update user after adding 'Email' Authservice
-        // \mod_mattermost\tools\mattermost_tools::update_user($data->userid);
+        // TODO: Add call for update user after adding 'Email' Authservice.
         \mod_mattermost\tools\mattermost_tools::synchronize_user_enrolments($data->userid);
     }
 }

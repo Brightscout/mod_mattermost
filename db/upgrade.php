@@ -17,10 +17,10 @@
 /**
  * upgrade file
  *
- * @package     mod_mattermost
- * @category    upgrade
- * @author      Manoj <manoj@brightscout.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package  mod_mattermost
+ * @category upgrade
+ * @author   Manoj <manoj@brightscout.com>
+ * @license  http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 function xmldb_mattermost_upgrade($oldversion) {
@@ -46,6 +46,6 @@ function xmldb_mattermost_upgrade($oldversion) {
         // Mattermost savepoint reached.
         upgrade_mod_savepoint(true, 2021081800, 'mattermost');
     }
-    
+
     return true;
 }

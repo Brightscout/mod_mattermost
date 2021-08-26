@@ -17,11 +17,12 @@
 /**
  * Plugin strings are defined here.
  *
- * @package     mod_mattermost
- * @category    string
- * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author      Manoj <manoj@brightscout.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later */
+ * @package   mod_mattermost
+ * @category  string
+ * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @author    Manoj <manoj@brightscout.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -99,3 +100,12 @@ $string['joinmattermost'] = 'Join Mattermost session';
 $string['mmchannelerror'] = 'Remote Mattermost channel can\'t be retrieved. Please contact your system administrator. Error code {$a}.';
 $string['mattermost_nickname'] = '{$a->firstname} {$a->lastname}';
 $string['mmusernotfounderror'] = 'Mattermost user not found in db.';
+$string['mmchannelcreationerror'] = 'Mattermost channel not created. Error: {$a}';
+$string['viewmissingparamerror'] = 'Error: Missing parameter';
+$string['usernotfoundonupdationerror'] = 'Error: user not found on user_updated event in mod_mattermost';
+$string['mminstanceurlmissingerror'] = 'Error: Mattermost instance url is empty';
+$string['mmsecretmissingerror'] = 'Error: Mattermost secret is empty';
+$string['mmteamslugnamemissingerror'] = 'Error: Mattermost team slug name is empty';
+$string['mmchannelnameerror'] = 'Error: sanitized Mattermost channelname can\'t be empty';
+$string['mminstancenotfounderror'] = 'Error: can\'t find mattermost instance {$a} in Moodle';
+$string['moodleusernotfounderror'] = 'Error: Moodle user {$a} not found';

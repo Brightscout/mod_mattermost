@@ -17,17 +17,18 @@
 /**
  * mattermost rest-client class
  *
- * @package     mod_mattermost
- * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author      Manoj <manoj@brightscout.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_mattermost
+ * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @author    Manoj <manoj@brightscout.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace mod_mattermost\client;
 
 defined('MOODLE_INTERNAL') || die();
 
-class mattermost_rest_client {
+class mattermost_rest_client
+{
 
     const MATTERMOST_PLUGIN_ID = 'com.mattermost.moodle-sync';
     private $baseurl;
