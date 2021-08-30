@@ -51,9 +51,9 @@
     </TABLE>
     <TABLE NAME="mattermostxgroups" COMMENT="Stores the mattermost channel ids mapped with Moodle group ids.">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Id of the moodle group"/>
         <FIELD NAME="channelid" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="Id of the mattermost channel."/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Id of the course to which the group belongs."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="channelid"/>
