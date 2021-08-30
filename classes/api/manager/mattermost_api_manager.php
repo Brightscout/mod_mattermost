@@ -135,6 +135,19 @@ class mattermost_api_manager
     }
 
     /**
+     * @param string $id
+     */
+    public function archive_mattermost_channel($id) {
+        try {
+            $this->client->archive_channel($id);
+        } catch (Exception $e) {
+            self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
+            debugging("Mattermost api Error ".$e->getCode()." : ".$e->getMessage(), DEBUG_DEVELOPER);
+        }   
+        return false;
+    }
+
+    /**
      * Function for enrolling a user to a channel
      *
      * @param string $channelid - Mattermost channel id

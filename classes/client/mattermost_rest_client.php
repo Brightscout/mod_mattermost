@@ -120,6 +120,15 @@ class mattermost_rest_client
     }
 
     /**
+     * Archives/deletes the channel at Mattermost
+     * 
+     * @param string $channelId
+     */
+    public function archive_channel($channelId) {
+        return $this->do_delete($this->pluginapiurl . '/channels/' . $channelId);
+    }
+
+    /**
      * Client function to get a user by email from Mattermost
      *
      * @param string $email
