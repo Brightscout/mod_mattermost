@@ -71,7 +71,7 @@ function mattermost_add_instance($moduleinstance, $mform = null) {
     $moduleinstance->timemodified = $moduleinstance->timecreated;
     $cmid       = $moduleinstance->coursemodule;
     $course = $DB->get_record('course', array('id' => $moduleinstance->course));
-    $channelname = mattermost_tools::get_mattermost_channel_name($cmid, $course);
+    $channelname = mattermost_tools::get_mattermost_channel_name_for_instance($cmid, $course);
     $mattermostapimanager = new mattermost_api_manager();
     $moduleinstance->mattermostid = $mattermostapimanager->create_mattermost_channel($channelname);
 
@@ -79,17 +79,43 @@ function mattermost_add_instance($moduleinstance, $mform = null) {
 
     $id = $DB->insert_record('mattermost', $moduleinstance);
 
+    $groups = $DB->get_records('groups', array('courseid' => $course->id));
+    $records = array();
+    foreach ($groups as $group) {
+        $channelname = mattermost_tools::get_mattermost_channel_name_for_group($course, $group);
+        $mattermostchannelid = $mattermostapimanager->create_mattermost_channel($channelname);
+
+        array_push($records, array(
+            'groupid' => $group->id,
+            'channelid' => $mattermostchannelid,
+            'courseid' => $course->id,
+        ));
+
+        // Set channelid key in the group object to be used while enrolling users.
+        $group->channelid = $mattermostchannelid;
+    }
+
+    $DB->insert_records('mattermostxgroups', $records);
+
     // Force creator if current user has a role for this instance.
     $channeladminrolesids = array_filter(explode(',', $moduleinstance->channeladminroles));
     $userrolesids = array_filter(explode(',', $moduleinstance->userroles));
     $coursecontext = context_course::instance($course->id);
     $forcecreator = mattermost_tools::has_mattermost_user_role($userrolesids, $USER, $coursecontext->id)
         || mattermost_tools::has_mattermost_channeladmin_role($channeladminrolesids, $USER, $coursecontext->id);
-    mattermost_tools::enrol_all_concerned_users_to_mattermost_channel(
+    mattermost_tools::enrol_all_concerned_users_to_mattermost_channel_for_course(
         $moduleinstance,
         (boolean)get_config('mod_mattermost', 'background_add_instance'),
         $forcecreator
     );
+
+    mattermost_tools::enrol_all_concerned_users_to_mattermost_channels_for_groups(
+        $groups,
+        $moduleinstance,
+        $coursecontext,
+        (boolean)get_config('mod_mattermost', 'background_add_instance'),
+    );
+
     return $id;
 }
 
