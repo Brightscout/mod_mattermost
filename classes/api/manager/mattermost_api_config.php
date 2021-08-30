@@ -27,15 +27,43 @@ namespace mod_mattermost\api\manager;
 
 use moodle_exception;
 
+/**
+ * Class for Mattermost API configuration
+ */
 class mattermost_api_config
 {
+    /**
+     * @var string
+     */
     private $instanceurl;
+
+    /**
+     * @var string
+     */
     private $secret;
+
+    /**
+     * @var string
+     */
     private $teamslugname;
+
+    /**
+     * It stores the index of the value selected from the array('ldap', 'saml') in the plugin config
+     *
+     * @var int
+     */
     private $authservice;
+
+    /**
+     * It stores the index of the value selected from the array('email', 'username') in the plugin config
+     *
+     * @var int
+     */
     private $authdata;
 
     /**
+     * Function to get Mattermost instance url from the configuration
+     *
      * @return string
      */
     public function get_instanceurl() {
@@ -43,6 +71,8 @@ class mattermost_api_config
     }
 
     /**
+     * Function to get Mattermost secret from the configuration
+     *
      * @return string
      */
     public function get_secret() {
@@ -50,6 +80,8 @@ class mattermost_api_config
     }
 
     /**
+     * Function to get Mattermost team slug name from the configuration
+     *
      * @return string
      */
     public function get_teamslugname() {
@@ -57,19 +89,27 @@ class mattermost_api_config
     }
 
     /**
-     * @return string
+     * Function to get Mattermost auth service from the configuration
+     *
+     * @return int
      */
     public function get_authservice() {
         return $this->authservice;
     }
 
     /**
-     * @return string
+     * Function to get Mattermost auth data from the configuration
+     *
+     * @return int
      */
     public function get_authdata() {
         return $this->authdata;
     }
 
+    /**
+     * Constructor for the mattermost_api_config class
+     * @throws Exception
+     */
     public function __construct() {
         if (is_null($this->instanceurl)) {
             $config = get_config('mod_mattermost');

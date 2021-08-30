@@ -17,7 +17,6 @@
  * observers file
  *
  * @package   mod_mattermost
- * @category  observer
  * @copyright 2020 Manoj <manoj@brightscout.com>
  * @author    Manoj <manoj@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -31,9 +30,16 @@ use moodle_exception;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * A class for the observers (event listeners)
+ */
 class observers
 {
-
+    /**
+     * Event handler function to handle the role_assigned event
+     *
+     * @param \core\event\role_assigned $event
+     */
     public static function role_assigned(\core\event\role_assigned $event) {
         global $DB;
         if (mattermost_tools::mattermost_enabled()) {
@@ -52,7 +58,7 @@ class observers
                     $coursecontext = \context_course::instance($cm->course);
                 }
                 if (($context->contextlevel == CONTEXT_COURSE
-                    && mattermost_tools::course_has_mattermost_module_instances($coursecontext->instanceid))
+                    && mattermost_tools::course_has_mattermost_module_instance($coursecontext->instanceid))
                     || ($context->contextlevel == CONTEXT_MODULE
                     && mattermost_tools::is_module_a_mattermost_instance($cm->id))
                 ) {
@@ -83,6 +89,11 @@ class observers
         }
     }
 
+    /**
+     * Event handler function to handle the role_unassigned event
+     *
+     * @param \core\event\role_unassigned $event
+     */
     public static function role_unassigned(\core\event\role_unassigned $event) {
         global $DB;
         if (mattermost_tools::mattermost_enabled()) {
@@ -100,7 +111,7 @@ class observers
                     $coursecontext = \context_course::instance($cm->course);
                 }
                 if (($context->contextlevel == CONTEXT_COURSE
-                    && mattermost_tools::course_has_mattermost_module_instances($coursecontext->instanceid))
+                    && mattermost_tools::course_has_mattermost_module_instance($coursecontext->instanceid))
                     || ($context->contextlevel == CONTEXT_MODULE && mattermost_tools::is_module_a_mattermost_instance($cm->id))
                 ) {
                     $backenrolmentsmethods = array_filter(
@@ -130,6 +141,11 @@ class observers
         }
     }
 
+    /**
+     * Event handler function to handle the user_updated event
+     *
+     * @param \core\event\user_updated $event
+     */
     public static function user_updated(\core\event\user_updated $event) {
         global $DB;
         $user = $DB->get_record('user', array('id' => $event->objectid));

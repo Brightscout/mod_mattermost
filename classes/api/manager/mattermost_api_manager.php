@@ -31,37 +31,85 @@ use moodle_exception;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Mattermost API magager class for calling the rest_client functions.
+ */
 class mattermost_api_manager
 {
+    /**
+     * The auth services used for creating user in Mattermost
+     */
     const AUTHSERVICES = array('ldap', 'saml');
+
+    /**
+     * The auth data used for creating a user in Mattermost
+     */
     const AUTHDATA = array('email', 'username');
+
+    /**
+     * The string used to denote a channel admin role in Mattermost
+     */
     const MATTERMOST_CHANNEL_ADMIN_ROLE = "channel_admin";
+
+    /**
+     * The string used to denote a channel member role in Mattermost
+     */
     const MATTERMOST_CHANNEL_MEMBER_ROLE = "channel_user";
 
+    /**
+     * An object of the mattermost_api_config class for getting configuration
+     * @var mattermost_api_config
+     */
     private $mattermostapiconfig;
+
+    /**
+     * An object of the mattermost_rest_client class for calling the APIs
+     * @var mattermost_rest_client
+     */
     private $client;
 
+    /**
+     * Function for getting the Mattermost instance url
+     * @return string
+     */
     public function get_instance_url() {
         return $this->mattermostapiconfig->get_instanceurl();
     }
 
+    /**
+     * Function for getting the Mattermost team slug name
+     * @return string
+     */
     public function get_team_slugname() {
         return $this->mattermostapiconfig->get_teamslugname();
     }
 
-    public function __construct($instanceurl = null, $secret = null) {
+    /**
+     * Constructor for the mattermost_api_manager class
+     */
+    public function __construct() {
         $this->mattermostapiconfig = new mattermost_api_config();
         $this->client = new mattermost_rest_client(
-            is_null($instanceurl) ? $this->mattermostapiconfig->get_instanceurl() : $instanceurl,
-            is_null($secret) ? $this->mattermostapiconfig->get_secret() : $secret,
+            $this->mattermostapiconfig->get_instanceurl(),
+            $this->mattermostapiconfig->get_secret(),
             $this->mattermostapiconfig->get_teamslugname()
         );
     }
 
+    /**
+     * API manager function for testing the connection to Mattermost.
+     */
     public function test_connection() {
         return $this->client->test_connection();
     }
 
+    /**
+     * Function for creating a Mattermost channel
+     *
+     * @param string $name
+     * @return string $channelid - Id of the mattermost channel created
+     * @throws Exception
+     */
     public function create_mattermost_channel($name) {
         try {
             return $this->client->create_channel($name);
@@ -72,8 +120,11 @@ class mattermost_api_manager
     }
 
     /**
-     * @param $moodleuser
-     * @param $e
+     * A function for debugging
+     *
+     * @param string $message
+     * @param Exception $e
+     * @param mixed $level - Debug level
      */
     public static function moodle_debugging_message($message, $e, $level = DEBUG_DEVELOPER) {
         if (!empty($message)) {
@@ -83,7 +134,15 @@ class mattermost_api_manager
         }
     }
 
-    public function enrol_user_to_channel($channelid, $moodleuser, $ischanneladmin = false, &$user=null) {
+    /**
+     * Function for enrolling a user to a channel
+     *
+     * @param string $channelid - Mattermost channel id
+     * @param object $moodleuser
+     * @param bool $ischanneladmin - Whether the user to be enrolled as a channel admin or not
+     * @return array $user
+     */
+    public function enrol_user_to_channel($channelid, $moodleuser, $ischanneladmin = false) {
         global $DB;
         $mattermostuser = $DB->get_record('mattermostxusers', array('moodleuserid' => $moodleuser->id));
 
@@ -114,13 +173,20 @@ class mattermost_api_manager
         return $user;
     }
 
+    /**
+     * Function to create a user in Mattermost or get a user if it already exists.
+     *
+     * @param object $moodleuser
+     * @param false|object $mattermostuser
+     * @return array $user
+     */
     public function get_or_create_user($moodleuser, $mattermostuser) {
         $mattermostuserinfo = array();
 
-        $authservice = get_config('mod_mattermost', 'authservice');
+        $authservice = $this->mattermostapiconfig->get_authservice();
         $mattermostuserinfo['auth_service'] = static::AUTHSERVICES[$authservice];
 
-        $authdata = get_config('mod_mattermost', 'authdata');
+        $authdata = $this->mattermostapiconfig->get_authdata();
         if ($authdata == 0) {
             $mattermostuserinfo['auth_data'] = $moodleuser->email;
         } else if ($authdata == 1) {
@@ -140,6 +206,13 @@ class mattermost_api_manager
         return $this->client->get_or_create_user($mattermostuserinfo);
     }
 
+    /**
+     * Function to update a Mattermost user
+     *
+     * @param object $moodleuser
+     * @param false|object $mattermostuser
+     * @throws Exception
+     */
     public function update_user($moodleuser, $mattermostuser) {
         if (!$mattermostuser) {
             throw new moodle_exception('mmusernotfounderror', 'mod_mattermost');
@@ -162,9 +235,12 @@ class mattermost_api_manager
     }
 
     /**
-     * @param $channelid
-     * @param $moodleuser
-     * @param bool $updatetochanneladmin
+     * Function to update a user's role in Mattermost channel
+     *
+     * @param string $channelid - Mattermost channel id
+     * @param object $moodleuser
+     * @param bool $updatetochanneladmin - true if role is updated to channel admin, false if updated to channel member
+     * @throws Exception
      */
     public function update_role_in_channel($channelid, $moodleuser, $updatetochanneladmin) {
         global $DB;
@@ -183,9 +259,16 @@ class mattermost_api_manager
         } catch (Exception $e) {
             self::moodle_debugging_message("Error updating role for user $moodleuser->username in remote Mattermost channel", $e);
         }
-        return false;
     }
 
+    /**
+     * Function to unenrol a user from a Mattermost channel
+     *
+     * @param string $channelid - Mattermost channel id
+     * @param object $moodleuser
+     * @param array $mattermostchannelmember returned from the get channel members API
+     * @throws Exception
+     */
     public function unenrol_user_from_channel($channelid, $moodleuser, $mattermostchannelmember = null) {
         global $DB;
 
@@ -209,9 +292,15 @@ class mattermost_api_manager
             $username = $moodleuser ? $moodleuser->username : $mattermostchannelmember['username'];
             self::moodle_debugging_message("User $username not added to remote Mattermost channel", $e);
         }
-        return false;
     }
 
+    /**
+     * Function to get members of a channel in Mattermost in the form of an array
+     * where key is member's email and value is the member object|array
+     *
+     * @param string $channelid - Mattermost channel id
+     * @return array $enrichedmembers
+     */
     public function get_enriched_channel_members($channelid) {
         $enrichedmembers = array();
         $page = 0;

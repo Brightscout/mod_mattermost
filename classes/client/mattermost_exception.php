@@ -26,16 +26,26 @@
 namespace mod_mattermost\client;
 use Exception;
 
+/**
+ * A custom made exception class which converts the response into json and makes the appropriate message for the error.
+ */
 class mattermost_exception extends Exception
 {
+    /**
+     * Constructor for the mattermost_exception class
+     *
+     * @param mixed $response
+     * @param int $code
+     * @param Exception $previous
+     */
     public function __construct($response, $code = 0, Exception $previous = null) {
         $message = '';
-        if (is_string($response)) {
-            $message = strip_tags($response);
-        } else {
-            $response = json_decode($response);
+        $jsonresponse = json_decode($response, true);
+        if ($jsonresponse) {
             $message = isset($response->error) ? $response->error : $response->message;
             $code = $code || $response->code;
+        } else {
+            $message = strip_tags($response);
         }
         parent::__construct($message, $code, $previous);
     }

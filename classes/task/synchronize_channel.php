@@ -17,7 +17,7 @@
  * adhoc task file file
  *
  * @package   mod_mattermost
- * @category  observer
+ * @category  task
  * @copyright 2020 Manoj <manoj@brightscout.com>
  * @author    Manoj <manoj@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,8 +27,14 @@ namespace mod_mattermost\task;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Adhoc task for synchronizing a channel
+ */
 class synchronize_channel extends \core\task\adhoc_task
 {
+    /**
+     * Execute the task
+     */
     public function execute() {
         $data = $this->get_custom_data();
         $context = \context::instance_by_id($data->coursecontextid);

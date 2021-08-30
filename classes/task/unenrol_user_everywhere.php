@@ -17,7 +17,7 @@
  * adhoc task file file
  *
  * @package   mod_mattermost
- * @category  observer
+ * @category  task
  * @copyright 2020 Manoj <manoj@brightscout.com>
  * @author    Manoj <manoj@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,8 +27,14 @@ namespace mod_mattermost\task;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Adhoc task for unenrolling a user from everywhere
+ */
 class unenrol_user_everywhere extends \core\task\adhoc_task
 {
+    /**
+     * Execute the task
+     */
     public function execute() {
         $data = $this->get_custom_data();
         \mod_mattermost\tools\mattermost_tools::unenrol_user_everywhere($data->userid);

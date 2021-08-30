@@ -19,10 +19,16 @@
  *
  * @package  mod_mattermost
  * @category upgrade
+ * @copyright 2020 Manoj <manoj@brightscout.com>
  * @author   Manoj <manoj@brightscout.com>
  * @license  http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+/**
+ * Function to upgrade the database if the plugin version is updated
+ *
+ * @param int $oldversion
+ */
 function xmldb_mattermost_upgrade($oldversion) {
     global $DB;
 

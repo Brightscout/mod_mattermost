@@ -33,19 +33,22 @@ use stdClass;
 use \mod_mattermost\api\manager\mattermost_api_manager;
 use moodle_exception;
 
+/**
+ * Class for some tool functions which provide various functionality.
+ */
 class mattermost_tools
 {
     /**
- * Display new window
-*/
+     * Display new window
+    */
     const DISPLAY_NEW = 1;
     /**
- * Display in curent window
-*/
+     * Display in curent window
+    */
     const DISPLAY_CURRENT = 2;
     /**
- * Display in popup
-*/
+     * Display in popup
+    */
     const DISPLAY_POPUP = 3;
 
     /**
@@ -62,6 +65,13 @@ class mattermost_tools
         return $options;
     }
 
+    /**
+     * Get mattermost channel name corresponding to the moodle course.
+     *
+     * @param int $cmid
+     * @param course $course
+     * @return string|string[]|null
+     */
     public static function get_mattermost_channel_name($cmid, $course) {
         global $CFG, $SITE;
         $formatarguments = new stdClass();
@@ -81,6 +91,14 @@ class mattermost_tools
         return self::sanitize_channelname($channelname);
     }
 
+    /**
+     * Formats the string according to the format arguments provided
+     * by replacing the arguments' value in the given string.
+     *
+     * @param string $string
+     * @param object $a Format arguments
+     * @return string|string[]
+     */
     public static function format_string($string, $a) {
         if ($a !== null) {
             // Process array's and objects (except lang_strings).
@@ -111,9 +129,13 @@ class mattermost_tools
     }
 
     /**
+     * Sanitize channelname matches the channel name with the regular expression
+     * for the mattermost channel name defined in the plugin settings and replaces
+     * any invalid character with underscore.
+     *
      * @param  string $channelname
      * @return string|string[]|null
-     * @throws dml_exception
+     * @throws moodle_exception
      */
     public static function sanitize_channelname($channelname) {
         // Replace white spaces anyway.
@@ -126,12 +148,24 @@ class mattermost_tools
         return $channelname;
     }
 
+    /**
+     * Returns the link for the mattermost channel by taking the channel id as param.
+     *
+     * @param string $mattermostchannelid
+     * @return string url for the mattermost channel
+     */
     public static function get_channel_link($mattermostchannelid) {
         $mattermostmanager = new mattermost_api_manager();
         return $mattermostmanager->get_instance_url() . '/'. $mattermostmanager->get_team_slugname() .
             '/channels/' . $mattermostchannelid;
     }
 
+    /**
+     * Returns true if module mattermost is visible and basic plugin settings
+     * like instanceurl, secret and teamslugname are not empty otherwise returns false.
+     *
+     * @return bool
+     */
     public static function mattermost_enabled() {
 
         global $DB;
@@ -147,7 +181,13 @@ class mattermost_tools
         return false;
     }
 
-    public static function course_has_mattermost_module_instances($courseid) {
+    /**
+     * Finds if a course has mattermost module instance.
+     *
+     * @param int $courseid
+     * @return bool true if course has a mattermost module instance, false otherwise
+     */
+    public static function course_has_mattermost_module_instance($courseid) {
         global $DB;
         $sql = 'select cm.*, mat.mattermostid, mat.channeladminroles, mat.userroles'
             .' from {course_modules} cm inner join {modules} m on m.id=cm.module inner join {mattermost} mat on mat.id=cm.instance '
@@ -155,6 +195,12 @@ class mattermost_tools
         return $DB->record_exists_sql($sql, array('courseid' => $courseid, 'mattermost' => 'mattermost'));
     }
 
+    /**
+     * Finds if a course module is a mattermost instance.
+     *
+     * @param int $cmid - Course module id
+     * @return bool true if course module is a mattermost instance, false otherwise
+     */
     public static function is_module_a_mattermost_instance($cmid) {
         global $DB;
         $sql = 'select cm.*, mat.mattermostid, mat.channeladminroles, mat.userroles'
@@ -163,6 +209,12 @@ class mattermost_tools
         return $DB->record_exists_sql($sql, array('cmid' => $cmid, 'mattermost' => 'mattermost'));
     }
 
+    /**
+     * Fetches mattermost module instances from database with given course id
+     *
+     * @param int $courseid
+     * @return array all mattermost module instances in the course
+     */
     public static function get_mattermost_module_instances_from_course($courseid) {
         global $DB;
         $sql = 'select cm.*, mat.mattermostid, mat.channeladminroles, mat.userroles'
@@ -172,6 +224,12 @@ class mattermost_tools
         return $moduleinstances;
     }
 
+    /**
+     * Fetches mattermost module instances from database with given course module id
+     *
+     * @param int $cmid Id of the course module
+     * @return array all mattermost module instances in the course
+     */
     public static function get_mattermost_module_instances_from_course_module($cmid) {
         global $DB;
         $sql = 'select cm.*, mat.mattermostid, mat.channeladminroles, mat.userroles'
@@ -182,10 +240,12 @@ class mattermost_tools
     }
 
     /**
+     * Finds if the moodlemember has a user role in Mattermost.
+     *
      * @param  array $userroleids
-     * @param  $moodlemember
-     * @param  int   $coursecontextid
-     * @return array
+     * @param  object $moodlemember
+     * @param  int $coursecontextid
+     * @return bool true if moodleuser has a role which is a user role in Mattermost, false otherwise
      */
     public static function has_mattermost_user_role(array $userroleids, $moodlemember, $coursecontextid) {
         $isuser = false;
@@ -199,10 +259,12 @@ class mattermost_tools
     }
 
     /**
+     * Finds if the moodlemember has a channel admin role in Mattermost.
+     *
      * @param  array $channeladminroleids
-     * @param  $moodlemember
-     * @param  int   $coursecontextid
-     * @return array
+     * @param  object $moodlemember
+     * @param  int $coursecontextid
+     * @return bool true if moodleuser has a role which is a channel admin role in Mattermost, false otherwise
      */
     public static function has_mattermost_channeladmin_role(
         array $channeladminroleids,
@@ -219,6 +281,13 @@ class mattermost_tools
         return $ischanneladmin;
     }
 
+    /**
+     * Enrols all the users in a course to the respective mattermost channel
+     *
+     * @param object $mattermostmoduleinstance
+     * @param bool $background - whether the enrolment should be done with the use of adhoc tasks
+     * @param bool $forcecreator - whether the currently logged in user should be created synchronously
+     */
     public static function enrol_all_concerned_users_to_mattermost_channel(
         $mattermostmoduleinstance,
         $background = false,
@@ -253,6 +322,15 @@ class mattermost_tools
         }
     }
 
+    /**
+     * Enrols a moodle user to a mattermost channel
+     *
+     * @param string $channelid - Mattermost channel id
+     * @param string $channeladminroles
+     * @param string $userroles
+     * @param int $userid - Id of the moodle user
+     * @param int $coursecontextid
+     */
     public static function enrol_user_to_mattermost_channel(
         $channelid,
         $channeladminroles,
@@ -278,9 +356,11 @@ class mattermost_tools
     }
 
     /**
-     * @param int      $courseid
-     * @param int      $roleid
-     * @param $moodleuser
+     * Handles the role assignment for a user in a course
+     *
+     * @param int $courseid
+     * @param int $roleid
+     * @param object $moodleuser
      * @param \context $context
      */
     public static function role_assign($courseid, int $roleid, $moodleuser, $context) {
@@ -307,9 +387,11 @@ class mattermost_tools
     }
 
     /**
-     * @param int      $courseid
-     * @param int      $roleid
-     * @param $moodleuser
+     * Handles the role unassignment for a user in a course
+     *
+     * @param int $courseid
+     * @param int $roleid
+     * @param object $moodleuser
      * @param \context $context
      */
     public static function role_unassign($courseid, int $roleid, $moodleuser, $context) {
@@ -365,6 +447,13 @@ class mattermost_tools
         }
     }
 
+    /**
+     * Given a mattermost module instance, finds all the enrolled members in the course and
+     * synchronizes all the members with the corresponding Mattermost channel.
+     *
+     * @param object $mattermostmoduleinstance
+     * @param bool $background - whether the synchronization should be done with the use of adhoc tasks
+     */
     public static function synchronize_channel_members($mattermostmoduleinstance, $background = false) {
         global $DB;
         if (!is_object($mattermostmoduleinstance)) {
@@ -406,10 +495,12 @@ class mattermost_tools
     }
 
     /**
-     * @param  $mattermostid
-     * @param  array          $moodlemembers
-     * @param  array          $channeladminroleids
-     * @param  array          $userroleids
+     * Synchronizes all the members of a mattermost channel with the given moodle members
+     *
+     * @param  string $mattermostid - Mattermost channel id
+     * @param  array $moodlemembers
+     * @param  array $channeladminroleids
+     * @param  array $userroleids
      * @param  context_course $coursecontext
      * @throws dml_exception
      */
@@ -442,13 +533,15 @@ class mattermost_tools
     }
 
     /**
-     * @param  $mattermostid
+     * Synchronizes a moodle user with respective roles with the Mattermost channel members
+     *
+     * @param  string $mattermostid - Mattermost channel id
      * @param  context_course $coursecontext
-     * @param  $moodleuser
-     * @param  array          $channeladminroleids
-     * @param  array          $userroleids
-     * @param  array          $mattermostmembers
-     * @return array
+     * @param  mixed $moodleuser
+     * @param  array $channeladminroleids
+     * @param  array $userroleids
+     * @param  array $mattermostmembers
+     * @return array $mattermostuser
      */
     private static function synchronize_mattermost_user($mattermostid, $coursecontext, $moodleuser, $channeladminroleids,
         $userroleids, $mattermostmembers
@@ -485,6 +578,12 @@ class mattermost_tools
         return $mattermostuser;
     }
 
+    /**
+     * Handles the logic for unenrolling a moodle user from all the Mattermost channels
+     * that he/she is a member of.
+     *
+     * @param int $userid
+     */
     public static function unenrol_user_everywhere($userid) {
         global $DB;
         $user = $DB->get_record('user', array('id' => $userid));
@@ -500,6 +599,11 @@ class mattermost_tools
         }
     }
 
+    /**
+     * Synchronizes the user enrollments for a Moodle user in all the Mattermost channels
+     *
+     * @param int $userid
+     */
     public static function synchronize_user_enrolments($userid) {
         global $DB;
         $user = $DB->get_record('user', array('id' => $userid));
@@ -532,6 +636,11 @@ class mattermost_tools
         }
     }
 
+    /**
+     * Updates a moodle user in Mattermost
+     *
+     * @param int $userid
+     */
     public static function update_user($userid) {
         global $DB;
         $user = $DB->get_record('user', array('id' => $userid));
@@ -541,7 +650,10 @@ class mattermost_tools
     }
 
     /**
-     * @return false|mixed
+     * Finds all the course enrolments for a moodle user
+     *
+     * @param int $userid
+     * @return false|array $courseenrolments
      * @throws dml_exception
      */
     private static function course_enrolments($userid) {
