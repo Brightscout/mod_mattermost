@@ -218,7 +218,8 @@ class observers
         if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
             $cminfos = $event->other;
             // Check that this is a mattermost module instance.
-            $sql = 'select * from {course_modules} cm inner join {modules} m on m.id=cm.module where cm.id=:cmid and m.name=:modulename';
+            $sql =
+                'select * from {course_modules} cm inner join {modules} m on m.id=cm.module where cm.id=:cmid and m.name=:modulename';
             $mattermostmodule = $DB->get_record_sql($sql, array('cmid' => $cminfos['cmid'], 'modulename' => 'mattermost'));
             if ($mattermostmodule) {
                 $mattermost = $DB->get_record('mattermost', array('id' => $cminfos['instanceid']));
@@ -397,15 +398,9 @@ class observers
             if (!empty($mattermost)) {
                 $mattermostapimanager = new mattermost_api_manager();
                 if (!$coursemodule->visible or !$coursemodule->visibleoncoursepage) {
-                    /**
-                     * It detects the change in instance visibility on course
-                     * Can't detect the change in course visibility here
-                     */
+                    // It detects the change in instance visibility on course.
+                    // Can't detect the change in course visibility here.
                     $mattermostapimanager->archive_mattermost_channel($mattermost->mattermostid);
-                }
-                else if ($coursemodule->visible && $coursemodule->visibleoncoursepage) {
-                    // To Do: Unarchive channel
-                    // $mattermostapimanager->unarchive_mattermost_channel($mattermost->mattermostid);
                 }
             }
         }

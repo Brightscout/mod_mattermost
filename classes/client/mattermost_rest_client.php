@@ -121,11 +121,11 @@ class mattermost_rest_client
 
     /**
      * Archives/deletes the channel at Mattermost
-     * 
-     * @param string $channelId
+     *
+     * @param string $channelid
      */
-    public function archive_channel($channelId) {
-        return $this->do_delete($this->pluginapiurl . '/channels/' . $channelId);
+    public function archive_channel($channelid) {
+        return $this->do_delete($this->pluginapiurl . '/channels/' . $channelid);
     }
 
     /**

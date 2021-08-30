@@ -143,7 +143,7 @@ class mattermost_api_manager
         } catch (Exception $e) {
             self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
             debugging("Mattermost api Error ".$e->getCode()." : ".$e->getMessage(), DEBUG_DEVELOPER);
-        }   
+        }
         return false;
     }
 

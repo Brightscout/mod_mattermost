@@ -75,9 +75,9 @@ function mattermost_add_instance($moduleinstance, $mform = null) {
     $mattermostapimanager = new mattermost_api_manager();
     $moduleinstance->mattermostid = $mattermostapimanager->create_mattermost_channel($channelname);
 
-        if (!$moduleinstance->visible || !$moduleinstance->visibleoncoursepage) {
-            $mattermostapimanager->archive_mattermost_channel($moduleinstance->mattermostid);
-        }
+    if (!$moduleinstance->visible || !$moduleinstance->visibleoncoursepage) {
+        $mattermostapimanager->archive_mattermost_channel($moduleinstance->mattermostid);
+    }
 
     $id = $DB->insert_record('mattermost', $moduleinstance);
 
@@ -162,14 +162,14 @@ function mattermost_delete_instance($id) {
     }
 
     $mattermostapimanager = new mattermost_api_manager();
-    
+
     try {
         $mattermostapimanager->archive_mattermost_channel($mattermost->mattermostid);
-    } catch(Exception $e) {
-        print_error($e->getMessage());
+    } catch (Exception $e) {
+        debugging("Error ".$e->getCode()." : ".$e->getMessage(), DEBUG_DEVELOPER);
     }
 
-    // Delete the instance of the mod_mattermost from database
+    // Delete the instance of the mod_mattermost from database.
     $DB->delete_records('mattermost', array('id' => $id));
 
     return true;
