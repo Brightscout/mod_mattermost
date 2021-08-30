@@ -54,7 +54,8 @@ if (empty($mattermosts)) {
 $table = new html_table();
 $table->attributes['class'] = 'generaltable mod_index';
 
-if ($usesections) {
+$strname = get_string('name', 'mod_mattermost');
+if ($course->format == 'weeks' or $course->format == 'topics') {
     $strsectionname = get_string('sectionname', 'format_'.$course->format);
     $table->head  = array ($strsectionname, $strname);
     $table->align = array ('center', 'left');
