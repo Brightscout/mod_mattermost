@@ -17,10 +17,10 @@
 /**
  * The main mod_mattermost configuration form.
  *
- * @package     mod_mattermost
- * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author      Manoj <manoj@brightscout.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_mattermost
+ * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @author    Manoj <manoj@brightscout.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -32,12 +32,13 @@ require_once($CFG->dirroot . '/course/moodleform_mod.php');
 /**
  * Module instance settings form.
  *
- * @package    mod_mattermost
- * @author     Manoj <manoj@brightscout.com>
- * @copyright  2020 Manoj <manoj@brightscout.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_mattermost
+ * @author    Manoj <manoj@brightscout.com>
+ * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_mattermost_mod_form extends moodleform_mod {
+class mod_mattermost_mod_form extends moodleform_mod
+{
 
     /**
      * Defines forms elements
@@ -165,6 +166,11 @@ class mod_mattermost_mod_form extends moodleform_mod {
         $this->add_action_buttons();
     }
 
+    /**
+     * This method is overriding the data_postprocessing method defined in moodleform_mod class
+     *
+     * @param stdClass $data passed by reference
+     */
     public function data_postprocessing($data) {
         $data->channeladminroles = is_array($data->channeladminroles) ?
             implode(',', $data->channeladminroles) :
@@ -173,8 +179,10 @@ class mod_mattermost_mod_form extends moodleform_mod {
     }
 
     /**
-     * @param string $formattedrole
-     * @param array $rolesoptions
+     * Function to format selected roles
+     *
+     * @param string $roleids - The ids of the roles separated by comma
+     * @param array  $rolesoptions - All the roles present in Moodle
      */
     protected function format_roles($roleids, $rolesoptions) {
         $i = 1;
@@ -189,8 +197,15 @@ class mod_mattermost_mod_form extends moodleform_mod {
         return $formattedrole;
     }
 
-    protected function validation($data, $files) {
-        global $COURSE, $DB, $CFG;
+    /**
+     * This function calls the validation function in moodleform_mod class
+     *
+     * @param stdClass $data passed by reference
+     * @param mixed $files
+     * @return array $errors
+     */
+    public function validation($data, $files) {
         $errors = parent::validation($data, $files);
+        return $errors;
     }
 }

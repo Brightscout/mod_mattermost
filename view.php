@@ -17,10 +17,10 @@
 /**
  * Prints an instance of mod_mattermost.
  *
- * @package     mod_mattermost
- * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author      Manoj <manoj@brightscout.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_mattermost
+ * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @author    Manoj <manoj@brightscout.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require(__DIR__.'/../../config.php');
@@ -42,7 +42,7 @@ if ($id) {
     $course         = $DB->get_record('course', array('id' => $moduleinstance->course), '*', MUST_EXIST);
     $cm             = get_coursemodule_from_instance('mattermost', $moduleinstance->id, $course->id, false, MUST_EXIST);
 } else {
-    print_error('missingparam');
+    throw new moodle_exception('viewmissingparamerror', 'mod_mattermost');
 }
 
 require_login($course, true, $cm);
@@ -63,29 +63,30 @@ $link = mattermost_tools::get_channel_link($moduleinstance->mattermostid);
 
 switch ($moduleinstance->displaytype) {
     case mattermost_tools::DISPLAY_POPUP:
-        echo $OUTPUT->action_link($link, get_string('joinmattermost', 'mod_mattermost'),
-            new popup_action(
-                'click',
-                $link,
-                'joinmattermost',
-                array('height' => $moduleinstance->popupheight, 'width' => $moduleinstance->popupwidth)
-            )
+        echo $OUTPUT->action_link(
+        $link, get_string('joinmattermost', 'mod_mattermost'),
+        new popup_action(
+            'click',
+            $link,
+            'joinmattermost',
+            array('height' => $moduleinstance->popupheight, 'width' => $moduleinstance->popupwidth)
+        )
         );
-        break;
+    break;
     case mattermost_tools::DISPLAY_CURRENT:
         echo $OUTPUT->action_link(
-            $link,
-            get_string('joinmattermost', 'mod_mattermost')
+        $link,
+        get_string('joinmattermost', 'mod_mattermost')
         );
-        break;
+    break;
     default:
         // DISPLAY_NEW and default case.
         echo html_writer::link(
-            $link,
-            get_string('joinmattermost', 'mod_mattermost'),
-            array('onclick' => 'this.target="_blank";')
+        $link,
+        get_string('joinmattermost', 'mod_mattermost'),
+        array('onclick' => 'this.target="_blank";')
         );
-        break;
+    break;
 }
 
 echo $OUTPUT->footer();

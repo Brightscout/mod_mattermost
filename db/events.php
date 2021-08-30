@@ -15,38 +15,29 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * mattermost exception class
+ * Plugin event observers are registered here.
  *
  * @package   mod_mattermost
+ * @category  event
  * @copyright 2020 Manoj <manoj@brightscout.com>
  * @author    Manoj <manoj@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_mattermost\client;
-use Exception;
+defined('MOODLE_INTERNAL') || die();
 
-/**
- * A custom made exception class which converts the response into json and makes the appropriate message for the error.
- */
-class mattermost_exception extends Exception
-{
-    /**
-     * Constructor for the mattermost_exception class
-     *
-     * @param mixed $response
-     * @param int $code
-     * @param Exception $previous
-     */
-    public function __construct($response, $code = 0, Exception $previous = null) {
-        $message = '';
-        $jsonresponse = json_decode($response, true);
-        if ($jsonresponse) {
-            $message = isset($response->error) ? $response->error : $response->message;
-            $code = $code || $response->code;
-        } else {
-            $message = strip_tags($response);
-        }
-        parent::__construct($message, $code, $previous);
-    }
-}
+$observers = array(
+
+    array(
+        'eventname' => '\core\event\role_assigned',
+        'callback' => '\mod_mattermost\observers::role_assigned',
+    ),
+    array(
+        'eventname' => '\core\event\role_unassigned',
+        'callback' => '\mod_mattermost\observers::role_unassigned',
+    ),
+    array(
+        'eventname' => '\core\event\user_updated',
+        'callback' => '\mod_mattermost\observers::user_updated',
+    ),
+);

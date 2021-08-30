@@ -17,11 +17,11 @@
 /**
  * Plugin administration pages are defined here.
  *
- * @package     mod_mattermost
- * @category    admin
- * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author Manoj <manoj@brightscout.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_mattermost
+ * @category  admin
+ * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @author    Manoj <manoj@brightscout.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -40,15 +40,18 @@ $ADMIN->add('modsettings', $modmattermostfolder);
 $settings->visiblename = new lang_string('settings', 'mod_mattermost');
 // Add the Libraries admin menu entry.
 $ADMIN->add('modmattermostfolder', $settings);
-$ADMIN->add('modmattermostfolder', new admin_externalpage(
-    'mattermostconnectiontest',
-    new lang_string('testconnection', 'mod_mattermost'),
-    new moodle_url('/mod/mattermost/test_connection.php')
-));
+$ADMIN->add(
+    'modmattermostfolder', new admin_externalpage(
+        'mattermostconnectiontest',
+        new lang_string('testconnection', 'mod_mattermost'),
+        new moodle_url('/mod/mattermost/test_connection.php')
+    )
+);
 
 if ($ADMIN->fulltree) {
     $settings->add(
-        new admin_setting_configtext('mod_mattermost/instanceurl',
+        new admin_setting_configtext(
+            'mod_mattermost/instanceurl',
             get_string('instanceurl', 'mod_mattermost'),
             get_string('instanceurl_desc', 'mod_mattermost'),
             null,
@@ -56,14 +59,16 @@ if ($ADMIN->fulltree) {
         )
     );
     $settings->add(
-        new admin_setting_configpasswordunmask('mod_mattermost/secret',
+        new admin_setting_configpasswordunmask(
+            'mod_mattermost/secret',
             get_string('secret', 'mod_mattermost'),
             get_string('secret_desc', 'mod_mattermost'),
             ''
         )
     );
     $settings->add(
-        new admin_setting_configtext('mod_mattermost/teamslugname',
+        new admin_setting_configtext(
+            'mod_mattermost/teamslugname',
             get_string('teamslugname', 'mod_mattermost'),
             get_string('teamslugname_desc', 'mod_mattermost'),
             null,
@@ -73,7 +78,8 @@ if ($ADMIN->fulltree) {
 
     $authservices = array('LDAP' => 'ldap', 'SAML' => 'saml');
     $settings->add(
-        new admin_setting_configselect('mod_mattermost/authservice',
+        new admin_setting_configselect(
+            'mod_mattermost/authservice',
             get_string('authservice', 'mod_mattermost'),
             get_string('authservice_desc', 'mod_mattermost'),
             $authservices['LDAP'],
@@ -83,7 +89,8 @@ if ($ADMIN->fulltree) {
 
     $authdata = array('Email' => 'email', 'Username' => 'username');
     $settings->add(
-        new admin_setting_configselect('mod_mattermost/authdata',
+        new admin_setting_configselect(
+            'mod_mattermost/authdata',
             get_string('authdata', 'mod_mattermost'),
             get_string('authdata_desc', 'mod_mattermost'),
             $authdata['Email'],
@@ -91,14 +98,16 @@ if ($ADMIN->fulltree) {
         )
     );
     $settings->add(
-        new admin_setting_configtext('mod_mattermost/channelnametoformat',
+        new admin_setting_configtext(
+            'mod_mattermost/channelnametoformat',
             get_string('channelnametoformat', 'mod_mattermost'),
             get_string('channelnametoformat_desc', 'mod_mattermost'),
             '{$a->moodleid}_{$a->courseshortname}_{$a->moduleid}'
         )
     );
     $settings->add(
-        new admin_setting_configtext('mod_mattermost/channelgroupnametoformat',
+        new admin_setting_configtext(
+            'mod_mattermost/channelgroupnametoformat',
             get_string('channelgroupnametoformat', 'mod_mattermost'),
             get_string('channelgroupnametoformat_desc', 'mod_mattermost'),
             '{$a->courseshortname}_{$a->groupname}'
@@ -110,7 +119,8 @@ if ($ADMIN->fulltree) {
     $editingteachers = get_archetype_roles('editingteacher');
     $student = get_archetype_roles('student');
     $settings->add(
-        new admin_setting_configmultiselect('mod_mattermost/defaultchanneladminroles',
+        new admin_setting_configmultiselect(
+            'mod_mattermost/defaultchanneladminroles',
             get_string('defaultchanneladminroles', 'mod_mattermost'),
             get_string('defaultchanneladminroles_desc', 'mod_mattermost'),
             array_keys($editingteachers),
@@ -119,7 +129,8 @@ if ($ADMIN->fulltree) {
     );
 
     $settings->add(
-        new admin_setting_configmultiselect('mod_mattermost/defaultuserroles',
+        new admin_setting_configmultiselect(
+            'mod_mattermost/defaultuserroles',
             get_string('defaultuserroles', 'mod_mattermost'),
             get_string('defaultuserroles_desc', 'mod_mattermost'),
             array_keys($student),
@@ -127,43 +138,73 @@ if ($ADMIN->fulltree) {
         )
     );
 
-    $settings->add(
-        new admin_setting_configcheckbox('mod_mattermost/create_user_account_if_not_exists',
-            get_string('create_user_account_if_not_exists', 'mod_mattermost'),
-            get_string('create_user_account_if_not_exists_desc', 'mod_mattermost'),
-            1
-        )
-    );
+    // TODO: Investigate if 'create_user_account_if_not_exists' setting is really worth adding.
 
     $settings->add(
-        new admin_setting_configtext('mod_mattermost/validationchannelnameregex',
+        new admin_setting_configtext(
+            'mod_mattermost/validationchannelnameregex',
             get_string('validationchannelnameregex', 'mod_mattermost'),
             get_string('validationchannelnameregex_desc', 'mod_mattermost'),
             '/[^0-9a-zA-Z-_.]/'
         )
     );
 
-    $settings->add(new admin_setting_configcheckbox('mod_mattermost/background_add_instance',
-        get_string('background_add_instance', 'mod_mattermost'),
-        get_string('background_add_instance_desc', 'mod_mattermost'),
-        1
-    ));
+    $enabledenrolmentplugins = enrol_get_plugins(true);
+    $enabledenrolmentplugins = array_keys($enabledenrolmentplugins);
+    array_walk(
+        $enabledenrolmentplugins,
+        function (&$value, $key) {
+            $value = 'enrol_'.$value;
+        }
+    );
+    $enabledenrolmentplugins = array_combine($enabledenrolmentplugins, $enabledenrolmentplugins);
+    $default = array(
+        'enrol_flatfile' => 'enrol_flatfile',
+        'enrol_cohort' => 'enrol_cohort'
+    );
+    $settings->add(
+        new admin_setting_configmultiselect(
+            'mod_mattermost/background_enrolment_task',
+            get_string('background_enrolment_task', 'mod_mattermost'),
+            get_string('background_enrolment_task_desc', 'mod_mattermost'),
+            $default,
+            $enabledenrolmentplugins
+        )
+    );
 
-    $settings->add(new admin_setting_configcheckbox('mod_mattermost/background_restore',
-        get_string('background_restore', 'mod_mattermost'),
-        get_string('background_restore_desc', 'mod_mattermost'),
-        1
-    ));
-    $settings->add(new admin_setting_configcheckbox('mod_mattermost/background_synchronize',
-        get_string('background_synchronize', 'mod_mattermost'),
-        get_string('background_synchronize_desc', 'mod_mattermost'),
-        1
-    ));
-    $settings->add(new admin_setting_configcheckbox('mod_mattermost/background_user_update',
-        get_string('background_user_update', 'mod_mattermost'),
-        get_string('background_user_update_desc', 'mod_mattermost'),
-        1
-    ));
+    $settings->add(
+        new admin_setting_configcheckbox(
+            'mod_mattermost/background_add_instance',
+            get_string('background_add_instance', 'mod_mattermost'),
+            get_string('background_add_instance_desc', 'mod_mattermost'),
+            1
+        )
+    );
+
+    $settings->add(
+        new admin_setting_configcheckbox(
+            'mod_mattermost/background_restore',
+            get_string('background_restore', 'mod_mattermost'),
+            get_string('background_restore_desc', 'mod_mattermost'),
+            1
+        )
+    );
+    $settings->add(
+        new admin_setting_configcheckbox(
+            'mod_mattermost/background_synchronize',
+            get_string('background_synchronize', 'mod_mattermost'),
+            get_string('background_synchronize_desc', 'mod_mattermost'),
+            1
+        )
+    );
+    $settings->add(
+        new admin_setting_configcheckbox(
+            'mod_mattermost/background_user_update',
+            get_string('background_user_update', 'mod_mattermost'),
+            get_string('background_user_update_desc', 'mod_mattermost'),
+            1
+        )
+    );
 }
 // Prevent Moodle from adding settings block in standard location.
 $settings = null;
