@@ -219,7 +219,8 @@ class observers
             $cminfos = $event->other;
             // Check that this is a mattermost module instance.
             $sql =
-                'select * from {course_modules} cm inner join {modules} m on m.id=cm.module where cm.id=:cmid and m.name=:modulename';
+                'select * from {course_modules} cm inner join {modules} m on m.id=
+                cm.module where cm.id=:cmid and m.name=:modulename';
             $mattermostmodule = $DB->get_record_sql($sql, array('cmid' => $cminfos['cmid'], 'modulename' => 'mattermost'));
             if ($mattermostmodule) {
                 $mattermost = $DB->get_record('mattermost', array('id' => $cminfos['instanceid']));
