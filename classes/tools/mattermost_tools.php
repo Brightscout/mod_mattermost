@@ -262,7 +262,7 @@ class mattermost_tools
     }
 
     /**
-     * Fetches mattermost channel ids corresponding to the moodle groups 
+     * Fetches mattermost channel ids corresponding to the moodle groups
      * inside a course which contain given user id as a member
      *
      * @param int $courseid Id of the course
@@ -285,7 +285,7 @@ class mattermost_tools
     /**
      * Fetches the user information for all the users
      * which are group members for the given group id
-     * 
+     *
      * @param int $groupid - Id of the group
      * @return array all user infos which are members in given group
      */
@@ -821,7 +821,7 @@ class mattermost_tools
 
     /**
      * Unenrols a user from a Mattermost channel
-     * 
+     *
      * @param string $channelid - Mattermost channel id
      * @param int $userid - Moodle id of the user
      */
