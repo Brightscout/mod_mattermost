@@ -762,7 +762,7 @@ class mattermost_tools
             $mattermostmembers = $mattermostapimanager->get_enriched_channel_members($courseenrolment->mattermostid);
 
             $coursecontext = context_course::instance($courseenrolment->courseid);
-            self::synchronize_mattermost_member($courseenrolment->mattermostid,
+            self::synchronize_mattermost_user($courseenrolment->mattermostid,
                 $coursecontext,
                 $user, $channeladminrolesids, $userrolesids, $mattermostmembers);
 
@@ -777,7 +777,7 @@ class mattermost_tools
                     continue;
                 }
 
-                self::synchronize_mattermost_member($group->channelid,
+                self::synchronize_mattermost_user($group->channelid,
                     $coursecontext,
                     $user, $channeladminrolesids, $userrolesids, $mattermostmembers);
             }
