@@ -17,7 +17,7 @@
 /**
  * Enable Mattermost connection test
  *
- * @package    mod
+ * @package    mod_mattermost
  * @subpackage mattermost
  * @copyright  2020 Manoj <manoj@brightscout.com>
  * @author     Manoj <manoj@brightscout.com>
