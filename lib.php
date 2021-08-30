@@ -17,10 +17,10 @@
 /**
  * Library of interface functions and constants.
  *
- * @package     mod_mattermost
- * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author      Manoj <manoj@brightscout.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_mattermost
+ * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @author    Manoj <manoj@brightscout.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -31,7 +31,7 @@ use \mod_mattermost\tools\mattermost_tools;
 /**
  * Return if the plugin supports $feature.
  *
- * @param string $feature Constant representing theadd feature.
+ * @param  string $feature Constant representing theadd feature.
  * @return true | null True if the feature is supported, null otherwise.
  */
 function mattermost_supports($feature) {
@@ -61,8 +61,8 @@ function mattermost_supports($feature) {
  * in mod_form.php) this function will create a new instance and return the id
  * number of the instance.
  *
- * @param object $moduleinstance An object from the form.
- * @param mod_mattermost_mod_form $mform The form.
+ * @param  object                  $moduleinstance An object from the form.
+ * @param  mod_mattermost_mod_form $mform          The form.
  * @return int The id of the newly inserted record.
  */
 function mattermost_add_instance($moduleinstance, $mform = null) {
@@ -73,34 +73,24 @@ function mattermost_add_instance($moduleinstance, $mform = null) {
     $course = $DB->get_record('course', array('id' => $moduleinstance->course));
     $channelname = mattermost_tools::get_mattermost_channel_name($cmid, $course);
     $mattermostapimanager = new mattermost_api_manager();
-    try {
-        $moduleinstance->mattermostid = $mattermostapimanager->create_mattermost_channel($channelname);
-        if (is_null($moduleinstance->mattermostid)) {
-            print_error('An error occured while creating Mattermost channel');
-        }
+    $moduleinstance->mattermostid = $mattermostapimanager->create_mattermost_channel($channelname);
 
-        // TODO: Make API for archiving a channel
-        // if (!$moduleinstance->visible || !$moduleinstance->visibleoncoursepage) {
-        //     $channel = $mattermostapimanager->archive_mattermost_channel($moduleinstance->mattermostid);
-        // }
+    // TODO: Call API for archiving the channel if instance is not visible.
 
-        $id = $DB->insert_record('mattermost', $moduleinstance);
+    $id = $DB->insert_record('mattermost', $moduleinstance);
 
-        // Force creator if current user has a role for this instance.
-        $channeladminrolesids = array_filter(explode(',', $moduleinstance->channeladminroles));
-        $userrolesids = array_filter(explode(',', $moduleinstance->userroles));
-        $coursecontext = context_course::instance($course->id);
-        $forcecreator = mattermost_tools::has_mattermost_user_role($userrolesids, $USER, $coursecontext->id)
-            || mattermost_tools::has_mattermost_channeladmin_role($channeladminrolesids, $USER, $coursecontext->id);
-        mattermost_tools::enrol_all_concerned_users_to_mattermost_channel(
-            $moduleinstance,
-            get_config('mod_mattermost', 'background_add_instance'),
-            $forcecreator);
-        return $id;
-    } catch(Exception $e) {
-        print_error($e->getMessage());
-    }
-    
+    // Force creator if current user has a role for this instance.
+    $channeladminrolesids = array_filter(explode(',', $moduleinstance->channeladminroles));
+    $userrolesids = array_filter(explode(',', $moduleinstance->userroles));
+    $coursecontext = context_course::instance($course->id);
+    $forcecreator = mattermost_tools::has_mattermost_user_role($userrolesids, $USER, $coursecontext->id)
+        || mattermost_tools::has_mattermost_channeladmin_role($channeladminrolesids, $USER, $coursecontext->id);
+    mattermost_tools::enrol_all_concerned_users_to_mattermost_channel(
+        $moduleinstance,
+        (boolean)get_config('mod_mattermost', 'background_add_instance'),
+        $forcecreator
+    );
+    return $id;
 }
 
 /**
@@ -109,8 +99,8 @@ function mattermost_add_instance($moduleinstance, $mform = null) {
  * Given an object containing all the necessary data (defined in mod_form.php),
  * this function will update an existing instance with new data.
  *
- * @param object $moduleinstance An object from the form in mod_form.php.
- * @param mod_mattermost_mod_form $mform The form.
+ * @param  object                  $moduleinstance An object from the form in mod_form.php.
+ * @param  mod_mattermost_mod_form $mform          The form.
  * @return bool True if successful, false otherwise.
  */
 function mattermost_update_instance($moduleinstance, $mform = null) {
@@ -120,8 +110,10 @@ function mattermost_update_instance($moduleinstance, $mform = null) {
     $mattermost = $DB->get_record('mattermost', array('id' => $moduleinstance->id));
     $return = $DB->update_record('mattermost', $moduleinstance);
     if ($return) {
-        $mattermostapimanager = new mattermost_api_manager();
-        // TODO: Add synchronize channel members logic.
+        mattermost_tools::synchronize_channel_members(
+            $mattermost->mattermostid,
+            (boolean)get_config('mod_mattermost', 'background_synchronize')
+        );
     }
     return $return;
 }
@@ -129,7 +121,7 @@ function mattermost_update_instance($moduleinstance, $mform = null) {
 /**
  * Removes an instance of the mod_mattermost from the database.
  *
- * @param int $id Id of the module instance.
+ * @param  int $id Id of the module instance.
  * @return bool True if successful, false on failure.
  */
 function mattermost_delete_instance($id) {

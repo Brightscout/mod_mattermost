@@ -28,21 +28,20 @@ namespace mod_mattermost\task;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Adhoc task for enrollingg a user to a mattermost channel
+ * Adhoc task for handling role assignment and user enrolment
  */
-class enrol_user_to_mattermost_channel extends \core\task\adhoc_task
+class enrol_role_assign extends \core\task\adhoc_task
 {
     /**
      * Execute the task
      */
     public function execute() {
         $data = $this->get_custom_data();
-        \mod_mattermost\tools\mattermost_tools::enrol_user_to_mattermost_channel(
-            $data->mattermostid,
-            $data->channeladminroles,
-            $data->userroles,
-            $data->userid,
-            $data->coursecontextid
+        \mod_mattermost\tools\mattermost_tools::role_assign(
+            $data->courseid,
+            $data->roleid,
+            $data->moodleuser,
+            $data->context
         );
     }
 }

@@ -17,11 +17,12 @@
 /**
  * Plugin strings are defined here.
  *
- * @package     mod_mattermost
- * @category    string
- * @copyright   2020 Manoj <manoj@brightscout.com>
- * @author      Manoj <manoj@brightscout.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later */
+ * @package   mod_mattermost
+ * @category  string
+ * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @author    Manoj <manoj@brightscout.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -65,11 +66,13 @@ $string['userroles'] = 'Moodle roles in course that will be Mattermost users (wi
 $string['defaultuserroles_desc'] = 'Moodle roles in course that will be Mattermost users (with normal user rights)';
 $string['create_user_account_if_not_exists'] = 'Create Mattermost user account';
 $string['create_user_account_if_not_exists_desc'] = 'While enrolling user, create Mattermost corresponding user account(username), if it does not exist';
-$string['validationchannelnameregex'] = 'Mattermost group validation name regular expression to remove invalid characters';
-$string['validationchannelnameregex_desc'] = 'Moodle will replace every unauthorized caracters by _. This regexp is the exact negation of the Mattermost server one concerning group name validation';
+$string['validationchannelnameregex'] = 'Mattermost channel validation name regular expression to remove invalid characters';
+$string['validationchannelnameregex_desc'] = 'Moodle will replace every unauthorized characters by _. This regexp is the exact negation of the Mattermost server one concerning channel name validation';
+$string['background_enrolment_task'] = 'Pass user enrolment/unenrolments to remote Mattermost as background tasks.';
+$string['background_enrolment_task_desc'] = 'This is to solve performance issue while enrolling large amounts of users.</br>This will prevent the enroller to wait on course enrolment page while enrolling/unenrolling large amount of users.</br>Choice of enrol cohort and flatfile, if enabled, are strongly advised';
 $string['background_add_instance'] = 'Pass Mattermost enrolments to background task while creating a new module instance';
 $string['background_add_instance_desc'] = 'This will prevent waiting of the module creation page';
-$string['background_restore'] = 'Pass Mattermost enrolments to background task while dupplicating a mattermost modules';
+$string['background_restore'] = 'Pass Mattermost enrolments to background task while duplicating a mattermost modules';
 $string['background_restore_desc'] = 'This will prevent waiting while duplicating a Mattermost module';
 $string['background_synchronize'] = 'Pass Mattermost enrolments to background task while synchronizing enrollees.';
 $string['background_synchronize_desc'] = 'This occurs after a course or a Mattermost module is restored from recyclebin.';
@@ -85,9 +88,9 @@ $string['connection-success'] = 'Connection succesfully established';
 $string['displaysection'] = 'Display settings';
 $string['rolessection'] = 'Roles definition settings';
 $string['displaytype'] = 'Display type';
-$string['displaynew'] = 'Display in new window';
+$string['displaynew'] = 'Display in new tab';
 $string['displaypopup'] = 'Display in popup window';
-$string['displaycurrent'] = 'Display in current window';
+$string['displaycurrent'] = 'Display in current tab';
 $string['popupheight'] = 'Pop-up height';
 $string['popupwidth'] = 'Pop-up width';
 
@@ -96,3 +99,16 @@ $string['mattermost:candefineroles'] = 'Can define roles to apply in Mattermost\
 $string['joinmattermost'] = 'Join Mattermost session';
 $string['mmchannelerror'] = 'Remote Mattermost channel can\'t be retrieved. Please contact your system administrator. Error code {$a}.';
 $string['mattermost_nickname'] = '{$a->firstname} {$a->lastname}';
+$string['mmusernotfounderror'] = 'Mattermost user not found in db.';
+$string['mmchannelcreationerror'] = 'Mattermost channel not created. Error: {$a}';
+$string['viewmissingparamerror'] = 'Error: Missing parameter';
+$string['usernotfoundonupdationerror'] = 'Error: user not found on user_updated event in mod_mattermost';
+$string['mminstanceurlmissingerror'] = 'Error: Mattermost instance url is empty';
+$string['mmsecretmissingerror'] = 'Error: Mattermost secret is empty';
+$string['mmteamslugnamemissingerror'] = 'Error: Mattermost team slug name is empty';
+$string['mmchannelnameerror'] = 'Error: sanitized Mattermost channelname can\'t be empty';
+$string['mminstancenotfounderror'] = 'Error: can\'t find mattermost instance {$a} in Moodle';
+$string['moodleusernotfounderror'] = 'Error: Moodle user {$a} not found';
+
+$string['mattermost:addinstance'] = 'Add a Mattermost module instance';
+$string['nomattermosts'] = 'No Mattermost module instances.';

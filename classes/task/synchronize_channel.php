@@ -28,21 +28,22 @@ namespace mod_mattermost\task;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Adhoc task for enrollingg a user to a mattermost channel
+ * Adhoc task for synchronizing a channel
  */
-class enrol_user_to_mattermost_channel extends \core\task\adhoc_task
+class synchronize_channel extends \core\task\adhoc_task
 {
     /**
      * Execute the task
      */
     public function execute() {
         $data = $this->get_custom_data();
-        \mod_mattermost\tools\mattermost_tools::enrol_user_to_mattermost_channel(
+        $context = \context::instance_by_id($data->coursecontextid);
+        \mod_mattermost\tools\mattermost_tools::synchronize_channel(
             $data->mattermostid,
-            $data->channeladminroles,
-            $data->userroles,
-            $data->userid,
-            $data->coursecontextid
+            (array)$data->moodlemembers,
+            (array)$data->channeladminroleids,
+            (array)$data->userroleids,
+            $context
         );
     }
 }

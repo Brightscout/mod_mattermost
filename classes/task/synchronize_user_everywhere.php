@@ -28,21 +28,16 @@ namespace mod_mattermost\task;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Adhoc task for enrollingg a user to a mattermost channel
+ * Adhoc task for synchronizing a user everywhere
  */
-class enrol_user_to_mattermost_channel extends \core\task\adhoc_task
+class synchronize_user_everywhere extends \core\task\adhoc_task
 {
     /**
      * Execute the task
      */
     public function execute() {
         $data = $this->get_custom_data();
-        \mod_mattermost\tools\mattermost_tools::enrol_user_to_mattermost_channel(
-            $data->mattermostid,
-            $data->channeladminroles,
-            $data->userroles,
-            $data->userid,
-            $data->coursecontextid
-        );
+        // TODO: Add call for update user after adding 'Email' Authservice.
+        \mod_mattermost\tools\mattermost_tools::synchronize_user_enrolments($data->userid);
     }
 }
