@@ -220,10 +220,10 @@ class observers
             // Check that this is a mattermost module instance.
             $mattermostmodule = mattermost_tools::get_mattermost_module_instance_from_course_module($courseinfo);
             if ($mattermostmodule) {
-                $mattermost = $DB->get_record('mattermost', array('id' => $$courseinfo['instanceid']));
+                $mattermost = $DB->get_record('mattermost', array('id' => $courseinfo['instanceid']));
                 // Insert item into association table.
                 $record = new \stdClass();
-                $record->cmid = $$courseinfo['cmid'];
+                $record->cmid = $courseinfo['cmid'];
                 $record->mattermostid = $mattermost->mattermostid;
                 $record->binid = $event->objectid;
                 $DB->insert_record('mattermostxrecyclebin', $record);

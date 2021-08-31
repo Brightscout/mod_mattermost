@@ -135,7 +135,7 @@ class mattermost_api_manager
     }
 
     /**
-     * Archives Mattermost channel 
+     * Archives Mattermost channel
      *
      * @param string $id - Mattermost channel id
      */
