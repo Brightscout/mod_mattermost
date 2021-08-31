@@ -146,6 +146,7 @@ class mattermost_tools
             } else {
                 $string = str_replace('{$a}', (string)$a, $string);
             }
+            $string = preg_replace('/{.*}/', '', $string);
         }
         return strtolower($string);
     }
@@ -263,13 +264,13 @@ class mattermost_tools
 
     /**
      * Fetches mattermost channel ids corresponding to the moodle groups
-     * inside a course which contain given user id as a member
+     * inside a course which contain given user id as a group member
      *
      * @param int $courseid Id of the course
      * @param int $userid Id of the user which is a member in the groups
      * @return array all mattermost channel ids corresponding to the groups
      */
-    public static function get_mattermost_channelids_for_groups_with_user($courseid, $userid) {
+    public static function get_mattermost_channelids_for_groups_with_given_member($courseid, $userid) {
         global $DB;
         $sql = 'select mg.channelid from {mattermostxgroups} mg inner join'
         . ' {groups_members} gm on gm.groupid = mg.groupid'
@@ -283,13 +284,12 @@ class mattermost_tools
     }
 
     /**
-     * Fetches the user information for all the users
-     * which are group members for the given group id
+     * Fetches the group members' information.
      *
      * @param int $groupid - Id of the group
      * @return array all user infos which are members in given group
      */
-    public static function get_group_members_for_group($groupid) {
+    public static function get_group_members($groupid) {
         global $DB;
         $sql = 'select u.* from {groups_members} gm inner join'
         . ' {user} u on gm.userid = u.id'
@@ -609,7 +609,7 @@ class mattermost_tools
         }
 
         foreach ($groups as $group) {
-            $groupmembers = self::get_group_members_for_group($group->groupid);
+            $groupmembers = self::get_group_members($group->groupid);
             if ($background) {
                 $tasksynchronize = new \mod_mattermost\task\synchronize_channel();
                 $tasksynchronize->set_custom_data(
