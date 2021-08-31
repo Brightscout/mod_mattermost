@@ -135,7 +135,9 @@ class mattermost_api_manager
     }
 
     /**
-     * @param string $id
+     * Archives Mattermost channel 
+     *
+     * @param string $id - Mattermost channel id
      */
     public function archive_mattermost_channel($id) {
         try {
@@ -144,7 +146,6 @@ class mattermost_api_manager
             self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
             debugging("Mattermost api Error ".$e->getCode()." : ".$e->getMessage(), DEBUG_DEVELOPER);
         }
-        return false;
     }
 
     /**

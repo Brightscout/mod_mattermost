@@ -216,17 +216,14 @@ class observers
     public static function course_bin_item_created(\tool_recyclebin\event\course_bin_item_created $event) {
         global $DB;
         if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
-            $cminfos = $event->other;
+            $courseinfo = $event->other;
             // Check that this is a mattermost module instance.
-            $sql =
-                'select * from {course_modules} cm inner join {modules} m on m.id=
-                cm.module where cm.id=:cmid and m.name=:modulename';
-            $mattermostmodule = $DB->get_record_sql($sql, array('cmid' => $cminfos['cmid'], 'modulename' => 'mattermost'));
+            $mattermostmodule = mattermost_tools::get_mattermost_module_instance_from_course_module($courseinfo);
             if ($mattermostmodule) {
-                $mattermost = $DB->get_record('mattermost', array('id' => $cminfos['instanceid']));
+                $mattermost = $DB->get_record('mattermost', array('id' => $$courseinfo['instanceid']));
                 // Insert item into association table.
                 $record = new \stdClass();
-                $record->cmid = $cminfos['cmid'];
+                $record->cmid = $$courseinfo['cmid'];
                 $record->mattermostid = $mattermost->mattermostid;
                 $record->binid = $event->objectid;
                 $DB->insert_record('mattermostxrecyclebin', $record);
@@ -306,23 +303,18 @@ class observers
     public static function category_bin_item_created(\tool_recyclebin\event\category_bin_item_created $event) {
         global $DB;
         if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
-            $courseinfos = $event->other;
+            $courseinfo = $event->other;
             // Check that this is a mattermost module instance.
-            $sql = 'select cm.id, cm.instance from {course_modules} cm inner join {modules} m on m.id=cm.module '
-                .'where cm.course=:courseid and m.name=:modname';
-            $mattermostmodules = $DB->get_records_sql($sql,
-                array('courseid' => $courseinfos['courseid'], 'modname' => 'mattermost'));
+            $mattermostmodule = mattermost_tools::get_mattermost_module_instance_from_course_module($courseinfo);
 
-            foreach ($mattermostmodules as $mattermostmodule) {
-                if ($mattermostmodule) {
-                    $mattermost = $DB->get_record('mattermost', array('id' => $mattermostmodule->instance));
-                    // Insert item into association table.
-                    $record = new \stdClass();
-                    $record->cmid = $mattermostmodule->id;
-                    $record->mattermostid = $mattermost->mattermostid;
-                    $record->binid = $event->objectid;
-                    $DB->insert_record('mattermostxrecyclebin', $record);
-                }
+            if ($mattermostmodule) {
+                $mattermost = $DB->get_record('mattermost', array('id' => $mattermostmodule->instance));
+                // Insert item into association table.
+                $record = new \stdClass();
+                $record->cmid = $mattermostmodule->id;
+                $record->mattermostid = $mattermost->mattermostid;
+                $record->binid = $event->objectid;
+                $DB->insert_record('mattermostxrecyclebin', $record);
             }
         }
     }
@@ -373,6 +365,8 @@ class observers
             $mattermostapimanager = null;
             if (!empty($mattermostrecyclebins)) {
                 $mattermostapimanager = new mattermost_api_manager();
+            } else {
+                return;
             }
 
             foreach ($mattermostrecyclebins as $mattermostrecyclebin) {
@@ -387,7 +381,7 @@ class observers
 
     /**
      * Event handler function to handle the course_module_updated event
-     * Archives/Unarchives the channel when course is hidden/shown on course
+     * Archives/Unarchives the channel when instance visibility is changed.
      *
      * @param \core\event\course_module_updated $event
      */

@@ -162,12 +162,7 @@ function mattermost_delete_instance($id) {
     }
 
     $mattermostapimanager = new mattermost_api_manager();
-
-    try {
-        $mattermostapimanager->archive_mattermost_channel($mattermost->mattermostid);
-    } catch (Exception $e) {
-        debugging("Error ".$e->getCode()." : ".$e->getMessage(), DEBUG_DEVELOPER);
-    }
+    $mattermostapimanager->archive_mattermost_channel($mattermost->mattermostid);
 
     // Delete the instance of the mod_mattermost from database.
     $DB->delete_records('mattermost', array('id' => $id));
