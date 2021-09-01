@@ -304,7 +304,7 @@ class observers
      * Restores mattermost instance, when instance is restored from
      * the course recycle bin
      *
-     * @param \tool_recyclebin\event\category_bin_item_restored $event
+     * @param \tool_recyclebin\event\course_bin_item_restored $event
      */
     public static function course_bin_item_restored(\tool_recyclebin\event\course_bin_item_restored $event) {
         global $DB;

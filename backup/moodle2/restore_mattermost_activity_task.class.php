@@ -54,7 +54,7 @@ class restore_mattermost_activity_task extends restore_activity_task {
      *
      * @return array.
      */
-    static public function define_decode_contents() {
+    public static function define_decode_contents() {
         $contents = array();
 
         $contents[] = new restore_decode_content('mattermost', array('intro'), 'mattermost.xml');
@@ -67,7 +67,7 @@ class restore_mattermost_activity_task extends restore_activity_task {
      *
      * @return array.
      */
-    static public function define_decode_rules() {
+    public static function define_decode_rules() {
         $rules = array();
         $rules[] = new restore_decode_rule('MATTERMOSTVIEWBYID', '/mod/mattermost/view.php?id=$1', 'course_module');
         $rules[] = new restore_decode_rule('MATTERMOSTINDEX', '/mod/mattermost/index.php?id=$1', 'course');
@@ -82,7 +82,7 @@ class restore_mattermost_activity_task extends restore_activity_task {
      *
      * @return array.
      */
-    static public function define_restore_log_rules() {
+    public static function define_restore_log_rules() {
         $rules = array();
 
         $rules[] = new restore_log_rule('mattermost', 'add', 'view.php?id={course_module}', '{mattermost}');
@@ -98,7 +98,7 @@ class restore_mattermost_activity_task extends restore_activity_task {
      * course logs. It must return one array
      * of restore_log_rule objects
      */
-    static public function define_restore_log_rules_for_course() {
+    public static function define_restore_log_rules_for_course() {
         $rules = array();
 
         $rules[] = new restore_log_rule('mattermost', 'view all', 'index.php?id={course}', null);
