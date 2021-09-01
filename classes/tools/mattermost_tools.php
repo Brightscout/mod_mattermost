@@ -478,7 +478,7 @@ class mattermost_tools
             return;
         }
 
-        $channelids = self::get_mattermost_channelids_for_groups_with_user($mattermostmoduleinstance->course, $moodleuser->id);
+        $channelids = self::get_mattermost_channelids_for_groups_with_given_member($mattermostmoduleinstance->course, $moodleuser->id);
         array_push($channelids, $mattermostmoduleinstance->mattermostid);
 
         foreach ($channelids as $channelid) {
@@ -517,7 +517,7 @@ class mattermost_tools
         $hasotheruserrole = false;
         $waschanneladmin = in_array($roleid, array_filter($channeladminroles));
 
-        $channelids = self::get_mattermost_channelids_for_groups_with_user($mattermostmoduleinstance->course, $moodleuser->id);
+        $channelids = self::get_mattermost_channelids_for_groups_with_given_member($mattermostmoduleinstance->course, $moodleuser->id);
         array_push($channelids, $mattermostmoduleinstance->mattermostid);
 
         // Has other channeladmin moodle roles?
