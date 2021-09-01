@@ -78,6 +78,7 @@ function mattermost_add_instance($moduleinstance, $mform = null) {
     // TODO: Call API for archiving the channel if instance is not visible.
 
     $id = $DB->insert_record('mattermost', $moduleinstance);
+    $moduleinstance->id = $id;
 
     $groups = $DB->get_records('groups', array('courseid' => $course->id));
     $records = array();

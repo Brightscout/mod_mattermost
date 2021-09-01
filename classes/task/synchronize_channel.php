@@ -43,7 +43,8 @@ class synchronize_channel extends \core\task\adhoc_task
             (array)$data->moodlemembers,
             (array)$data->channeladminroleids,
             (array)$data->userroleids,
-            $context
+            $context,
+            $data->mattermostinstanceid
         );
     }
 }
