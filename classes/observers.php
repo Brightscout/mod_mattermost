@@ -26,6 +26,7 @@
 namespace mod_mattermost;
 
 use mod_mattermost\tools\mattermost_tools;
+use mod_mattermost\api\manager\mattermost_api_manager;
 use moodle_exception;
 
 defined('MOODLE_INTERNAL') || die();
@@ -174,6 +175,111 @@ class observers
             } else {
                 // TODO: Add call for update user here.
                 mattermost_tools::synchronize_user_enrolments($user->id);
+            }
+        }
+    }
+
+    /**
+     * Event handler function to handle the group_created event
+     *
+     * @param \core\event\group_created $event
+     */
+    public static function group_created(\core\event\group_created $event) {
+        global $DB;
+        if (mattermost_tools::mattermost_enabled()) {
+            $context = $event->get_context();
+
+            if ($context->contextlevel == CONTEXT_COURSE &&
+                mattermost_tools::course_has_mattermost_module_instance($context->instanceid)) {
+                $course = $DB->get_record('course', array('id' => $event->courseid));
+                $group = $DB->get_record('groups', array('id' => $event->objectid));
+                $channelname = mattermost_tools::get_mattermost_channel_name_for_group($course, $group);
+                $mattermostapimanager = new mattermost_api_manager();
+                $mattermostchannelid = $mattermostapimanager->create_mattermost_channel($channelname);
+
+                $DB->insert_record('mattermostxgroups', array(
+                    'groupid' => $group->id,
+                    'channelid' => $mattermostchannelid,
+                    'courseid' => $course->id,
+                ));
+            }
+        }
+    }
+
+    /**
+     * Event handler function to handle the group_member_added event
+     *
+     * @param \core\event\group_member_added $event
+     */
+    public static function group_member_added(\core\event\group_member_added $event) {
+        global $DB;
+        if (mattermost_tools::mattermost_enabled()) {
+            $context = $event->get_context();
+
+            if ($context->contextlevel == CONTEXT_COURSE &&
+                mattermost_tools::course_has_mattermost_module_instance($context->instanceid)) {
+                $courseid = $event->courseid;
+                $groupid = $event->objectid;
+                $userid = $event->relateduserid;
+                $mattermostgroup = $DB->get_record('mattermostxgroups', array('groupid' => $groupid));
+                $mattermostmoduleinstance = $DB->get_record('mattermost', array('course' => $courseid));
+                $coursecontext = \context_course::instance($courseid);
+
+                $background = (boolean)get_config('mod_mattermost', 'background_synchronize');
+                if ($background) {
+                    $taskenrolment = new \mod_mattermost\task\enrol_user_to_mattermost_channel();
+                    $taskenrolment->set_custom_data(
+                        array(
+                            'mattermostid' => $mattermostgroup->channelid,
+                            'channeladminroles' => $mattermostmoduleinstance->channeladminroles,
+                            'userroles' => $mattermostmoduleinstance->userroles,
+                            'userid' => $userid,
+                            'coursecontextid' => $coursecontext->id
+                        )
+                    );
+                    \core\task\manager::queue_adhoc_task($taskenrolment);
+                } else {
+                    mattermost_tools::enrol_user_to_mattermost_channel(
+                        $mattermostgroup->channelid,
+                        $mattermostmoduleinstance->channeladminroles,
+                        $mattermostmoduleinstance->userroles,
+                        $userid,
+                        $coursecontext->id,
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * Event handler function to handle the group_member_removed event
+     *
+     * @param \core\event\group_member_removed $event
+     */
+    public static function group_member_removed(\core\event\group_member_removed $event) {
+        global $DB;
+        if (mattermost_tools::mattermost_enabled()) {
+            $context = $event->get_context();
+
+            if ($context->contextlevel == CONTEXT_COURSE &&
+                mattermost_tools::course_has_mattermost_module_instance($context->instanceid)) {
+                $groupid = $event->objectid;
+                $userid = $event->relateduserid;
+                $mattermostgroup = $DB->get_record('mattermostxgroups', array('groupid' => $groupid));
+
+                $background = (boolean)get_config('mod_mattermost', 'background_synchronize');
+                if ($background) {
+                    $taskunenrolment = new \mod_mattermost\task\unenrol_user_from_mattermost_channel();
+                    $taskunenrolment->set_custom_data(
+                        array(
+                            'channelid' => $mattermostgroup->channelid,
+                            'userid' => $userid,
+                        )
+                    );
+                    \core\task\manager::queue_adhoc_task($taskunenrolment);
+                } else {
+                    mattermost_tools::unenrol_user_from_mattermost_channel($mattermostgroup->channelid, $userid);
+                }
             }
         }
     }

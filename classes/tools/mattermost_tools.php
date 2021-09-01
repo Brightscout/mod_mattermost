@@ -72,7 +72,7 @@ class mattermost_tools
      * @param course $course
      * @return string|string[]|null
      */
-    public static function get_mattermost_channel_name($cmid, $course) {
+    public static function get_mattermost_channel_name_for_instance($cmid, $course) {
         global $CFG, $SITE;
         $formatarguments = new stdClass();
         $formatarguments->moodleshortname = $SITE->shortname;
@@ -92,6 +92,28 @@ class mattermost_tools
     }
 
     /**
+     * Get mattermost channel name corresponding to the moodle group inside a course.
+     *
+     * @param course $course
+     * @param group $group
+     * @return string|string[]|null
+     */
+    public static function get_mattermost_channel_name_for_group($course, $group) {
+        $formatarguments = new stdClass();
+        $formatarguments->courseid = $course->id;
+        $formatarguments->courseshortname = $course->shortname;
+        $formatarguments->coursefullname = $course->fullname;
+        $formatarguments->groupid = $group->id;
+        $formatarguments->groupname = $group->name;
+        $channelgroupnametoformat = get_config('mod_mattermost', 'channelgroupnametoformat');
+        $channelgroupnametoformat = is_null($channelgroupnametoformat) ?
+            '{$a->courseshortname}_{$a->groupname}' :
+            $channelgroupnametoformat;
+        $channelname = self::format_string($channelgroupnametoformat, $formatarguments);
+        return self::sanitize_channelname($channelname);
+    }
+
+    /**
      * Formats the string according to the format arguments provided
      * by replacing the arguments' value in the given string.
      *
@@ -99,7 +121,7 @@ class mattermost_tools
      * @param object $a Format arguments
      * @return string|string[]
      */
-    public static function format_string($string, $a) {
+    private static function format_string($string, $a) {
         if ($a !== null) {
             // Process array's and objects (except lang_strings).
             if (is_array($a) or (is_object($a) && !($a instanceof lang_string))) {
@@ -124,8 +146,9 @@ class mattermost_tools
             } else {
                 $string = str_replace('{$a}', (string)$a, $string);
             }
+            $string = preg_replace('/{.*}/', '', $string);
         }
-        return $string;
+        return strtolower($string);
     }
 
     /**
@@ -137,7 +160,7 @@ class mattermost_tools
      * @return string|string[]|null
      * @throws moodle_exception
      */
-    public static function sanitize_channelname($channelname) {
+    private static function sanitize_channelname($channelname) {
         // Replace white spaces anyway.
         $channelname = preg_replace('/\/s/', '_', $channelname);
         $channelname =
@@ -215,12 +238,12 @@ class mattermost_tools
      * @param int $courseid
      * @return array all mattermost module instances in the course
      */
-    public static function get_mattermost_module_instances_from_course($courseid) {
+    public static function get_mattermost_module_instance_from_course($courseid) {
         global $DB;
         $sql = 'select cm.*, mat.mattermostid, mat.channeladminroles, mat.userroles'
             .' from {course_modules} cm inner join {modules} m on m.id=cm.module inner join {mattermost} mat on mat.id=cm.instance '
             .'where m.name=:mattermost and cm.course=:courseid';
-        $moduleinstances = $DB->get_records_sql($sql, array('courseid' => $courseid, 'mattermost' => 'mattermost'));
+        $moduleinstances = $DB->get_record_sql($sql , array('courseid' => $courseid, 'mattermost' => 'mattermost'));
         return $moduleinstances;
     }
 
@@ -230,13 +253,48 @@ class mattermost_tools
      * @param int $cmid Id of the course module
      * @return array all mattermost module instances in the course
      */
-    public static function get_mattermost_module_instances_from_course_module($cmid) {
+    public static function get_mattermost_module_instance_from_course_module($cmid) {
         global $DB;
         $sql = 'select cm.*, mat.mattermostid, mat.channeladminroles, mat.userroles'
             .' from {course_modules} cm inner join {modules} m on m.id=cm.module inner join {mattermost} mat on mat.id=cm.instance '
             .'where m.name=:mattermost and cm.id=:cmid';
-        $moduleinstances = $DB->get_records_sql($sql, array('cmid' => $cmid, 'mattermost' => 'mattermost'));
+        $moduleinstances = $DB->get_record_sql($sql , array('cmid' => $cmid, 'mattermost' => 'mattermost'));
         return $moduleinstances;
+    }
+
+    /**
+     * Fetches mattermost channel ids corresponding to the moodle groups
+     * inside a course which contain given user id as a group member
+     *
+     * @param int $courseid Id of the course
+     * @param int $userid Id of the user which is a member in the groups
+     * @return array all mattermost channel ids corresponding to the groups
+     */
+    public static function get_mattermost_channelids_for_groups_with_given_member($courseid, $userid) {
+        global $DB;
+        $sql = 'select mg.channelid from {mattermostxgroups} mg inner join'
+        . ' {groups_members} gm on gm.groupid = mg.groupid'
+        . ' where mg.courseid = :courseid and gm.userid = :userid';
+        $channelids = $DB->get_records_sql($sql, array(
+            'courseid' => $courseid,
+            'userid' => $userid
+        ));
+
+        return array_keys($channelids);
+    }
+
+    /**
+     * Fetches the group members' information.
+     *
+     * @param int $groupid - Id of the group
+     * @return array all user infos which are members in given group
+     */
+    public static function get_group_members($groupid) {
+        global $DB;
+        $sql = 'select u.* from {groups_members} gm inner join'
+        . ' {user} u on gm.userid = u.id'
+        . ' where gm.groupid = :groupid';
+        return $DB->get_records_sql($sql, array('groupid' => $groupid));
     }
 
     /**
@@ -288,7 +346,7 @@ class mattermost_tools
      * @param bool $background - whether the enrolment should be done with the use of adhoc tasks
      * @param bool $forcecreator - whether the currently logged in user should be created synchronously
      */
-    public static function enrol_all_concerned_users_to_mattermost_channel(
+    public static function enrol_all_concerned_users_to_mattermost_channel_for_course(
         $mattermostmoduleinstance,
         $background = false,
         $forcecreator = false
@@ -318,6 +376,49 @@ class mattermost_tools
                     )
                 );
                 \core\task\manager::queue_adhoc_task($taskenrolment);
+            }
+        }
+    }
+
+    /**
+     * Enrols all the users in all the groups inside a course to their
+     * respective mattermost channels
+     *
+     * @param array $groups - Array of the groups inside the course
+     * @param object $mattermostmoduleinstance
+     * @param context_course $coursecontext - Context of the course
+     * @param bool $background - whether the enrolment should be done with the use of adhoc tasks
+     */
+    public static function enrol_all_concerned_users_to_mattermost_channels_for_groups(
+        $groups, $mattermostmoduleinstance, context_course $coursecontext, $background = false
+    ) {
+        global $DB;
+        foreach ($groups as $group) {
+
+            $groupmembers = $DB->get_records('groups_members', array('groupid' => $group->id), '', 'userid');
+            $userids = array_keys($groupmembers);
+            foreach ($userids as $userid) {
+                if ($background) {
+                    $taskenrolment = new \mod_mattermost\task\enrol_user_to_mattermost_channel();
+                    $taskenrolment->set_custom_data(
+                        array(
+                            'mattermostid' => $group->channelid,
+                            'channeladminroles' => $mattermostmoduleinstance->channeladminroles,
+                            'userroles' => $mattermostmoduleinstance->userroles,
+                            'userid' => $userid,
+                            'coursecontextid' => $coursecontext->id
+                        )
+                    );
+                    \core\task\manager::queue_adhoc_task($taskenrolment);
+                } else {
+                    self::enrol_user_to_mattermost_channel(
+                        $group->channelid,
+                        $mattermostmoduleinstance->channeladminroles,
+                        $mattermostmoduleinstance->userroles,
+                        $userid,
+                        $coursecontext->id
+                    );
+                }
             }
         }
     }
@@ -365,23 +466,26 @@ class mattermost_tools
      */
     public static function role_assign($courseid, int $roleid, $moodleuser, $context) {
         $mattermostapimanager = array();
-        $mattermostmoduleinstances = null;
+        $mattermostmoduleinstance = null;
         if ($context->contextlevel == CONTEXT_COURSE) {
-            $mattermostmoduleinstances = self::get_mattermost_module_instances_from_course($courseid);
+            $mattermostmoduleinstance = self::get_mattermost_module_instance_from_course($courseid);
         } else {
-            $mattermostmoduleinstances = self::get_mattermost_module_instances_from_course_module($context->instanceid);
+            $mattermostmoduleinstance = self::get_mattermost_module_instance_from_course_module($context->instanceid);
         }
-        if (!empty($mattermostmoduleinstances)) {
+        if (!empty($mattermostmoduleinstance)) {
             $mattermostapimanager = new mattermost_api_manager();
+        } else {
+            return;
         }
-        foreach ($mattermostmoduleinstances as $mattermostmoduleinstance) {
+
+        $channelids = self::get_mattermost_channelids_for_groups_with_user($mattermostmoduleinstance->course, $moodleuser->id);
+        array_push($channelids, $mattermostmoduleinstance->mattermostid);
+
+        foreach ($channelids as $channelid) {
             if (in_array($roleid, array_filter(explode(',', $mattermostmoduleinstance->channeladminroles)))) {
-                $mattermostapimanager->enrol_user_to_channel(
-                    $mattermostmoduleinstance->mattermostid,
-                    $moodleuser, true
-                );
+                $mattermostapimanager->enrol_user_to_channel($channelid, $moodleuser, true);
             } else if (in_array($roleid, array_filter(explode(',', $mattermostmoduleinstance->userroles)))) {
-                    $mattermostapimanager->enrol_user_to_channel($mattermostmoduleinstance->mattermostid, $moodleuser);
+                $mattermostapimanager->enrol_user_to_channel($channelid, $moodleuser);
             }
         }
     }
@@ -395,53 +499,60 @@ class mattermost_tools
      * @param \context $context
      */
     public static function role_unassign($courseid, int $roleid, $moodleuser, $context) {
-        $mattermostmoduleinstances = array();
+        $mattermostmoduleinstance = array();
         if ($context->contextlevel == CONTEXT_COURSE) {
-            $mattermostmoduleinstances = self::get_mattermost_module_instances_from_course($courseid);
+            $mattermostmoduleinstance = self::get_mattermost_module_instance_from_course($courseid);
         } else {
-            $mattermostmoduleinstances = self::get_mattermost_module_instances_from_course_module($context->instanceid);
+            $mattermostmoduleinstance = self::get_mattermost_module_instance_from_course_module($context->instanceid);
         }
-        if (!empty($mattermostmoduleinstances)) {
+        if (!empty($mattermostmoduleinstance)) {
             $mattermostapimanager = new mattermost_api_manager();
+        } else {
+            return;
         }
-        foreach ($mattermostmoduleinstances as $mattermostmoduleinstance) {
-            $channeladminroles = explode(',', $mattermostmoduleinstance->channeladminroles);
-            $userroles = explode(',', $mattermostmoduleinstance->userroles);
-            $hasotherchanneladminrole = false;
-            $hasotheruserrole = false;
-            $waschanneladmin = false;
-            // Has other channeladmin moodle roles?
-            foreach ($channeladminroles as $channeladminrole) {
-                if ($channeladminrole != $roleid) {
-                    if (user_has_role_assignment($moodleuser->id, $channeladminrole, $context->id)) {
-                        $hasotherchanneladminrole = true;
-                        break;
-                    }
+
+        $channeladminroles = explode(',', $mattermostmoduleinstance->channeladminroles);
+        $userroles = explode(',', $mattermostmoduleinstance->userroles);
+        $hasotherchanneladminrole = false;
+        $hasotheruserrole = false;
+        $waschanneladmin = in_array($roleid, array_filter($channeladminroles));
+
+        $channelids = self::get_mattermost_channelids_for_groups_with_user($mattermostmoduleinstance->course, $moodleuser->id);
+        array_push($channelids, $mattermostmoduleinstance->mattermostid);
+
+        // Has other channeladmin moodle roles?
+        foreach ($channeladminroles as $channeladminrole) {
+            if ($channeladminrole != $roleid) {
+                if (user_has_role_assignment($moodleuser->id, $channeladminrole, $context->id)) {
+                    $hasotherchanneladminrole = true;
+                    break;
                 }
             }
-            // Has other user moodle roles?
-            foreach ($userroles as $userrole) {
-                if ($userrole != $roleid) {
-                    if (user_has_role_assignment($moodleuser->id, $userrole, $context->id)) {
-                        $hasotheruserrole = true;
-                        break;
-                    }
+        }
+        // Has other user moodle roles?
+        foreach ($userroles as $userrole) {
+            if ($userrole != $roleid) {
+                if (user_has_role_assignment($moodleuser->id, $userrole, $context->id)) {
+                    $hasotheruserrole = true;
+                    break;
                 }
             }
+        }
+
+        foreach ($channelids as $channelid) {
             if (in_array($roleid, array_filter($channeladminroles))) {
-                $waschanneladmin = true;
                 if (!$hasotherchanneladminrole) {
-                    $mattermostapimanager->update_role_in_channel($mattermostmoduleinstance->mattermostid, $moodleuser, false);
+                    $mattermostapimanager->update_role_in_channel($channelid, $moodleuser, false);
                 }
             }
 
             if (!$hasotherchanneladminrole) {
                 if (in_array($roleid, array_filter($userroles))) {
                     if (!$hasotheruserrole) {
-                        $mattermostapimanager->unenrol_user_from_channel($mattermostmoduleinstance->mattermostid, $moodleuser);
+                        $mattermostapimanager->unenrol_user_from_channel($channelid, $moodleuser);
                     }
                 } else if ($waschanneladmin && !$hasotheruserrole) {
-                    $mattermostapimanager->unenrol_user_from_channel($mattermostmoduleinstance->mattermostid, $moodleuser);
+                    $mattermostapimanager->unenrol_user_from_channel($channelid, $moodleuser);
                 }
             }
         }
@@ -488,9 +599,33 @@ class mattermost_tools
             \core\task\manager::queue_adhoc_task($tasksynchronize);
         } else {
             self::synchronize_channel(
-                $mattermostid,
-                $moodlemembers, $channeladminroleids, $userroleids, $coursecontext
+                $mattermostid, $moodlemembers, $channeladminroleids, $userroleids, $coursecontext
             );
+        }
+
+        $groups = $DB->get_records('mattermostxgroups', array('courseid' => $courseid));
+        if (!$groups || !is_array($groups) || count($groups) == 0) {
+            return;
+        }
+
+        foreach ($groups as $group) {
+            $groupmembers = self::get_group_members($group->groupid);
+            if ($background) {
+                $tasksynchronize = new \mod_mattermost\task\synchronize_channel();
+                $tasksynchronize->set_custom_data(
+                    array(
+                        'mattermostid' => $group->channelid,
+                        'moodlemembers' => $groupmembers,
+                        'channeladminroleids' => $channeladminroleids,
+                        'userroleids' => $userroleids,
+                        'coursecontextid' => $coursecontext->id
+                    )
+                );
+                \core\task\manager::queue_adhoc_task($tasksynchronize);
+            } else {
+                self::synchronize_channel($group->channelid,
+                    $groupmembers, $channeladminroleids, $userroleids, $coursecontext);
+            }
         }
     }
 
@@ -549,28 +684,26 @@ class mattermost_tools
         $mattermostapimanager = new mattermost_api_manager();
         $moodleemail = $moodleuser->email;
         $mattermostuser = null;
+
+        $haschanneladminrole = self::has_mattermost_channeladmin_role($channeladminroleids, $moodleuser, $coursecontext->id);
+        $hasuserrole = self::has_mattermost_user_role($userroleids, $moodleuser, $coursecontext->id);
         if (array_key_exists($moodleemail, $mattermostmembers)) {
             $mattermostuser = $mattermostmembers[$moodleemail];
-            $ischanneladmin = self::has_mattermost_channeladmin_role($channeladminroleids, $moodleuser, $coursecontext->id);
-            if ($ischanneladmin != $mattermostuser['is_channel_admin']) {
-                if ($ischanneladmin) {
+            if ($haschanneladminrole != $mattermostuser['is_channel_admin']) {
+                if ($haschanneladminrole) {
                     $mattermostapimanager->update_role_in_channel($mattermostid, $moodleuser, true);
                 } else {
                     $mattermostapimanager->update_role_in_channel($mattermostid, $moodleuser, false);
                 }
             }
-            if (!$ischanneladmin) {
-                // Maybe not a user.
-                $isuser = self::has_mattermost_user_role($userroleids, $moodleuser, $coursecontext->id);
-                if (!$isuser) {
-                    // Unenrol.
-                    $mattermostapimanager->unenrol_user_from_channel($mattermostid, $moodleuser);
-                }
+            if (!$haschanneladminrole && !$hasuserrole) {
+                // Unenrol.
+                $mattermostapimanager->unenrol_user_from_channel($mattermostid, $moodleuser);
             }
         } else {
-            if (self::has_mattermost_channeladmin_role($channeladminroleids, $moodleuser, $coursecontext->id)) {
+            if ($haschanneladminrole) {
                 $mattermostuser = $mattermostapimanager->enrol_user_to_channel($mattermostid, $moodleuser, true);
-            } else if (self::has_mattermost_user_role($userroleids, $moodleuser, $coursecontext->id)) {
+            } else if ($hasuserrole) {
                 $mattermostuser = $mattermostapimanager->enrol_user_to_channel($mattermostid, $moodleuser);
             }
         }
@@ -595,6 +728,15 @@ class mattermost_tools
         if ($DB->get_record('mattermostxusers', array('moodleuserid' => $userid))) {
             foreach ($courseenrolments as $courseenrolment) {
                 $mattermostapimanager->unenrol_user_from_channel($courseenrolment->mattermostid, $user);
+
+                $groups = $DB->get_records('mattermostxgroups', array('courseid' => $courseenrolment->courseid));
+                if (!$groups || !is_array($groups) || count($groups) == 0) {
+                    continue;
+                }
+
+                foreach ($groups as $group) {
+                    $mattermostapimanager->unenrol_user_from_channel($group->channelid, $user);
+                }
             }
         }
     }
@@ -612,26 +754,32 @@ class mattermost_tools
         if (!$user) {
             throw new moodle_exception('moodleusernotfounderror', 'mod_mattermost', '', $userid);
         }
-        // Due to the fact that userroles is a string and role_assignments is an int,
-        // No possibility to make a sql query without specific sql functions linked to database language.
+
         $courseenrolments = self::course_enrolments($userid);
         foreach ($courseenrolments as $courseenrolment) {
             $channeladminrolesids = array_filter(explode(',', $courseenrolment->channeladminroles));
             $userrolesids = array_filter(explode(',', $courseenrolment->userroles));
             $mattermostmembers = $mattermostapimanager->get_enriched_channel_members($courseenrolment->mattermostid);
-            if (count($mattermostmembers) == 0) {
+
+            $coursecontext = context_course::instance($courseenrolment->courseid);
+            self::synchronize_mattermost_user($courseenrolment->mattermostid,
+                $coursecontext,
+                $user, $channeladminrolesids, $userrolesids, $mattermostmembers);
+
+            $groups = $DB->get_records('mattermostxgroups', array('courseid' => $courseenrolment->courseid));
+            if (!$groups || !is_array($groups) || count($groups) == 0) {
                 continue;
             }
 
-            $mattermostuser = self::synchronize_mattermost_user(
-                $courseenrolment->mattermostid,
-                context_course::instance($courseenrolment->courseid),
-                $user, $channeladminrolesids, $userrolesids, $mattermostmembers
-            );
-            if (isset($mattermostuser) && is_array($mattermostuser)
-                && array_key_exists($mattermostuser['email'], $mattermostmembers)
-            ) {
-                $mattermostapimanager->unenrol_user_from_channel($courseenrolment->mattermostid, null, $mattermostuser);
+            foreach ($groups as $group) {
+                $mattermostmembers = $mattermostapimanager->get_enriched_channel_members($group->channelid);
+                if (count($mattermostmembers) == 0) {
+                    continue;
+                }
+
+                self::synchronize_mattermost_user($group->channelid,
+                    $coursecontext,
+                    $user, $channeladminrolesids, $userrolesids, $mattermostmembers);
             }
         }
     }
@@ -669,5 +817,18 @@ class mattermost_tools
                 'modulename' => 'mattermost')
         );
         return $courseenrolments;
+    }
+
+    /**
+     * Unenrols a user from a Mattermost channel
+     *
+     * @param string $channelid - Mattermost channel id
+     * @param int $userid - Moodle id of the user
+     */
+    public static function unenrol_user_from_mattermost_channel($channelid, $userid) {
+        global $DB;
+        $user = $DB->get_record('user', array('id' => $userid));
+        $mattermostapimanager = new mattermost_api_manager();
+        $mattermostapimanager->unenrol_user_from_channel($channelid, $user);
     }
 }

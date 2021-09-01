@@ -40,4 +40,16 @@ $observers = array(
         'eventname' => '\core\event\user_updated',
         'callback' => '\mod_mattermost\observers::user_updated',
     ),
+    array(
+        'eventname' => '\core\event\group_created',
+        'callback' => '\mod_mattermost\observers::group_created',
+    ),
+    array(
+        'eventname' => '\core\event\group_member_added',
+        'callback' => '\mod_mattermost\observers::group_member_added',
+    ),
+    array(
+        'eventname' => '\core\event\group_member_removed',
+        'callback' => '\mod_mattermost\observers::group_member_removed',
+    ),
 );

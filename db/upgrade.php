@@ -53,5 +53,42 @@ function xmldb_mattermost_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2021081800, 'mattermost');
     }
 
+    if ($oldversion < 2021082000) {
+
+        // Define table mattermostxgroups to be created.
+        $table = new xmldb_table('mattermostxgroups');
+
+        // Adding fields to table mattermostxgroups.
+        $table->add_field('groupid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('channelid', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table mattermostxgroups.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['channelid']);
+        $table->add_key('fk_group', XMLDB_KEY_FOREIGN, ['groupid'], 'groups', ['id']);
+
+        // Conditionally launch create table for mattermostxgroups.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Mattermost savepoint reached.
+        upgrade_mod_savepoint(true, 2021082000, 'mattermost');
+    }
+
+    if ($oldversion < 2021082500) {
+
+        // Define field courseid to be added to mattermostxgroups.
+        $table = new xmldb_table('mattermostxgroups');
+        $field = new xmldb_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, 'channelid');
+
+        // Conditionally launch add field courseid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Mattermost savepoint reached.
+        upgrade_mod_savepoint(true, 2021082500, 'mattermost');
+    }
+
     return true;
 }
