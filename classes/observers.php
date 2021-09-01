@@ -216,8 +216,10 @@ class observers
         global $DB;
         if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
             $courseinfo = $event->other;
+
             // Check that this is a mattermost module instance.
-            $mattermostmodule = mattermost_tools::get_mattermost_module_instance_from_course_module($courseinfo);
+            $mattermostmodule = mattermost_tools::get_mattermost_module_instance_from_course_module_using_module_id($courseinfo['cmid']);
+
             if ($mattermostmodule) {
                 $mattermost = $DB->get_record('mattermost', array('id' => $courseinfo['instanceid']));
                 // Insert item into association table.
@@ -296,6 +298,29 @@ class observers
     }
 
     /**
+     * Restores mattermost instance, when instance is restored from
+     * the course recycle bin 
+     *
+     * @param tool_recyclebin\event\category_bin_item_restored $event
+     */
+    public static function course_bin_item_restored(\tool_recyclebin\event\course_bin_item_restored $event) {
+        global $DB;
+        if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
+            // Check that this is a mattermost module.
+            $mattermostrecyclebin = $DB->get_record('mattermostxrecyclebin', array('binid' => $event->objectid));
+            if($mattermostrecyclebin){
+                $mattermostapimanager = new mattermost_api_manager();
+                $mattermostapimanager->Unarchive_mattermost_channel($mattermostrecyclebin->mattermostid);
+                $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id));
+                // To Do: Confirm if this is required.
+                // Synchronise members.
+                // mattermost_tools::synchronize_channel_members($mattermostrecyclebin->mattermostid,
+                //     get_config('mod_mattermost', 'background_synchronize'));
+            }
+        }
+    }
+
+    /**
      * Event handler function to handle the category_bin_item_created event
      * Adds record of recycled courses into 'mattermostxrecyclebin' table
      *
@@ -306,7 +331,7 @@ class observers
         if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
             $courseinfo = $event->other;
             // Check that this is a mattermost module instance.
-            $mattermostmodule = mattermost_tools::get_mattermost_module_instance_from_course_module($courseinfo);
+            $mattermostmodule = mattermost_tools::get_mattermost_module_instance_from_course_module($courseinfo['courseid']);
 
             if ($mattermostmodule) {
                 $mattermost = $DB->get_record('mattermost', array('id' => $mattermostmodule->instance));
@@ -385,6 +410,31 @@ class observers
     }
 
     /**
+     * Restores mattermost instance when course is restored from
+     * the category recycle bin
+     *
+     * @param tool_recyclebin\event\category_bin_item_restored $event
+     */
+    public static function category_bin_item_restored(\tool_recyclebin\event\category_bin_item_restored $event) {
+        global $DB;
+        if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
+            $mattermostrecyclebins = $DB->get_records('mattermostxrecyclebin', array('binid' => $event->objectid));
+            $mattermostapimanager = null;
+            if (!empty($mattermostrecyclebins)) {
+                $mattermostapimanager = new mattermost_api_manager();
+            } else {
+                return;
+            }
+
+            foreach ($mattermostrecyclebins as $mattermostrecyclebin) {
+                $mattermostapimanager->Unarchive_mattermost_channel($mattermostrecyclebin->mattermostid);
+                $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id,
+                    'mattermostid' => $mattermostrecyclebin->mattermostid));
+            }
+        }
+    }
+
+    /**
      * Event handler function to handle the course_module_updated event
      * Archives/Unarchives the channel when instance visibility is changed.
      *
@@ -401,6 +451,8 @@ class observers
                     // It detects the change in instance visibility on course.
                     // Can't detect the change in course visibility here.
                     $mattermostapimanager->archive_mattermost_channel($mattermost->mattermostid);
+                } else if ($coursemodule->visible && $coursemodule->visibleoncoursepage) {
+                    $mattermostapimanager->Unarchive_mattermost_channel($mattermost->mattermostid);
                 }
             }
         }

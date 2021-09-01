@@ -129,6 +129,15 @@ class mattermost_rest_client
     }
 
     /**
+     * Unarchives a channel at Mattermost
+     *
+     * @param string $channelid
+     */
+    public function unarchive_channel($channelid) {
+        return $this->do_post($this->pluginapiurl . '/channels/' . $channelid . '/unarchive');
+    }
+
+    /**
      * Client function to get a user by email from Mattermost
      *
      * @param string $email

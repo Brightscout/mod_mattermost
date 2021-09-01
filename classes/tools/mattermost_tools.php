@@ -305,6 +305,22 @@ class mattermost_tools
     }
 
     /**
+     * Fetches single mattermost module instance from database with given course module id
+     *
+     * @param object $cmid id of the course module
+     * @return object of mattermost module instance in the course
+     */
+    public static function get_mattermost_module_instance_from_course_module_using_module_id($cmid) {
+        global $DB;
+
+        $sql = 'select cm.*, mat.mattermostid, mat.channeladminroles, mat.userroles'
+            .' from {course_modules} cm inner join {modules} m on m.id=cm.module inner join {mattermost} mat on mat.id=cm.instance '
+            .'where m.name=:mattermost and cm.id=:cmid';
+        $moduleinstances = $DB->get_record_sql($sql, array('cmid' => $cmid, 'mattermost' => 'mattermost'));
+        return $moduleinstances;
+    }
+
+    /**
      * Finds if the moodlemember has a user role in Mattermost.
      *
      * @param  array $userroleids

@@ -44,6 +44,7 @@ function mattermost_supports($feature) {
         (string) FEATURE_GROUPINGS => true,
         (string) FEATURE_SHOW_DESCRIPTION => true,
         (string) FEATURE_MOD_INTRO => true,
+        (string) FEATURE_BACKUP_MOODLE2 => true,
         (string) FEATURE_COMPLETION_TRACKS_VIEWS => true,
         (string) FEATURE_GRADE_HAS_GRADE => false,
         (string) FEATURE_GRADE_OUTCOMES => false,
