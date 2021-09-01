@@ -19,7 +19,6 @@
  *
  * To Do: change these to Brightscout
  * @package   mod_mattermost
- * @category  restore
  * @copyright 2021 Abhishek Verma <abhishek.verma@brightscout.com>
  * @author    Abhishek Verma <abhishek.verma@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

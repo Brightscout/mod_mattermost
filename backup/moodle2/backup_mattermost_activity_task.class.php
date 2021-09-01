@@ -19,7 +19,6 @@
  *
  * To Do: change these to Brightscout
  * @package   mod_mattermost
- * @category  restore
  * @copyright 2021 Abhishek Verma <abhishek.verma@brightscout.com>
  * @author    Abhishek Verma <abhishek.verma@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -50,7 +49,7 @@ class backup_mattermost_activity_task extends backup_activity_task {
     /**
      * Codes the transformations to perform in the activity in order to get transportable (encoded) links.
      *
-     * @param string $content.
+     * @param string $content content of resource or instance to be encoded
      * @return string.
      */
     static public function encode_content_links($content) {

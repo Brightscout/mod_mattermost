@@ -153,7 +153,7 @@ class mattermost_api_manager
      *
      * @param string $id - Mattermost channel id
      */
-    public function Unarchive_mattermost_channel($id) {
+    public function unarchive_mattermost_channel($id) {
         try {
             $this->client->unarchive_channel($id);
         } catch (Exception $e) {
