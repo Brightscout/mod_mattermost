@@ -274,20 +274,17 @@ class mattermost_api_manager
 
         if ($moodleuser) {
             $mattermostuser = $DB->get_record('mattermostxusers', array('moodleuserid' => $moodleuser->id));
-        } else if ($mattermostchannelmember) {
-            $mattermostuser = $DB->get_record(
-                'mattermostxusers', array(
-                'mattermostuserid' => $mattermostchannelmember['user_id'] ?? $mattermostchannelmember['id']
-                )
-            );
-        }
+            if (!$mattermostuser) {
+                throw new moodle_exception('mmusernotfounderror', 'mod_mattermost');
+            }
 
-        if (!$mattermostuser) {
-            throw new moodle_exception('mmusernotfounderror', 'mod_mattermost');
+            $userid = $mattermostuser->mattermostuserid;
+        } else if ($mattermostchannelmember) {
+            $userid = $mattermostchannelmember['user_id'] ?? $mattermostchannelmember['id'];
         }
 
         try {
-            $this->client->remove_user_from_channel($channelid, $mattermostuser->mattermostuserid);
+            $this->client->remove_user_from_channel($channelid, $userid);
         } catch (Exception $e) {
             $username = $moodleuser ? $moodleuser->username : $mattermostchannelmember['username'];
             self::moodle_debugging_message("User $username not added to remote Mattermost channel", $e);
