@@ -51,6 +51,8 @@ $observers = array(
     array(
         'eventname' => '\core\event\group_member_removed',
         'callback' => '\mod_mattermost\observers::group_member_removed',
+    ),
+    array(
         'eventname' => 'tool_recyclebin\event\course_bin_item_created',
         'callback' => '\mod_mattermost\observers::course_bin_item_created',
     ),
