@@ -219,7 +219,7 @@ class observers
 
             // Check that this is a mattermost module instance.
             $mattermostmodule =
-                mattermost_tools::get_mattermost_module_instance_from_course_module_using_module_id(
+                mattermost_tools::get_mattermost_module_instance_from_course_module(
                     $courseinfo['cmid']
                 );
 
@@ -334,7 +334,7 @@ class observers
         if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
             $courseinfo = $event->other;
             // Check that this is a mattermost module instance.
-            $mattermostmodule = mattermost_tools::get_mattermost_module_instance_from_course_module($courseinfo['courseid']);
+            $mattermostmodule = mattermost_tools::get_mattermost_module_instance_from_course_module_using_course_id($courseinfo['courseid']);
 
             if ($mattermostmodule) {
                 $mattermost = $DB->get_record('mattermost', array('id' => $mattermostmodule->instance));

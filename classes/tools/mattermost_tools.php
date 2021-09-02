@@ -255,7 +255,7 @@ class mattermost_tools
     }
 
     /**
-     * Fetches mattermost module instances from database with given course module id
+     * Fetches mattermost module instance from database with given course module id
      *
      * @param int $cmid Id of the course module
      * @return array all mattermost module instances in the course
@@ -265,8 +265,24 @@ class mattermost_tools
         $sql = 'select cm.*, mat.mattermostid, mat.channeladminroles, mat.userroles'
             .' from {course_modules} cm inner join {modules} m on m.id=cm.module inner join {mattermost} mat on mat.id=cm.instance '
             .'where m.name=:mattermost and cm.id=:cmid';
-        $moduleinstances = $DB->get_record_sql($sql , array('cmid' => $cmid, 'mattermost' => 'mattermost'));
-        return $moduleinstances;
+        $moduleinstance = $DB->get_record_sql($sql , array('cmid' => $cmid, 'mattermost' => 'mattermost'));
+        return $moduleinstance;
+    }
+
+    /**
+     * Fetches single mattermost module instance from database with given courseid
+     *
+     * @param object $courseid course info
+     * @return object of mattermost module instance in the course
+     */
+    public static function get_mattermost_module_instance_from_course_module_using_course_id($courseid) {
+        global $DB;
+
+        $sql = 'select cm.id, cm.instance from {course_modules} cm inner join {modules} m on m.id=cm.module '
+            .'where cm.course=:courseid and m.name=:modname';
+        $mattermostmodule = $DB->get_record_sql($sql,
+            array('courseid' => $courseid, 'modname' => 'mattermost'));
+        return $mattermostmodule;
     }
 
     /**
@@ -302,22 +318,6 @@ class mattermost_tools
         . ' {user} u on gm.userid = u.id'
         . ' where gm.groupid = :groupid';
         return $DB->get_records_sql($sql, array('groupid' => $groupid));
-    }
-
-    /**
-     * Fetches single mattermost module instance from database with given course module id
-     *
-     * @param object $cmid id of the course module
-     * @return object of mattermost module instance in the course
-     */
-    public static function get_mattermost_module_instance_from_course_module_using_module_id($cmid) {
-        global $DB;
-
-        $sql = 'select cm.*, mat.mattermostid, mat.channeladminroles, mat.userroles'
-            .' from {course_modules} cm inner join {modules} m on m.id=cm.module inner join {mattermost} mat on mat.id=cm.instance '
-            .'where m.name=:mattermost and cm.id=:cmid';
-        $moduleinstances = $DB->get_record_sql($sql, array('cmid' => $cmid, 'mattermost' => 'mattermost'));
-        return $moduleinstances;
     }
 
     /**
