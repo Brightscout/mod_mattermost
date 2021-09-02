@@ -18,7 +18,7 @@
  * Plugin internal classes, functions and constants are defined here.
  *
  * @package   mod_mattermost
- * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @copyright 2021 Brightscout <hello@brightscout.com>
  * @author    Manoj <manoj@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -478,7 +478,9 @@ class mattermost_tools
             return;
         }
 
-        $channelids = self::get_mattermost_channelids_for_groups_with_given_member($mattermostmoduleinstance->course, $moodleuser->id);
+        $channelids = self::get_mattermost_channelids_for_groups_with_given_member(
+            $mattermostmoduleinstance->course, $moodleuser->id
+        );
         array_push($channelids, $mattermostmoduleinstance->mattermostid);
 
         foreach ($channelids as $channelid) {
@@ -517,7 +519,9 @@ class mattermost_tools
         $hasotheruserrole = false;
         $waschanneladmin = in_array($roleid, array_filter($channeladminroles));
 
-        $channelids = self::get_mattermost_channelids_for_groups_with_given_member($mattermostmoduleinstance->course, $moodleuser->id);
+        $channelids = self::get_mattermost_channelids_for_groups_with_given_member(
+            $mattermostmoduleinstance->course, $moodleuser->id
+        );
         array_push($channelids, $mattermostmoduleinstance->mattermostid);
 
         // Has other channeladmin moodle roles?
