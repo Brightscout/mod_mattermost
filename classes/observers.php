@@ -28,7 +28,6 @@ namespace mod_mattermost;
 use mod_mattermost\tools\mattermost_tools;
 use mod_mattermost\api\manager\mattermost_api_manager;
 use moodle_exception;
-use mod_mattermost\api\manager\mattermost_api_manager;
 
 defined('MOODLE_INTERNAL') || die();
 
