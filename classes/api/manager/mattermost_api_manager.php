@@ -206,7 +206,7 @@ class mattermost_api_manager
      *  2. using binid, when course is deleted and restored from category bin
      *
      * @param int $courseid - id of Moodle course whose groups are to be restored
-     * @param int $binid- bin id of Moodle deleted course whose groups are to be restored
+     * @param int $binid - bin id of Moodle deleted course whose groups are to be restored
      */
     public function unarchive_mattermost_group_channels($courseid, $binid) {
         global $DB;
