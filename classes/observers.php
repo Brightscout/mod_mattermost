@@ -349,7 +349,7 @@ class observers
                 $mattermostapimanager->unarchive_mattermost_channel($mattermostrecyclebin->mattermostid, $mattermost->course, null);
                 $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id));
 
-                // update binid for mattermost groups after deleted instance is restored.
+                // Update binid for mattermost groups after deleted instance is restored.
                 $DB->execute("UPDATE {mattermostxgroups} SET binid=null WHERE binid=?",
                     array($event->objectid));
                 // To Do: Confirm if this is required.
@@ -371,10 +371,9 @@ class observers
         if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
             $courseinfo = $event->other;
             // Check that this is a mattermost module instance.
-            $mattermostmodule =
-                mattermost_tools::get_mattermost_module_instance_from_course_module_using_course_id(
-                    $courseinfo['courseid']
-                );
+            $mattermostmodule = mattermost_tools::get_mattermost_module_instance_from_course_module_using_course_id(
+                $courseinfo['courseid']
+            );
 
             if ($mattermostmodule) {
                 $mattermost = $DB->get_record('mattermost', array('id' => $mattermostmodule->instance));
@@ -481,9 +480,10 @@ class observers
                 $mattermost = $DB->get_record('mattermost', array('mattermostid' => $mattermostrecyclebin->mattermostid));
                 $groups = $DB->get_records('groups', array('courseid' => $mattermost->course));
 
-                // update groupid, courseid and binid in mattermostxgroups after deleted course is restored.
+                // Update groupid, courseid and binid in mattermostxgroups after deleted course is restored.
                 foreach ($groups as $group) {
-                    $DB->execute("UPDATE {mattermostxgroups} SET groupid=?, courseid=?, categorybinid=null WHERE categorybinid=? AND name=?",
+                    $DB->execute(
+                        "UPDATE {mattermostxgroups} SET groupid=?, courseid=?, categorybinid=null WHERE categorybinid=? AND name=?",
                         array($group->id, $mattermost->course, $event->objectid, $group->name));
                 }
                 $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id,
