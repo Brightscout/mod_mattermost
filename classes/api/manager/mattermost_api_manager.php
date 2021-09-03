@@ -139,6 +139,8 @@ class mattermost_api_manager
      * also triggers archiving of all Mattermost group channels of the course
      *
      * @param string $id - Mattermost channel id
+     * @param int $courseid - Course id
+     *  exists only if groups are to be deleted alongwith parent channel
      */
     public function archive_mattermost_channel($id, $courseid = null) {
         if ($courseid) {
@@ -156,7 +158,7 @@ class mattermost_api_manager
     }
 
     /**
-     * Archives all the Mattermost group channels of a course 
+     * Archives all the Mattermost group channels of a course
      *
      * @param int $courseid - id of Moodle course whose groups are to be deleted
      */
@@ -179,8 +181,10 @@ class mattermost_api_manager
     /**
      * Unarchives Mattermost channel
      * also triggers unarchiving of all Mattermost group channels of the course
-     * 
+     *
      * @param string $id - Mattermost channel id
+     * @param int $courseid - Id of course
+     * @param int $binid - Bin Id of recycled group
      */
     public function unarchive_mattermost_channel($id, $courseid, $binid) {
         $this->unarchive_mattermost_group_channels($courseid, $binid);
@@ -196,11 +200,11 @@ class mattermost_api_manager
     }
 
     /**
-     * Archives all the Mattermost group channels of a course 
+     * Archives all the Mattermost group channels of a course
      * Archiving of group channels are done in two ways:
      *  1. using courseid, when instace visibility changes or restored from course bin
      *  2. using binid, when course is deleted and restored from category bin
-     * 
+     *
      * @param int $courseid - id of Moodle course whose groups are to be restored
      * @param int $binid- bin id of Moodle deleted course whose groups are to be restored
      */
