@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/mattermost/db" VERSION="20210823" COMMENT="XMLDB file for Moodle mod_mattermost"
+<XMLDB PATH="mod/mattermost/db" VERSION="20210902" COMMENT="XMLDB file for Moodle mod_mattermost"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -56,6 +56,9 @@
         <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Id of the moodle group"/>
         <FIELD NAME="channelid" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="Id of the mattermost channel."/>
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Id of the course to which the group belongs."/>
+        <FIELD NAME="binid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Bin Id of deleted course."/>
+        <FIELD NAME="categorybinid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Bin Id of recycled course in category."/>
+        <FIELD NAME="name" TYPE="char" LENGTH="254" NOTNULL="true" SEQUENCE="false" COMMENT="Name of the moodle group."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="channelid"/>

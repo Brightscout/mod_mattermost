@@ -119,5 +119,50 @@ function xmldb_mattermost_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2021083100, 'mattermost');
     }
 
+    if ($oldversion < 2021090200) {
+
+        // Define field binid to be added to mattermostxgroups.
+        $table = new xmldb_table('mattermostxgroups');
+        $field = new xmldb_field('binid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, null);
+
+        // Conditionally launch add field courseid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Mattermost savepoint reached.
+        upgrade_mod_savepoint(true, 2021090200, 'mattermost');
+    }
+
+    if ($oldversion < 2021090201) {
+
+        // Define field name to be added to mattermostxgroups.
+        $table = new xmldb_table('mattermostxgroups');
+        $field = new xmldb_field('name', XMLDB_TYPE_CHAR, '254', null, XMLDB_NOTNULL, null, null, null);
+
+        // Conditionally launch add field courseid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Mattermost savepoint reached.
+        upgrade_mod_savepoint(true, 2021090201, 'mattermost');
+    }
+
+    if ($oldversion < 2021090300) {
+
+        // Define field categorybinid to be added to mattermostxgroups.
+        $table = new xmldb_table('mattermostxgroups');
+        $field = new xmldb_field('categorybinid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, null);
+
+        // Conditionally launch add field courseid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Mattermost savepoint reached.
+        upgrade_mod_savepoint(true, 2021090300, 'mattermost');
+    }
+
     return true;
 }
