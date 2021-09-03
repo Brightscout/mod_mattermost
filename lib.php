@@ -77,7 +77,7 @@ function mattermost_add_instance($moduleinstance, $mform = null) {
     $moduleinstance->mattermostid = $mattermostapimanager->create_mattermost_channel($channelname);
 
     if (!$moduleinstance->visible || !$moduleinstance->visibleoncoursepage) {
-        $mattermostapimanager->archive_mattermost_channel($moduleinstance->mattermostid);
+        $mattermostapimanager->archive_mattermost_channel($moduleinstance->mattermostid, $moduleinstance->course);
     }
 
     $id = $DB->insert_record('mattermost', $moduleinstance);
@@ -93,6 +93,7 @@ function mattermost_add_instance($moduleinstance, $mform = null) {
             'groupid' => $group->id,
             'channelid' => $mattermostchannelid,
             'courseid' => $course->id,
+            'name' => $group->name
         ));
 
         // Set channelid key in the group object to be used while enrolling users.
@@ -164,7 +165,7 @@ function mattermost_delete_instance($id) {
     }
 
     $mattermostapimanager = new mattermost_api_manager();
-    $mattermostapimanager->archive_mattermost_channel($mattermost->mattermostid);
+    $mattermostapimanager->archive_mattermost_channel($mattermost->mattermostid, $mattermost->course);
 
     // Delete the instance of the mod_mattermost from database.
     $DB->delete_records('mattermost', array('id' => $id));

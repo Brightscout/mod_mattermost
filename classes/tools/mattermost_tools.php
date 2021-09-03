@@ -270,6 +270,28 @@ class mattermost_tools
     }
 
     /**
+     * updates course bin id for mattermost group record
+     *
+     * @param int $binid - Bin Id of the deleted course module
+     * @param int $courseid - Id of the course
+     */
+    public static function update_mattermost_group_record($binid, $courseid) {
+        global $DB;
+        $DB->execute("UPDATE {mattermostxgroups} SET binid=? WHERE courseid=?", array($binid, $courseid));
+    }
+
+    /**
+     * updates category bin id of mattermost group record
+     *
+     * @param int $binid - Bin Id of the deleted course module
+     * @param int $courseid - Id of the course
+     */
+    public static function update_category_bin_id_mattermost_group($binid, $courseid) {
+        global $DB;
+        $DB->execute("UPDATE {mattermostxgroups} SET categorybinid=? WHERE courseid=?", array($binid, $courseid));
+    }
+
+    /**
      * Fetches single mattermost module instance from database with given courseid
      *
      * @param object $courseid course info

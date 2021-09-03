@@ -201,7 +201,27 @@ class observers
                     'groupid' => $group->id,
                     'channelid' => $mattermostchannelid,
                     'courseid' => $course->id,
+                    'name' => $group->name
                 ));
+            }
+        }
+    }
+
+    /**
+     * Event handler function to handle the group_deleted event
+     *
+     * @param \core\event\group_deleted $event
+     */
+    public static function group_deleted(\core\event\group_deleted $event) {
+        global $DB;
+        if (mattermost_tools::mattermost_enabled()) {
+            $group = $DB->get_record('mattermostxgroups', array('groupid' => $event->objectid));
+
+            if ($group) {
+                $mattermostapimanager = new mattermost_api_manager();
+                $mattermostapimanager->archive_mattermost_channel($group->channelid);
+                // Delete group record only if moodle group is permanently deleted and not recycled.
+                $DB->delete_records('mattermostxgroups', array('groupid' => $event->objectid, 'categorybinid' => null));
             }
         }
     }
@@ -232,6 +252,9 @@ class observers
                 $record->binid = $event->objectid;
                 $DB->insert_record('mattermostxrecyclebin', $record);
             }
+
+            // Update bin id for mattermost groups to be uniquely identified during instance deletion/restoration.
+            mattermost_tools::update_mattermost_group_record($event->objectid, $mattermost->course);
         }
     }
 
@@ -245,10 +268,19 @@ class observers
         global $DB;
         if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
             $mattermostrecyclebin = $DB->get_record('mattermostxrecyclebin', array('binid' => $event->objectid));
+            $mattermostgroups = $DB->get_records('mattermostxgroups', array('binid' => $event->objectid));
+
             if ($mattermostrecyclebin) {
-                $mattermostapimanager = new mattermost_api_manager();
-                $mattermostapimanager->archive_mattermost_channel($mattermostrecyclebin->mattermostid);
                 $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id));
+            }
+
+            // Delete record from database when group is permanently deleted.
+            if (!empty($mattermostgroups)) {
+                foreach ($mattermostgroups as $mattermostgroup) {
+                    if (!empty($mattermostgroup)) {
+                        $DB->delete_records('mattermostxgroups', array('channelid' => $mattermostgroup->channelid));
+                    }
+                }
             }
         }
     }
@@ -313,9 +345,14 @@ class observers
             $mattermostrecyclebin = $DB->get_record('mattermostxrecyclebin', array('binid' => $event->objectid));
             if ($mattermostrecyclebin) {
                 $mattermostapimanager = new mattermost_api_manager();
-                $mattermostapimanager->unarchive_mattermost_channel($mattermostrecyclebin->mattermostid);
+                $mattermost = $DB->get_record('mattermost', array('mattermostid' => $mattermostrecyclebin->mattermostid));
+                $mattermostapimanager->unarchive_mattermost_channel($mattermostrecyclebin->mattermostid, $mattermost->course, null);
                 $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id));
-                // TODO: Confirm if this is required.
+
+                // update binid for mattermost groups after deleted instance is restored.
+                $DB->execute("UPDATE {mattermostxgroups} SET binid=null WHERE binid=?",
+                    array($event->objectid));
+                // To Do: Confirm if this is required.
                 // Synchronise members.
                 // mattermost_tools::synchronize_channel_members($mattermostrecyclebin->mattermostid.
                 // get_config('mod_mattermost', 'background_synchronize')).
@@ -347,6 +384,9 @@ class observers
                 $record->mattermostid = $mattermost->mattermostid;
                 $record->binid = $event->objectid;
                 $DB->insert_record('mattermostxrecyclebin', $record);
+
+                // Update bin id for a group to be uniquely identified during course restoration.
+                mattermost_tools::update_category_bin_id_mattermost_group($event->objectid, $courseinfo['courseid']);
             }
         }
     }
@@ -398,17 +438,23 @@ class observers
         global $DB;
         if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
             $mattermostrecyclebins = $DB->get_records('mattermostxrecyclebin', array('binid' => $event->objectid));
-            $mattermostapimanager = null;
-            if (empty($mattermostrecyclebins)) {
-                return;
-            }
-            $mattermostapimanager = new mattermost_api_manager();
+            $mattermostgroups = $DB->get_records('mattermostxgroups', array('categorybinid' => $event->objectid));
 
-            foreach ($mattermostrecyclebins as $mattermostrecyclebin) {
-                if (!empty($mattermostrecyclebin)) {
-                    $mattermostapimanager->archive_mattermost_channel($mattermostrecyclebin->mattermostid);
-                    $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id,
-                        'mattermostid' => $mattermostrecyclebin->mattermostid));
+            if (!empty($mattermostrecyclebins)) {
+                foreach ($mattermostrecyclebins as $mattermostrecyclebin) {
+                    if (!empty($mattermostrecyclebin)) {
+                        $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id,
+                            'mattermostid' => $mattermostrecyclebin->mattermostid));
+                    }
+                }
+            }
+
+            // Delete record from database when group is permanently deleted.
+            if (!empty($mattermostgroups)) {
+                foreach ($mattermostgroups as $mattermostgroup) {
+                    if (!empty($mattermostgroup)) {
+                        $DB->delete_records('mattermostxgroups', array('channelid' => $mattermostgroup->channelid));
+                    }
                 }
             }
         }
@@ -431,7 +477,15 @@ class observers
             $mattermostapimanager = new mattermost_api_manager();
 
             foreach ($mattermostrecyclebins as $mattermostrecyclebin) {
-                $mattermostapimanager->unarchive_mattermost_channel($mattermostrecyclebin->mattermostid);
+                $mattermostapimanager->unarchive_mattermost_channel($mattermostrecyclebin->mattermostid, null, $event->objectid);
+                $mattermost = $DB->get_record('mattermost', array('mattermostid' => $mattermostrecyclebin->mattermostid));
+                $groups = $DB->get_records('groups', array('courseid' => $mattermost->course));
+
+                // update groupid, courseid and binid in mattermostxgroups after deleted course is restored.
+                foreach ($groups as $group) {
+                    $DB->execute("UPDATE {mattermostxgroups} SET groupid=?, courseid=?, categorybinid=null WHERE categorybinid=? AND name=?",
+                        array($group->id, $mattermost->course, $event->objectid, $group->name));
+                }
                 $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id,
                     'mattermostid' => $mattermostrecyclebin->mattermostid));
             }
@@ -456,7 +510,7 @@ class observers
                     // Can't detect the change in course visibility here.
                     $mattermostapimanager->archive_mattermost_channel($mattermost->mattermostid);
                 } else {
-                    $mattermostapimanager->unarchive_mattermost_channel($mattermost->mattermostid);
+                    $mattermostapimanager->unarchive_mattermost_channel($mattermost->mattermostid, $coursemodule->course, null);
                 }
             }
         }
