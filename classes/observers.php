@@ -365,7 +365,11 @@ class observers
                 if (!empty($mattermost)) {
                     // Unarchive channel only if intance is not hidden.
                     if ($coursemodule->visible) {
-                        $mattermostapimanager->unarchive_mattermost_channel($mattermostrecyclebin->mattermostid, $mattermost->course, null);
+                        $mattermostapimanager->unarchive_mattermost_channel(
+                            $mattermostrecyclebin->mattermostid,
+                            $mattermost->course,
+                            null
+                        );
                     }
                 }
 
@@ -376,7 +380,7 @@ class observers
                 // Synchronise course channel members.
                 mattermost_tools::synchronize_channel_members($mattermostrecyclebin->mattermostid,
                     (boolean)get_config('mod_mattermost', 'background_synchronize'));
-                
+
                 // Synchronise course's group channel members.
                 $groups = $DB->get_records('mattermostxgroups', array('courseid' => $mattermost->course));
                 foreach ($groups as $group) {
