@@ -219,6 +219,13 @@ class mattermost_tools
     }
 
     /**
+     * Checks if recycle bin patch is installed in Moodle
+     */
+    public static function is_patch_installed() {
+        return get_config('mod_mattermost', 'recyclebin_patch');
+    }
+
+    /**
      * Finds if a course module is a mattermost instance.
      *
      * @param int $cmid - Course module id

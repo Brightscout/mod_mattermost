@@ -173,6 +173,14 @@ if ($ADMIN->fulltree) {
     );
 
     $settings->add(
+        new admin_setting_configcheckbox('mod_mattermost/recyclebin_patch',
+            get_string('recyclebin_patch', 'mod_mattermost'),
+            get_string('recyclebin_patch_desc', 'mod_mattermost'),
+            1
+        )
+    );
+
+    $settings->add(
         new admin_setting_configcheckbox(
             'mod_mattermost/background_add_instance',
             get_string('background_add_instance', 'mod_mattermost'),
