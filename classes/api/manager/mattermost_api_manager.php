@@ -77,6 +77,14 @@ class mattermost_api_manager
     }
 
     /**
+     * Function for getting the Mattermost rest api client
+     * @return mattermost_rest_client
+     */
+    public function get_client() {
+        return $this->client;
+    }
+
+    /**
      * Function for getting the Mattermost team slug name
      * @return string
      */
@@ -150,6 +158,7 @@ class mattermost_api_manager
             'mattermostinstanceid' => $mattermostinstanceid,
         ));
 
+        file_put_contents('/var/www/html/moodle/log.txt', 'user '.print_r($moodleuser, true).PHP_EOL, FILE_APPEND);
         try {
             $user = $this->get_or_create_user($moodleuser, $mattermostuser);
             $DB->insert_record(
@@ -185,7 +194,7 @@ class mattermost_api_manager
      * @param false|object $mattermostuser
      * @return array $user
      */
-    public function get_or_create_user($moodleuser, $mattermostuser) {
+    public function get_or_create_user($moodleuser, $mattermostuser = null) {
         $mattermostuserinfo = array();
 
         $authservice = $this->mattermostapiconfig->get_authservice();

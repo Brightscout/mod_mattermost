@@ -13,21 +13,22 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
- * Plugin version and other meta-data are defined here.
+ * config unit test file
  *
  * @package   mod_mattermost
- * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @category    config test file
+ * @copyright 2021 Brightscout <hello@brightscout.com>
  * @author    Manoj <manoj@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2021090300; // The current module version (Date: YYYYMMDDXX).
-$plugin->requires = 2018050800; // Moodle version!
-
-$plugin->component = 'mod_mattermost';
-$plugin->release = '0.1.0';
-$plugin->maturity = MATURITY_ALPHA;
+set_config('instanceurl', 'https://mattermost-server_url', 'mod_mattermost');
+set_config('secret', 'secret_from_the_mattermost_plugin', 'mod_mattermost');
+set_config('teamslugname', 'your_team_on_mattermost', 'mod_mattermost');
+set_config('authservice', '0', 'mod_mattermost');
+set_config('authdata', '0', 'mod_mattermost');
+// Fake config test to avoid email domain troubles.
+set_config('domainmail', 'your_domain_mail_if_necessary', 'mod_mattermost'); // Optional argument line.

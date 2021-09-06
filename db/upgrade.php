@@ -119,5 +119,60 @@ function xmldb_mattermost_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2021083100, 'mattermost');
     }
 
+    if ($oldversion < 2021090300) {
+
+        // Define table mattermostxusers to be dropped.
+        $usertable = new xmldb_table('mattermostxusers');
+
+        // Conditionally launch drop table for mattermostxusers.
+        if ($dbman->table_exists($usertable)) {
+            $dbman->drop_table($usertable);
+        }
+
+         // Adding fields to table mattermostxusers.
+        $usertable->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $usertable->add_field('moodleuserid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $usertable->add_field('mattermostuserid', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, null);
+        $usertable->add_field('mattermostinstanceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table mattermostxusers.
+        $usertable->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $usertable->add_key('fk_user', XMLDB_KEY_FOREIGN, ['moodleuserid'], 'user', ['id']);
+        $usertable->add_key('fk_instance', XMLDB_KEY_FOREIGN, ['mattermostinstanceid'], 'mattermost', ['id']);
+        $usertable->add_key('unique', XMLDB_KEY_UNIQUE, ['moodleuserid', 'mattermostinstanceid']);
+
+        // Conditionally launch create table for mattermostxusers.
+        if (!$dbman->table_exists($usertable)) {
+            $dbman->create_table($usertable);
+        }
+
+        // Define table mattermostxusers to be dropped.
+        $groupstable = new xmldb_table('mattermostxusers');
+
+        // Conditionally launch drop table for mattermostxusers.
+        if ($dbman->table_exists($groupstable)) {
+            $dbman->drop_table($groupstable);
+        }
+
+        // Adding fields to table mattermostxgroups.
+        $groupstable->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $groupstable->add_field('groupid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $groupstable->add_field('channelid', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, null);
+        $groupstable->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table mattermostxgroups.
+        $groupstable->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $groupstable->add_key('unique', XMLDB_KEY_UNIQUE, ['channelid']);
+        $groupstable->add_key('fk_group', XMLDB_KEY_FOREIGN_UNIQUE, ['groupid'], 'groups', ['id']);
+
+        // Conditionally launch create table for mattermostxgroups.
+        if (!$dbman->table_exists($groupstable)) {
+            $dbman->create_table($groupstable);
+        }
+
+        // Mattermost savepoint reached.
+        upgrade_mod_savepoint(true, 2021090300, 'mattermost');
+    }
+
     return true;
 }

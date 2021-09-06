@@ -41,24 +41,28 @@
     </TABLE>
     <TABLE NAME="mattermostxusers" COMMENT="Stores the mattermost user ids mapped with Moodle user ids.">
       <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="moodleuserid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Id of the moodle user"/>
         <FIELD NAME="mattermostuserid" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="Id of the mattermost user."/>
         <FIELD NAME="mattermostinstanceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Id of the mattermost instance."/>
       </FIELDS>
       <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="fk_user" TYPE="foreign" FIELDS="moodleuserid" REFTABLE="user" REFFIELDS="id"/>
         <KEY NAME="fk_instance" TYPE="foreign" FIELDS="mattermostinstanceid" REFTABLE="mattermost" REFFIELDS="id"/>
-        <KEY NAME="primary" TYPE="primary" FIELDS="moodleuserid,mattermostinstanceid"/>
+        <KEY NAME="unique" TYPE="unique" FIELDS="moodleuserid,mattermostinstanceid"/>
       </KEYS>
     </TABLE>
     <TABLE NAME="mattermostxgroups" COMMENT="Stores the mattermost channel ids mapped with Moodle group ids.">
       <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Id of the moodle group"/>
         <FIELD NAME="channelid" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="Id of the mattermost channel."/>
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Id of the course to which the group belongs."/>
       </FIELDS>
       <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="channelid"/>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="unique" TYPE="unique" FIELDS="channelid"/>
         <KEY NAME="fk_group" TYPE="foreign" FIELDS="groupid" REFTABLE="groups" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
