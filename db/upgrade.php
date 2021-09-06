@@ -90,5 +90,34 @@ function xmldb_mattermost_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2021082500, 'mattermost');
     }
 
+    if ($oldversion < 2021083100) {
+
+        // Define table mattermostxusers to be dropped.
+        $table = new xmldb_table('mattermostxusers');
+
+        // Conditionally launch drop table for mattermostxusers.
+        if ($dbman->table_exists($table)) {
+            $dbman->drop_table($table);
+        }
+
+         // Adding fields to table mattermostxusers.
+         $table->add_field('moodleuserid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+         $table->add_field('mattermostuserid', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, null);
+         $table->add_field('mattermostinstanceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+         // Adding keys to table mattermostxusers.
+         $table->add_key('fk_user', XMLDB_KEY_FOREIGN, ['moodleuserid'], 'user', ['id']);
+         $table->add_key('fk_instance', XMLDB_KEY_FOREIGN, ['mattermostinstanceid'], 'mattermost', ['id']);
+         $table->add_key('primary', XMLDB_KEY_PRIMARY, ['moodleuserid', 'mattermostinstanceid']);
+
+         // Conditionally launch create table for mattermostxusers.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Mattermost savepoint reached.
+        upgrade_mod_savepoint(true, 2021083100, 'mattermost');
+    }
+
     return true;
 }

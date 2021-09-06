@@ -276,7 +276,8 @@ class observers
                             'channeladminroles' => $mattermostmoduleinstance->channeladminroles,
                             'userroles' => $mattermostmoduleinstance->userroles,
                             'userid' => $userid,
-                            'coursecontextid' => $coursecontext->id
+                            'coursecontextid' => $coursecontext->id,
+                            'mattermostinstanceid' => $mattermostmoduleinstance->id
                         )
                     );
                     \core\task\manager::queue_adhoc_task($taskenrolment);
@@ -287,6 +288,7 @@ class observers
                         $mattermostmoduleinstance->userroles,
                         $userid,
                         $coursecontext->id,
+                        $mattermostmoduleinstance->id
                     );
                 }
             }
@@ -333,6 +335,7 @@ class observers
                 $groupid = $event->objectid;
                 $userid = $event->relateduserid;
                 $mattermostgroup = $DB->get_record('mattermostxgroups', array('groupid' => $groupid));
+                $mattermostmoduleinstance = $DB->get_record('mattermost', array('course' => $mattermostgroup->courseid));
 
                 $background = (boolean)get_config('mod_mattermost', 'background_synchronize');
                 if ($background) {
@@ -341,11 +344,14 @@ class observers
                         array(
                             'channelid' => $mattermostgroup->channelid,
                             'userid' => $userid,
+                            'mattermostinstanceid' => $mattermostmoduleinstance->id
                         )
                     );
                     \core\task\manager::queue_adhoc_task($taskunenrolment);
                 } else {
-                    mattermost_tools::unenrol_user_from_mattermost_channel($mattermostgroup->channelid, $userid);
+                    mattermost_tools::unenrol_user_from_mattermost_channel(
+                        $mattermostgroup->channelid, $userid, $mattermostmoduleinstance->id
+                    );
                 }
             }
         }

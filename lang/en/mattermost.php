@@ -114,3 +114,14 @@ $string['moodleusernotfounderror'] = 'Error: Moodle user {$a} not found';
 
 $string['mattermost:addinstance'] = 'Add a Mattermost module instance';
 $string['nomattermosts'] = 'No Mattermost module instances.';
+
+$string['privacy:metadata:mod_mattermost:mattermost_server:username'] = 'User username';
+$string['privacy:metadata:mod_mattermost:mattermost_server:firstname'] = 'User firstname';
+$string['privacy:metadata:mod_mattermost:mattermost_server:lastname'] = 'User lastname';
+$string['privacy:metadata:mod_mattermost:mattermost_server:email'] = 'User email';
+$string['privacy:metadata:mod_mattermost:mattermost_server:mattermostids'] = 'Mattermost remote private channel ids where user is enrolled in';
+$string['privacy:metadata:mod_mattermost:mattermost_server'] = 'Data transmitted to remote Mattermost server';
+$string['privacy:metadata:mattermostxusers'] = 'Table for storing the mattermost user ids mapped with Moodle user ids.';
+$string['privacy:metadata:mattermostxusers:moodleuserid'] = 'Moodle user id';
+$string['privacy:metadata:mattermostxusers:mattermostuserid'] = 'Mattermost user id';
+$string['datatransmittedtomm'] = 'data transmitted to Mattermost';

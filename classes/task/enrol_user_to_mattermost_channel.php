@@ -42,7 +42,8 @@ class enrol_user_to_mattermost_channel extends \core\task\adhoc_task
             $data->channeladminroles,
             $data->userroles,
             $data->userid,
-            $data->coursecontextid
+            $data->coursecontextid,
+            $data->mattermostinstanceid,
         );
     }
 }

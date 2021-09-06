@@ -80,6 +80,7 @@ function mattermost_add_instance($moduleinstance, $mform = null) {
     }
 
     $id = $DB->insert_record('mattermost', $moduleinstance);
+    $moduleinstance->id = $id;
 
     $groups = $DB->get_records('groups', array('courseid' => $course->id));
     $records = array();
