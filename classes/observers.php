@@ -315,7 +315,7 @@ class observers
                 $mattermostapimanager = new mattermost_api_manager();
                 $mattermostapimanager->unarchive_mattermost_channel($mattermostrecyclebin->mattermostid);
                 $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id));
-                // To Do: Confirm if this is required.
+                // TODO: Confirm if this is required.
                 // Synchronise members.
                 // mattermost_tools::synchronize_channel_members($mattermostrecyclebin->mattermostid.
                 // get_config('mod_mattermost', 'background_synchronize')).
@@ -396,11 +396,10 @@ class observers
         if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
             $mattermostrecyclebins = $DB->get_records('mattermostxrecyclebin', array('binid' => $event->objectid));
             $mattermostapimanager = null;
-            if (!empty($mattermostrecyclebins)) {
-                $mattermostapimanager = new mattermost_api_manager();
-            } else {
+            if (empty($mattermostrecyclebins)) {
                 return;
             }
+            $mattermostapimanager = new mattermost_api_manager();
 
             foreach ($mattermostrecyclebins as $mattermostrecyclebin) {
                 if (!empty($mattermostrecyclebin)) {
@@ -423,11 +422,10 @@ class observers
         if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
             $mattermostrecyclebins = $DB->get_records('mattermostxrecyclebin', array('binid' => $event->objectid));
             $mattermostapimanager = null;
-            if (!empty($mattermostrecyclebins)) {
-                $mattermostapimanager = new mattermost_api_manager();
-            } else {
+            if (empty($mattermostrecyclebins)) {
                 return;
             }
+            $mattermostapimanager = new mattermost_api_manager();
 
             foreach ($mattermostrecyclebins as $mattermostrecyclebin) {
                 $mattermostapimanager->unarchive_mattermost_channel($mattermostrecyclebin->mattermostid);

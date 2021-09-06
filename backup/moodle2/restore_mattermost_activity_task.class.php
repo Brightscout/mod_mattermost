@@ -17,7 +17,7 @@
 /**
  * The task that provides a complete restore of mod_mattermost is defined here.
  *
- * To Do: change these to Brightscout
+ * TODO: change these to Brightscout
  * @package   mod_mattermost
  * @copyright 2021 Abhishek Verma <abhishek.verma@brightscout.com>
  * @author    Abhishek Verma <abhishek.verma@brightscout.com>

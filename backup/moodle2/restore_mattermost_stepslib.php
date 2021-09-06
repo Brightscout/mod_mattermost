@@ -17,7 +17,7 @@
 /**
  * All the steps to restore mod_mattermost are defined here.
  *
- * To Do: change these to Brightscout
+ * TODO: change these to Brightscout
  * @package   mod_mattermost
  * @copyright 2021 Abhishek Verma <abhishek.verma@brightscout.com>
  * @author    Abhishek Verma <abhishek.verma@brightscout.com>
@@ -62,6 +62,5 @@ class restore_mattermost_activity_structure_step extends restore_activity_struct
         }
         $newitemid = $DB->insert_record('mattermost', $data);
         $this->apply_activity_instance($newitemid);
-
     }
 }
