@@ -17,9 +17,8 @@
 /**
  * Backup steps for mod_mattermost are defined here.
  *
- * TODO: change these to Brightscout
  * @package   mod_mattermost
- * @copyright 2021 Abhishek Verma <abhishek.verma@brightscout.com>
+ * @copyright 2021 Brightscout <hello@brightscout.com>
  * @author    Abhishek Verma <abhishek.verma@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

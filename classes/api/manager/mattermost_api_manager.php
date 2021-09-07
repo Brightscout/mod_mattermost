@@ -144,7 +144,7 @@ class mattermost_api_manager
             $this->client->archive_channel($id);
         } catch (Exception $e) {
             self::moodle_debugging_message(
-                "Mattermost api Error " .
+                "Mattermost api Error " .$e->getCode()." : ".
                 $e->getMessage(), $e, DEBUG_DEVELOPER
             );
         }
@@ -160,7 +160,7 @@ class mattermost_api_manager
             $this->client->unarchive_channel($id);
         } catch (Exception $e) {
             self::moodle_debugging_message(
-                "Mattermost api Error " .
+                "Mattermost api Error " .$e->getCode()." : ".
                 $e->getMessage(), $e, DEBUG_DEVELOPER
             );
         }
