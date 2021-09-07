@@ -108,6 +108,7 @@ class mod_mattermost_tools_testcase extends advanced_testcase {
         $this->resetAfterTest(true);
         $this->load_mattermost_test_config();
         $this->mattermostapimanager = new mattermost_api_manager();
+        $this->setAdminUser();
         $studentrole = $DB->get_record('role', array('shortname' => 'student'));
         $editingteacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
         $this->generator = $this->getDataGenerator();
