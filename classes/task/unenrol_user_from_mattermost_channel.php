@@ -38,6 +38,7 @@ class unenrol_user_from_mattermost_channel extends \core\task\adhoc_task {
         \mod_mattermost\tools\mattermost_tools::unenrol_user_from_mattermost_channel(
             $data->channelid,
             $data->userid,
+            $data->mattermostinstanceid
         );
     }
 }

@@ -78,6 +78,9 @@ $string['background_synchronize'] = 'Pass Mattermost enrollments to background t
 $string['background_synchronize_desc'] = 'This occurs after a course or a Mattermost module is restored from recyclebin.';
 $string['background_user_update'] = 'Pass Mattermost enrollments to background task while updating user informations such as activation/deactivation.';
 $string['background_user_update_desc'] = 'Pass Mattermost enrollments to background task while updating user informations such as activation/deactivation.';
+$string['recyclebin_patch'] = 'Is recyclebin moodle core patch installed?';
+$string['recyclebin_patch_desc'] = 'the mod mattermost recyclebin patch is a patch located in admin/tool/recyclebin/classes/course_bin.php file enabling to pass cmid and module instanceid to recyclebin item created event. It enables the deletion of remote Mattermost channels';
+
 
 $string['errorintestwhileconnection'] = 'Error while testing connection';
 $string['testerrorcode'] = 'Error code : {$a}';
@@ -111,3 +114,14 @@ $string['moodleusernotfounderror'] = 'Error: Moodle user {$a} not found';
 
 $string['mattermost:addinstance'] = 'Add a Mattermost module instance';
 $string['nomattermosts'] = 'No Mattermost module instances.';
+
+$string['privacy:metadata:mod_mattermost:mattermost_server:username'] = 'User username';
+$string['privacy:metadata:mod_mattermost:mattermost_server:firstname'] = 'User firstname';
+$string['privacy:metadata:mod_mattermost:mattermost_server:lastname'] = 'User lastname';
+$string['privacy:metadata:mod_mattermost:mattermost_server:email'] = 'User email';
+$string['privacy:metadata:mod_mattermost:mattermost_server:mattermostids'] = 'Mattermost remote private channel ids where user is enrolled in';
+$string['privacy:metadata:mod_mattermost:mattermost_server'] = 'Data transmitted to remote Mattermost server';
+$string['privacy:metadata:mattermostxusers'] = 'Table for storing the mattermost user ids mapped with Moodle user ids.';
+$string['privacy:metadata:mattermostxusers:moodleuserid'] = 'Moodle user id';
+$string['privacy:metadata:mattermostxusers:mattermostuserid'] = 'Mattermost user id';
+$string['datatransmittedtomm'] = 'data transmitted to Mattermost';

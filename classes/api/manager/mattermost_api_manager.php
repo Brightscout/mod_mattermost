@@ -135,23 +135,43 @@ class mattermost_api_manager
     }
 
     /**
+     * Archives Mattermost channel
+     *
+     * @param string $id - Mattermost channel id
+     */
+    public function archive_mattermost_channel($id) {
+        try {
+            $this->client->archive_channel($id);
+        } catch (Exception $e) {
+            self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
+            debugging("Mattermost api Error ".$e->getCode()." : ".$e->getMessage(), DEBUG_DEVELOPER);
+        }
+    }
+
+    /**
      * Function for enrolling a user to a channel
      *
      * @param string $channelid - Mattermost channel id
      * @param object $moodleuser
+     * @param int $mattermostinstanceid
      * @param bool $ischanneladmin - Whether the user to be enrolled as a channel admin or not
      * @return array $user
      */
-    public function enrol_user_to_channel($channelid, $moodleuser, $ischanneladmin = false) {
+    public function enrol_user_to_channel($channelid, $moodleuser, $mattermostinstanceid, $ischanneladmin = false) {
         global $DB;
-        $mattermostuser = $DB->get_record('mattermostxusers', array('moodleuserid' => $moodleuser->id));
+        $mattermostuser = $DB->get_record('mattermostxusers', array(
+            'moodleuserid' => $moodleuser->id,
+            'mattermostinstanceid' => $mattermostinstanceid,
+        ));
 
+        $user = array();
         try {
             $user = $this->get_or_create_user($moodleuser, $mattermostuser);
             $DB->insert_record(
                 'mattermostxusers', array(
-                'moodleuserid' => $moodleuser->id,
-                'mattermostuserid' => $user['id'],
+                    'moodleuserid' => $moodleuser->id,
+                    'mattermostuserid' => $user['id'],
+                    'mattermostinstanceid' => $mattermostinstanceid,
                 )
             );
         } catch (Exception $e) {
@@ -240,12 +260,17 @@ class mattermost_api_manager
      * @param string $channelid - Mattermost channel id
      * @param object $moodleuser
      * @param bool $updatetochanneladmin - true if role is updated to channel admin, false if updated to channel member
+     * @param int $mattermostinstanceid
      * @throws Exception
      */
-    public function update_role_in_channel($channelid, $moodleuser, $updatetochanneladmin) {
+    public function update_role_in_channel($channelid, $moodleuser, $updatetochanneladmin, $mattermostinstanceid) {
         global $DB;
 
-        $mattermostuser = $DB->get_record('mattermostxusers', array('moodleuserid' => $moodleuser->id));
+        $mattermostuser = $DB->get_record('mattermostxusers', array(
+            'moodleuserid' => $moodleuser->id,
+            'mattermostinstanceid' => $mattermostinstanceid
+        ));
+
         if (!$mattermostuser) {
             throw new moodle_exception('mmusernotfounderror', 'mod_mattermost');
         }
@@ -266,10 +291,11 @@ class mattermost_api_manager
      *
      * @param string $channelid - Mattermost channel id
      * @param object $moodleuser
+     * @param int $mattermostinstanceid
      * @param array $mattermostchannelmember returned from the get channel members API
      * @throws Exception
      */
-    public function unenrol_user_from_channel($channelid, $moodleuser, $mattermostchannelmember = null) {
+    public function unenrol_user_from_channel($channelid, $moodleuser, $mattermostinstanceid, $mattermostchannelmember = null) {
         global $DB;
 
         if ($moodleuser) {

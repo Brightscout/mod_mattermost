@@ -207,6 +207,48 @@ class observers
     }
 
     /**
+     * Event handler function to handle the course_bin_item_created event
+     * Adds record of recycled instance into 'mattermostxrecyclebin' table
+     *
+     * @param \tool_recyclebin\event\course_bin_item_created $event
+     */
+    public static function course_bin_item_created(\tool_recyclebin\event\course_bin_item_created $event) {
+        global $DB;
+        if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
+            $courseinfo = $event->other;
+            // Check that this is a mattermost module instance.
+            $mattermostmodule = mattermost_tools::get_mattermost_module_instance_from_course_module($courseinfo);
+            if ($mattermostmodule) {
+                $mattermost = $DB->get_record('mattermost', array('id' => $courseinfo['instanceid']));
+                // Insert item into association table.
+                $record = new \stdClass();
+                $record->cmid = $courseinfo['cmid'];
+                $record->mattermostid = $mattermost->mattermostid;
+                $record->binid = $event->objectid;
+                $DB->insert_record('mattermostxrecyclebin', $record);
+            }
+        }
+    }
+
+    /**
+     * Event handler function to handle the course_bin_item_deleted event
+     * Deletes record of instances present in course recyclebin from 'mattermostxrecyclebin' table
+     *
+     * @param \tool_recyclebin\event\course_bin_item_deleted $event
+     */
+    public static function course_bin_item_deleted(\tool_recyclebin\event\course_bin_item_deleted $event) {
+        global $DB;
+        if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
+            $mattermostrecyclebin = $DB->get_record('mattermostxrecyclebin', array('binid' => $event->objectid));
+            if ($mattermostrecyclebin) {
+                $mattermostapimanager = new mattermost_api_manager();
+                $mattermostapimanager->archive_mattermost_channel($mattermostrecyclebin->mattermostid);
+                $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id));
+            }
+        }
+    }
+
+    /**
      * Event handler function to handle the group_member_added event
      *
      * @param \core\event\group_member_added $event
@@ -234,7 +276,8 @@ class observers
                             'channeladminroles' => $mattermostmoduleinstance->channeladminroles,
                             'userroles' => $mattermostmoduleinstance->userroles,
                             'userid' => $userid,
-                            'coursecontextid' => $coursecontext->id
+                            'coursecontextid' => $coursecontext->id,
+                            'mattermostinstanceid' => $mattermostmoduleinstance->id
                         )
                     );
                     \core\task\manager::queue_adhoc_task($taskenrolment);
@@ -245,8 +288,34 @@ class observers
                         $mattermostmoduleinstance->userroles,
                         $userid,
                         $coursecontext->id,
+                        $mattermostmoduleinstance->id
                     );
                 }
+            }
+        }
+    }
+
+    /**
+     * Event handler function to handle the category_bin_item_created event
+     * Adds record of recycled courses into 'mattermostxrecyclebin' table
+     *
+     * @param \tool_recyclebin\event\category_bin_item_created $event
+     */
+    public static function category_bin_item_created(\tool_recyclebin\event\category_bin_item_created $event) {
+        global $DB;
+        if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
+            $courseinfo = $event->other;
+            // Check that this is a mattermost module instance.
+            $mattermostmodule = mattermost_tools::get_mattermost_module_instance_from_course_module($courseinfo);
+
+            if ($mattermostmodule) {
+                $mattermost = $DB->get_record('mattermost', array('id' => $mattermostmodule->instance));
+                // Insert item into association table.
+                $record = new \stdClass();
+                $record->cmid = $mattermostmodule->id;
+                $record->mattermostid = $mattermost->mattermostid;
+                $record->binid = $event->objectid;
+                $DB->insert_record('mattermostxrecyclebin', $record);
             }
         }
     }
@@ -266,6 +335,7 @@ class observers
                 $groupid = $event->objectid;
                 $userid = $event->relateduserid;
                 $mattermostgroup = $DB->get_record('mattermostxgroups', array('groupid' => $groupid));
+                $mattermostmoduleinstance = $DB->get_record('mattermost', array('course' => $mattermostgroup->courseid));
 
                 $background = (boolean)get_config('mod_mattermost', 'background_synchronize');
                 if ($background) {
@@ -274,11 +344,63 @@ class observers
                         array(
                             'channelid' => $mattermostgroup->channelid,
                             'userid' => $userid,
+                            'mattermostinstanceid' => $mattermostmoduleinstance->id
                         )
                     );
                     \core\task\manager::queue_adhoc_task($taskunenrolment);
                 } else {
-                    mattermost_tools::unenrol_user_from_mattermost_channel($mattermostgroup->channelid, $userid);
+                    mattermost_tools::unenrol_user_from_mattermost_channel(
+                        $mattermostgroup->channelid, $userid, $mattermostmoduleinstance->id
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * Event handler function to handle the category_bin_item_deleted event
+     * Deletes record of courses present in category recyclebin from 'mattermostxrecyclebin' table
+     *
+     * @param \tool_recyclebin\event\category_bin_item_deleted $event
+     */
+    public static function category_bin_item_deleted(\tool_recyclebin\event\category_bin_item_deleted $event) {
+        global $DB;
+        if (mattermost_tools::mattermost_enabled() && mattermost_tools::is_patch_installed()) {
+            $mattermostrecyclebins = $DB->get_records('mattermostxrecyclebin', array('binid' => $event->objectid));
+            $mattermostapimanager = null;
+            if (!empty($mattermostrecyclebins)) {
+                $mattermostapimanager = new mattermost_api_manager();
+            } else {
+                return;
+            }
+
+            foreach ($mattermostrecyclebins as $mattermostrecyclebin) {
+                if (!empty($mattermostrecyclebin)) {
+                    $mattermostapimanager->archive_mattermost_channel($mattermostrecyclebin->mattermostid);
+                    $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id,
+                        'mattermostid' => $mattermostrecyclebin->mattermostid));
+                }
+            }
+        }
+    }
+
+    /**
+     * Event handler function to handle the course_module_updated event
+     * Archives/Unarchives the channel when instance visibility is changed.
+     *
+     * @param \core\event\course_module_updated $event
+     */
+    public static function course_module_updated(\core\event\course_module_updated $event) {
+        global $DB;
+        if (mattermost_tools::mattermost_enabled() && $event->other['modulename'] == 'mattermost') {
+            $coursemodule = $DB->get_record('course_modules', array('id' => $event->objectid));
+            $mattermost = $DB->get_record('mattermost', array('id' => $event->other['instanceid']));
+            if (!empty($mattermost)) {
+                $mattermostapimanager = new mattermost_api_manager();
+                if (!$coursemodule->visible or !$coursemodule->visibleoncoursepage) {
+                    // It detects the change in instance visibility on course.
+                    // Can't detect the change in course visibility here.
+                    $mattermostapimanager->archive_mattermost_channel($mattermost->mattermostid);
                 }
             }
         }
