@@ -17,22 +17,23 @@
 /**
  * mod_mattermost rest api manager tests.
  *
- * @package    local_digital_training_account_services
- * @copyright   2020 ESUP-Portail {@link https://www.esup-portail.org/}
- * @author Céline Pervès<cperves@unistra.fr>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_mattermost
+ * @copyright 2021 Brightscout <hello@brightscout.com>
+ * @author    Manoj <manoj@brightscout.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 defined('MOODLE_INTERNAL') || die();
 use \mod_mattermost\api\manager\mattermost_api_manager;
-// global $CFG;
-
-// require_once($CFG->dirroot.'/mod/mattermost/vendor/autoload.php');
+use \mod_mattermost\tools\mattermost_tools;
 
 class mod_mattermost_api_manager_testcase extends advanced_testcase{
     /**
      * @var mattermost_api_manager
      */
     private $mattermostapimanager;
+
+    const MATTERMOST_INSTANCE_ID = 1;
 
     public function setUp() : void {
         global $DB;
@@ -44,7 +45,6 @@ class mod_mattermost_api_manager_testcase extends advanced_testcase{
         $modulerecord->visible = 1;
         $DB->update_record('modules', $modulerecord);
         $this->initiate_test_environment();
-        // set_config('create_user_account_if_not_exists', 1, 'mod_mattermost');
     }
 
     public function test_construct() {
@@ -74,17 +74,56 @@ class mod_mattermost_api_manager_testcase extends advanced_testcase{
         $channelname = 'moodletestchannel' . time();
         $channelid = $this->mattermostapimanager->create_mattermost_channel($channelname);
         $this->assertNotEmpty($channelid);
+        $this->mattermostapimanager->archive_mattermost_channel($channelid);
+    }
+
+    public function test_create_channel_invalid_channelname() {
+        $this->initiate_environment_and_connection();
+        $channelname = 'moodletestchannel/'.time();
+        $channelid = $this->mattermostapimanager->create_mattermost_channel($channelname);
+        $this->assertDebuggingCalledCount(2);
+        $this->assertEmpty($channelid);
+        $sanitizedchannelname = mattermost_tools::sanitize_channelname($channelname);
+        $channelid = $this->mattermostapimanager->create_mattermost_channel($sanitizedchannelname);
+        $this->assertNotEmpty($channelid);
+        $this->mattermostapimanager->archive_mattermost_channel($channelid);
+    }
+
+    public function test_create_channel_channelname_with_whitespace() {
+        $this->initiate_environment_and_connection();
+        $channelname = 'moodletestchannel '.time();
+        $sanitizedchannelname = mattermost_tools::sanitize_channelname($channelname);
+        $channelid = $this->mattermostapimanager->create_mattermost_channel($sanitizedchannelname);
+        $this->assertNotEmpty($channelid);
+        $this->mattermostapimanager->archive_mattermost_channel($channelid);
+    }
+
+    public function test_create_channels_with_same_names() {
+        $this->initiate_environment_and_connection();
+        $channelname = 'moodletestchannel'.time();
+        $channelid = $this->mattermostapimanager->create_mattermost_channel($channelname);
+        $this->assertNotEmpty($channelid);
+
+        // Create same second time.
+        $channelid2 = $this->mattermostapimanager->create_mattermost_channel($channelname);
+        $this->assertDebuggingCalledCount(2);
+        $this->assertEmpty($channelid2);
+        $this->mattermostapimanager->archive_mattermost_channel($channelid);
     }
 
     public function test_get_enriched_channel_members() {
         $this->initiate_environment_and_connection();
-        list($channeladmin, $mattermostchanneladmin, $user, $mattermostuser, $channelid) = $this->create_channel_with_users();
+        list($channeladmin, $user, $channelid) = $this->create_channel_with_users();
         $enrichedmembers = $this->mattermostapimanager->get_enriched_channel_members($channelid);
         $this->assertCount(2, $enrichedmembers);
-        $this->assertTrue(array_key_exists($mattermostchanneladmin['email'], $enrichedmembers));
-        $this->assertTrue(array_key_exists($mattermostuser['email'], $enrichedmembers));
-        $this->assertTrue($enrichedmembers[$mattermostchanneladmin['email']]['is_channel_admin']);
-        $this->assertFalse($enrichedmembers[$mattermostuser['email']]['is_channel_admin']);
+        $this->assertTrue(array_key_exists($channeladmin->email, $enrichedmembers));
+        $this->assertTrue(array_key_exists($user->email, $enrichedmembers));
+        $this->assertTrue($enrichedmembers[$channeladmin->email]['is_channel_admin']);
+        $this->assertFalse($enrichedmembers[$user->email]['is_channel_admin']);
+
+        $this->mattermostapimanager->archive_mattermost_channel($channelid);
+        $this->mattermostapimanager->delete_mattermost_user($channeladmin, self::MATTERMOST_INSTANCE_ID);
+        $this->mattermostapimanager->delete_mattermost_user($user, self::MATTERMOST_INSTANCE_ID);
     }
 
     /**
@@ -110,16 +149,37 @@ class mod_mattermost_api_manager_testcase extends advanced_testcase{
         $this->assertNotEmpty($mattermostchanneladmin);
         $this->assertNotEmpty($mattermostuser);
         $this->assertTrue(array_key_exists('id', $mattermostchanneladmin));
+        $this->assertTrue(array_key_exists('id', $mattermostuser));
         $channelname = 'moodletestchannel' . time();
         $channelid = $this->mattermostapimanager->create_mattermost_channel($channelname);
         $this->assertNotEmpty($channelid);
 
-        // TODO
-        // $this->assertTrue($this->mattermostapimanager->channel_exists($channelid));
+        $this->assertNotEmpty($this->mattermostapimanager->enrol_user_to_channel(
+            $channelid, $channeladmin, static::MATTERMOST_INSTANCE_ID, true
+        ));
+        $this->assertNotEmpty($this->mattermostapimanager->enrol_user_to_channel(
+            $channelid, $user, static::MATTERMOST_INSTANCE_ID
+        ));
+        return array($channeladmin, $user, $channelid);
+    }
 
-        $this->assertNotEmpty($this->mattermostapimanager->enrol_user_to_channel($channelid, $channeladmin, 1, true));
-        $this->waitForSecond(); // Some times seems that Rocket.Chat server is too long.
-        $this->assertNotEmpty($this->mattermostapimanager->enrol_user_to_channel($channelid, $user, 1));
-        return array($channeladmin, $mattermostchanneladmin, $user, $mattermostuser, $channelid);
+    public function test_enrol_unenrol_user_to_channel() {
+        $this->initiate_environment_and_connection();
+        list($channeladmin, $user, $channelid) = $this->create_channel_with_users();
+
+        $members = $this->mattermostapimanager->get_enriched_channel_members($channelid);
+        $this->assertTrue(is_array($members));
+        $this->assertCount(2, $members);
+
+        $this->mattermostapimanager->unenrol_user_from_channel($channelid, $channeladmin, static::MATTERMOST_INSTANCE_ID);
+        $this->mattermostapimanager->unenrol_user_from_channel($channelid, $user, static::MATTERMOST_INSTANCE_ID);
+
+        $members = $this->mattermostapimanager->get_enriched_channel_members($channelid);
+        $this->assertTrue(is_array($members));
+        $this->assertCount(0, $members);
+
+        $this->mattermostapimanager->archive_mattermost_channel($channelid);
+        $this->mattermostapimanager->delete_mattermost_user($channeladmin, self::MATTERMOST_INSTANCE_ID);
+        $this->mattermostapimanager->delete_mattermost_user($user, self::MATTERMOST_INSTANCE_ID);
     }
 }

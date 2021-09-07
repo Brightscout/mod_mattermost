@@ -17,7 +17,6 @@
  * config unit test file
  *
  * @package   mod_mattermost
- * @category    config test file
  * @copyright 2021 Brightscout <hello@brightscout.com>
  * @author    Manoj <manoj@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

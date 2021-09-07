@@ -160,7 +160,7 @@ class mattermost_tools
      * @return string|string[]|null
      * @throws moodle_exception
      */
-    private static function sanitize_channelname($channelname) {
+    public static function sanitize_channelname($channelname) {
         // Replace white spaces anyway.
         $channelname = preg_replace('/\/s/', '_', $channelname);
         $channelname =

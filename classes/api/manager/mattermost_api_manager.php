@@ -123,7 +123,9 @@ class mattermost_api_manager
             return $this->client->create_channel($name);
         } catch (Exception $e) {
             self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
-            throw new moodle_exception('mmchannelcreationerror', 'mod_mattermost', '', $e->getMessage());
+            if (!PHPUNIT_TEST) {
+                throw new moodle_exception('mmchannelcreationerror', 'mod_mattermost', '', $e->getMessage());
+            }
         }
     }
 
@@ -172,16 +174,18 @@ class mattermost_api_manager
             'mattermostinstanceid' => $mattermostinstanceid,
         ));
 
-        file_put_contents('/var/www/html/moodle/log.txt', 'user '.print_r($moodleuser, true).PHP_EOL, FILE_APPEND);
+        $user = array();
         try {
             $user = $this->get_or_create_user($moodleuser, $mattermostuser);
-            $DB->insert_record(
-                'mattermostxusers', array(
-                    'moodleuserid' => $moodleuser->id,
-                    'mattermostuserid' => $user['id'],
-                    'mattermostinstanceid' => $mattermostinstanceid,
-                )
-            );
+            if (!$mattermostuser) {
+                $DB->insert_record(
+                    'mattermostxusers', array(
+                        'moodleuserid' => $moodleuser->id,
+                        'mattermostuserid' => $user['id'],
+                        'mattermostinstanceid' => $mattermostinstanceid,
+                    )
+                );
+            }
         } catch (Exception $e) {
             self::moodle_debugging_message(
                 "User $moodleuser->username was not succesfully created.",
@@ -263,6 +267,35 @@ class mattermost_api_manager
     }
 
     /**
+     * Function to delete a mattermost user
+     * 
+     * @param object $moodleuser
+     * @param int $mattermostinstanceid
+     */
+    public function delete_mattermost_user($moodleuser, $mattermostinstanceid) {
+        global $DB;
+        $mattermostuser = $DB->get_record('mattermostxusers', array(
+            'moodleuserid' => $moodleuser->id,
+            'mattermostinstanceid' => $mattermostinstanceid
+        ));
+
+        if (!$mattermostuser) {
+            throw new moodle_exception('mmusernotfounderror', 'mod_mattermost');
+        }
+
+        try {
+            $this->client->delete_mattermost_user($mattermostuser->mattermostuserid);
+            $DB->delete_records_select(
+                'mattermostxusers', 'moodleuserid = :userid AND mattermostinstanceid = :instanceid', array(
+                'userid' => $moodleuser->id,
+                'instanceid' => $mattermostinstanceid
+            ));
+        } catch (Exception $e) {
+            self::moodle_debugging_message("User $moodleuser->username was not successfully deleted.", $e);
+        }
+    }
+
+    /**
      * Function to update a user's role in Mattermost channel
      *
      * @param string $channelid - Mattermost channel id
@@ -311,20 +344,17 @@ class mattermost_api_manager
                 'moodleuserid' => $moodleuser->id,
                 'mattermostinstanceid' => $mattermostinstanceid
             ));
-        } else if ($mattermostchannelmember) {
-            $mattermostuser = $DB->get_record('mattermostxusers', array(
-                    'mattermostuserid' => $mattermostchannelmember['user_id'] ?? $mattermostchannelmember['id'],
-                    'mattermostinstanceid' => $mattermostinstanceid
-                )
-            );
-        }
+            if (!$mattermostuser) {
+                throw new moodle_exception('mmusernotfounderror', 'mod_mattermost');
+            }
 
-        if (!$mattermostuser) {
-            throw new moodle_exception('mmusernotfounderror', 'mod_mattermost');
+            $userid = $mattermostuser->mattermostuserid;
+        } else if ($mattermostchannelmember) {
+            $userid = $mattermostchannelmember['user_id'] ?? $mattermostchannelmember['id'];
         }
 
         try {
-            $this->client->remove_user_from_channel($channelid, $mattermostuser->mattermostuserid);
+            $this->client->remove_user_from_channel($channelid, $userid);
         } catch (Exception $e) {
             $username = $moodleuser ? $moodleuser->username : $mattermostchannelmember['username'];
             self::moodle_debugging_message("User $username not added to remote Mattermost channel", $e);
