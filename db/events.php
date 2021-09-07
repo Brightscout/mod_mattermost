@@ -19,7 +19,7 @@
  *
  * @package   mod_mattermost
  * @category  event
- * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @copyright 2021 Brightscout <hello@brightscout.com>
  * @author    Manoj <manoj@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -51,5 +51,25 @@ $observers = array(
     array(
         'eventname' => '\core\event\group_member_removed',
         'callback' => '\mod_mattermost\observers::group_member_removed',
+    ),
+    array(
+        'eventname' => 'tool_recyclebin\event\course_bin_item_created',
+        'callback' => '\mod_mattermost\observers::course_bin_item_created',
+    ),
+    array(
+        'eventname' => 'tool_recyclebin\event\course_bin_item_deleted',
+        'callback' => '\mod_mattermost\observers::course_bin_item_deleted',
+    ),
+    array(
+        'eventname' => 'tool_recyclebin\event\category_bin_item_created',
+        'callback' => '\mod_mattermost\observers::category_bin_item_created',
+    ),
+    array(
+        'eventname' => 'tool_recyclebin\event\category_bin_item_deleted',
+        'callback' => '\mod_mattermost\observers::category_bin_item_deleted',
+    ),
+    array(
+        'eventname' => '\core\event\course_module_updated',
+        'callback' => '\mod_mattermost\observers::course_module_updated',
     ),
 );

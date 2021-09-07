@@ -19,7 +19,7 @@
  *
  * @package   mod_mattermost
  * @category  admin
- * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @copyright 2021 Brightscout <hello@brightscout.com>
  * @author    Manoj <manoj@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -169,6 +169,14 @@ if ($ADMIN->fulltree) {
             get_string('background_enrolment_task_desc', 'mod_mattermost'),
             $default,
             $enabledenrolmentplugins
+        )
+    );
+
+    $settings->add(
+        new admin_setting_configcheckbox('mod_mattermost/recyclebin_patch',
+            get_string('recyclebin_patch', 'mod_mattermost'),
+            get_string('recyclebin_patch_desc', 'mod_mattermost'),
+            1
         )
     );
 

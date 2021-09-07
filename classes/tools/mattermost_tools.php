@@ -18,7 +18,7 @@
  * Plugin internal classes, functions and constants are defined here.
  *
  * @package   mod_mattermost
- * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @copyright 2021 Brightscout <hello@brightscout.com>
  * @author    Manoj <manoj@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -216,6 +216,13 @@ class mattermost_tools
             .' from {course_modules} cm inner join {modules} m on m.id=cm.module inner join {mattermost} mat on mat.id=cm.instance '
             .'where m.name=:mattermost and cm.course=:courseid';
         return $DB->record_exists_sql($sql, array('courseid' => $courseid, 'mattermost' => 'mattermost'));
+    }
+
+    /**
+     * Checks if recycle bin patch is installed in Moodle
+     */
+    public static function is_patch_installed() {
+        return get_config('mod_mattermost', 'recyclebin_patch');
     }
 
     /**

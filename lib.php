@@ -18,7 +18,7 @@
  * Library of interface functions and constants.
  *
  * @package   mod_mattermost
- * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @copyright 2021 Brightscout <hello@brightscout.com>
  * @author    Manoj <manoj@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -75,7 +75,9 @@ function mattermost_add_instance($moduleinstance, $mform = null) {
     $mattermostapimanager = new mattermost_api_manager();
     $moduleinstance->mattermostid = $mattermostapimanager->create_mattermost_channel($channelname);
 
-    // TODO: Call API for archiving the channel if instance is not visible.
+    if (!$moduleinstance->visible || !$moduleinstance->visibleoncoursepage) {
+        $mattermostapimanager->archive_mattermost_channel($moduleinstance->mattermostid);
+    }
 
     $id = $DB->insert_record('mattermost', $moduleinstance);
     $moduleinstance->id = $id;
@@ -146,18 +148,24 @@ function mattermost_update_instance($moduleinstance, $mform = null) {
 }
 
 /**
- * Removes an instance of the mod_mattermost from the database.
+ * Removes an instance of the mod_mattermost from the database
+ * and archives/deletes the corresponding channel at Mattermost
  *
  * @param  int $id Id of the module instance.
  * @return bool True if successful, false on failure.
  */
 function mattermost_delete_instance($id) {
     global $DB;
+
     $mattermost = $DB->get_record('mattermost', array('id' => $id));
     if (!$mattermost) {
         return false;
     }
-    // TODO: Add delete mattermost channel logic.
+
+    $mattermostapimanager = new mattermost_api_manager();
+    $mattermostapimanager->archive_mattermost_channel($mattermost->mattermostid);
+
+    // Delete the instance of the mod_mattermost from database.
     $DB->delete_records('mattermost', array('id' => $id));
 
     return true;

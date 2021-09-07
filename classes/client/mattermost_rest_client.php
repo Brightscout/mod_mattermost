@@ -18,7 +18,7 @@
  * mattermost rest-client class
  *
  * @package   mod_mattermost
- * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @copyright 2021 Brightscout <hello@brightscout.com>
  * @author    Manoj <manoj@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -117,6 +117,15 @@ class mattermost_rest_client
             $this->pluginapiurl . '/users',
             $user
         );
+    }
+
+    /**
+     * Archives/deletes the channel at Mattermost
+     *
+     * @param string $channelid
+     */
+    public function archive_channel($channelid) {
+        return $this->do_delete($this->pluginapiurl . '/channels/' . $channelid);
     }
 
     /**

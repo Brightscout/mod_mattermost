@@ -19,7 +19,7 @@
  *
  * @package   mod_mattermost
  * @category  string
- * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @copyright 2020 Brightscout <hello@brightscout.com>
  * @author    Manoj <manoj@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -78,6 +78,9 @@ $string['background_synchronize'] = 'Pass Mattermost enrolments to background ta
 $string['background_synchronize_desc'] = 'This occurs after a course or a Mattermost module is restored from recyclebin.';
 $string['background_user_update'] = 'Pass Mattermost enrolments to background task while updating user informations such as activation/deactivation.';
 $string['background_user_update_desc'] = 'Pass Mattermost enrolments to background task while updating user informations such as activation/deactivation.';
+$string['recyclebin_patch'] = 'Is recyclebin moodle core patch installed?';
+$string['recyclebin_patch_desc'] = 'the mod mattermost recyclebin patch is a patch located in admin/tool/recyclebin/classes/course_bin.php file enabling to pass cmid and module instanceid to recyclebin item created event. It enables the deletion of remote Mattermost channels';
+
 
 $string['errorintestwhileconnection'] = 'Error while testing connection';
 $string['testerrorcode'] = 'Error code : {$a}';

@@ -18,7 +18,7 @@
  * Mattermost API manager class
  *
  * @package   mod_mattermost
- * @copyright 2020 Manoj <manoj@brightscout.com>
+ * @copyright 2021 Brightscout <hello@brightscout.com>
  * @author    Manoj <manoj@brightscout.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -138,6 +138,20 @@ class mattermost_api_manager
         if (!empty($message)) {
             debugging($message."\n"."Mattermost api Error ".$e->getCode()." : ".$e->getMessage(), $level);
         } else {
+            debugging("Mattermost api Error ".$e->getCode()." : ".$e->getMessage(), DEBUG_DEVELOPER);
+        }
+    }
+
+    /**
+     * Archives Mattermost channel
+     *
+     * @param string $id - Mattermost channel id
+     */
+    public function archive_mattermost_channel($id) {
+        try {
+            $this->client->archive_channel($id);
+        } catch (Exception $e) {
+            self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
             debugging("Mattermost api Error ".$e->getCode()." : ".$e->getMessage(), DEBUG_DEVELOPER);
         }
     }
