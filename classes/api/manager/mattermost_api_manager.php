@@ -164,6 +164,7 @@ class mattermost_api_manager
             'mattermostinstanceid' => $mattermostinstanceid,
         ));
 
+        $user = array();
         try {
             $user = $this->get_or_create_user($moodleuser, $mattermostuser);
             $DB->insert_record(
@@ -298,24 +299,18 @@ class mattermost_api_manager
         global $DB;
 
         if ($moodleuser) {
-            $mattermostuser = $DB->get_record('mattermostxusers', array(
-                'moodleuserid' => $moodleuser->id,
-                'mattermostinstanceid' => $mattermostinstanceid
-            ));
-        } else if ($mattermostchannelmember) {
-            $mattermostuser = $DB->get_record('mattermostxusers', array(
-                    'mattermostuserid' => $mattermostchannelmember['user_id'] ?? $mattermostchannelmember['id'],
-                    'mattermostinstanceid' => $mattermostinstanceid
-                )
-            );
-        }
+            $mattermostuser = $DB->get_record('mattermostxusers', array('moodleuserid' => $moodleuser->id));
+            if (!$mattermostuser) {
+                throw new moodle_exception('mmusernotfounderror', 'mod_mattermost');
+            }
 
-        if (!$mattermostuser) {
-            throw new moodle_exception('mmusernotfounderror', 'mod_mattermost');
+            $userid = $mattermostuser->mattermostuserid;
+        } else if ($mattermostchannelmember) {
+            $userid = $mattermostchannelmember['user_id'] ?? $mattermostchannelmember['id'];
         }
 
         try {
-            $this->client->remove_user_from_channel($channelid, $mattermostuser->mattermostuserid);
+            $this->client->remove_user_from_channel($channelid, $userid);
         } catch (Exception $e) {
             $username = $moodleuser ? $moodleuser->username : $mattermostchannelmember['username'];
             self::moodle_debugging_message("User $username not added to remote Mattermost channel", $e);
