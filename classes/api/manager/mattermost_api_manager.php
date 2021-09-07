@@ -183,7 +183,7 @@ class mattermost_api_manager
     /**
      * Unarchives Mattermost channel
      * also triggers unarchiving of all Mattermost channels corresponding to the groups inside the course
-     * 
+     *
      * @param string $id - Mattermost channel id
      * @param int $courseid - Id of course
      * @param int $binid - Bin Id of recycled group
