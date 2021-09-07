@@ -299,7 +299,10 @@ class mattermost_api_manager
         global $DB;
 
         if ($moodleuser) {
-            $mattermostuser = $DB->get_record('mattermostxusers', array('moodleuserid' => $moodleuser->id));
+            $mattermostuser = $DB->get_record('mattermostxusers', array(
+                'moodleuserid' => $moodleuser->id,
+                'mattermostinstanceid' => $mattermostinstanceid
+            ));
             if (!$mattermostuser) {
                 throw new moodle_exception('mmusernotfounderror', 'mod_mattermost');
             }
