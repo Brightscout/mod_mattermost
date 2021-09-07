@@ -150,10 +150,7 @@ class mattermost_api_manager
         try {
             $this->client->archive_channel($id);
         } catch (Exception $e) {
-            self::moodle_debugging_message(
-                "Mattermost api Error " .$e->getCode()." : ".
-                $e->getMessage(), $e, DEBUG_DEVELOPER
-            );
+            self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
         }
     }
 
@@ -174,10 +171,7 @@ class mattermost_api_manager
                 try {
                     $this->client->archive_channel($group->channelid);
                 } catch (Exception $e) {
-                    self::moodle_debugging_message(
-                        "Mattermost api Error " .$e->getCode()." : ".
-                        $e->getMessage(), $e, DEBUG_DEVELOPER
-                    );
+                    self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
                 }
             }
         }
@@ -197,10 +191,7 @@ class mattermost_api_manager
         try {
             $this->client->unarchive_channel($id);
         } catch (Exception $e) {
-            self::moodle_debugging_message(
-                "Mattermost api Error " .$e->getCode()." : ".
-                $e->getMessage(), $e, DEBUG_DEVELOPER
-            );
+            self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
         }
     }
 
@@ -230,10 +221,7 @@ class mattermost_api_manager
             try {
                 $this->client->unarchive_channel($group->channelid);
             } catch (Exception $e) {
-                self::moodle_debugging_message(
-                    "Mattermost api Error " .$e->getCode()." : ".
-                    $e->getMessage(), $e, DEBUG_DEVELOPER
-                );
+                self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
             }
         }
     }
