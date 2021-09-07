@@ -27,23 +27,53 @@ defined('MOODLE_INTERNAL') || die();
 use \mod_mattermost\api\manager\mattermost_api_manager;
 use \mod_mattermost\tools\mattermost_tools;
 
+/**
+ * Class for background enrollments testcases
+ */
 class mod_mattermost_background_enrolments_testcase extends advanced_testcase{
     /**
      * @var mattermost_api_manager
      */
     private $mattermostapimanager;
+
+    /**
+     * @var stdClass course record
+     */
     private $course;
+
+    /**
+     * @var stdClass user record
+     */
     private $user;
+
+    /**
+     * @var stdClass user record
+     */
     private $user2;
 
     /**
      * @var testing_data_generator
      */
     private $datagenerator;
+
+    /**
+     * @var stdClass mattermost activity record
+     */
     private $mattermost;
+
+    /**
+     * @var stdClass role record
+     */
     private $studentrole;
+
+    /**
+     * @var stdClass role record
+     */
     private $editingteacherrole;
 
+    /**
+     * A function to setup the test environment and initialize the variables
+     */
     public function setUp() : void {
         $domainmail = get_config('mod_mattermost', 'domainmail');
         global $DB;
@@ -70,6 +100,9 @@ class mod_mattermost_background_enrolments_testcase extends advanced_testcase{
             'mod_mattermost');
     }
 
+    /**
+     * Function to tear down everything after all the tests are complete
+     */
     protected function tearDown() : void {
         if (!empty($this->mattermost)) {
             course_delete_module($this->mattermost->cmid, true);
@@ -79,6 +112,9 @@ class mod_mattermost_background_enrolments_testcase extends advanced_testcase{
     }
 
 
+    /**
+     * Test for user enrollment/unenrollment with no background task configuration
+     */
     public function test_enrol_unenrol_user_no_background() {
         // No enrolment method in background.
         set_config('background_enrolment_task', '', 'mod_mattermost');
@@ -94,6 +130,9 @@ class mod_mattermost_background_enrolments_testcase extends advanced_testcase{
         $this->assertCount(0, $members);
     }
 
+    /**
+     * Test for user enrollment/unenrollment with background configuration 'manual'
+     */
     public function test_enrol_unenrol_user_manual_background() {
         set_config('background_enrolment_task', 'enrol_manual', 'mod_mattermost');
         $this->create_mattermost_module();
@@ -116,6 +155,9 @@ class mod_mattermost_background_enrolments_testcase extends advanced_testcase{
         $this->assertCount(0, $members);
     }
 
+    /**
+     * Test for user enrollment/unenrollment with background configuration 'cohort'
+     */
     public function test_enrol_unenrol_user_cohort_background() {
         $this->create_mattermost_module();
         self::enable_cohort_enrolments();
@@ -153,6 +195,9 @@ class mod_mattermost_background_enrolments_testcase extends advanced_testcase{
         $this->assertCount(0, $members);
     }
 
+    /**
+     * Test for user role changes with background configuration 'manual'
+     */
     public function test_user_role_changes_override_module_context() {
         $this->create_mattermost_module();
         set_config('background_enrolment_task', 'enrol_manual', 'mod_mattermost');
@@ -166,7 +211,6 @@ class mod_mattermost_background_enrolments_testcase extends advanced_testcase{
         phpunit_util::run_all_adhoc_tasks();
         $members = $this->mattermostapimanager->get_enriched_channel_members($this->mattermost->mattermostid);
         $this->assertCount(1, $members);
-        $enrolmethod = 'manual';
         // Assign editingteacher role.
         role_assign($this->editingteacherrole->id, $this->user->id, $modulecontext->id);
         $members = $this->mattermostapimanager->get_enriched_channel_members($this->mattermost->mattermostid);
@@ -187,6 +231,9 @@ class mod_mattermost_background_enrolments_testcase extends advanced_testcase{
         $this->assertCount(1, $members);
     }
 
+    /**
+     * Test for testing that the current user in not enrolled in background even with configuration
+     */
     public function test_add_instance_enrol_user_manual_background_currentuser() {
         set_config('background_enrolment_task', 'enrol_manual', 'mod_mattermost');
         // Create a new mattermost instance after course enrolments.
@@ -202,18 +249,28 @@ class mod_mattermost_background_enrolments_testcase extends advanced_testcase{
         $this->assertCount(2, $members);
     }
 
+    /**
+     * Function for loading the test configuration
+     */
     private function load_mattermost_test_config() {
         global $CFG;
         require($CFG->dirroot.'/mod/mattermost/config-test.php');
     }
 
+    /**
+     * Function for initiating the test environment
+     */
     private function initiate_test_environment() {
         $this->resetAfterTest(true);
         $this->load_mattermost_test_config();
     }
 
     /**
+     * Function for unenrolling a user from a course
+     *
      * @param string $enrolmethod
+     * @param int $courseid
+     * @param int $userid
      * @throws coding_exception
      */
     protected static function unenrol_user($enrolmethod, $courseid, $userid) {
@@ -228,6 +285,9 @@ class mod_mattermost_background_enrolments_testcase extends advanced_testcase{
         $enrol->unenrol_user($instance, $userid);
     }
 
+    /**
+     * Function for enabling cohort enrollments
+     */
     protected static function enable_cohort_enrolments(): void {
         $enabled = enrol_get_plugins(true);
         $enabled['cohort'] = true;
@@ -235,12 +295,20 @@ class mod_mattermost_background_enrolments_testcase extends advanced_testcase{
         set_config('enrol_plugins_enabled', implode(',', $enabled));
     }
 
+    /**
+     * Function for filtering the channel admins from mattermost channel members
+     *
+     * @param array $mattermostchannelmembers
+     */
     private function filter_channel_admins($mattermostchannelmembers) {
         return array_filter($mattermostchannelmembers, function ($channelmember) {
             return $channelmember['is_channel_admin'];
         });
     }
 
+    /**
+     * Function for creating a mattermost module/instance
+     */
     private function create_mattermost_module(): void {
         $channelname = mattermost_tools::get_mattermost_channel_name_for_instance(0, $this->course);
         $this->mattermost = $this->datagenerator->create_module('mattermost',

@@ -27,41 +27,52 @@ defined('MOODLE_INTERNAL') || die();
 use \mod_mattermost\api\manager\mattermost_api_manager;
 use \mod_mattermost\tools\mattermost_tools;
 
+/**
+ * Class for testcases of mattermost tools
+ */
 class mod_mattermost_tools_testcase extends advanced_testcase {
     /**
      * @var mattermost_api_manager
      */
     private $mattermostapimanager;
+
+    /**
+     * @var stdClass course record
+     */
     private $course;
+
+    /**
+     * @var stdClass mattermost activity record
+     */
     private $mattermost;
 
     /**
-     * @var stdClass
+     * @var stdClass user record
      */
     private $student1;
 
     /**
-     * @var stdClass
+     * @var stdClass user record
      */
     private $student2;
 
     /**
-     * @var stdClass
+     * @var stdClass user record
      */
     private $student3;
 
     /**
-     * @var stdClass
+     * @var stdClass user record
      */
     private $teacher1;
 
     /**
-     * @var stdClass
+     * @var stdClass user record
      */
     private $teacher2;
 
     /**
-     * @var stdClass
+     * @var stdClass user record
      */
     private $teacher3;
 
@@ -70,6 +81,9 @@ class mod_mattermost_tools_testcase extends advanced_testcase {
      */
     private $generator;
 
+    /**
+     * A function to setup the test environment
+     */
     public function setUp() : void {
         global $DB;
         parent::setUp();
@@ -80,11 +94,17 @@ class mod_mattermost_tools_testcase extends advanced_testcase {
         $this->initiate_test_environment();
     }
 
+    /**
+     * Function for loading the test configuration
+     */
     private function load_mattermost_test_config() {
         global $CFG;
         require($CFG->dirroot.'/mod/mattermost/config-test.php');
     }
 
+    /**
+     * Function to tear down everything after all the tests are complete
+     */
     public function tearDown() : void {
         ob_start();
         if (!empty($this->mattermost)) {
@@ -102,6 +122,9 @@ class mod_mattermost_tools_testcase extends advanced_testcase {
         parent::tearDown();
     }
 
+    /**
+     * Function for initiating the test environment and the variables
+     */
     private function initiate_test_environment() {
         $domainmail = get_config('mod_mattermost', 'domainmail');
         global $DB;
@@ -148,12 +171,18 @@ class mod_mattermost_tools_testcase extends advanced_testcase {
 
     }
 
+    /**
+     * Function for creating a mattermost module/instance
+     */
     private function create_instance() {
         $channelname = mattermost_tools::get_mattermost_channel_name_for_instance(0, $this->course);
         $this->mattermost = $this->generator->create_module('mattermost',
             array('course' => $this->course->id, 'name' => $channelname));
     }
 
+    /**
+     * Test for synchronize channel members function
+     */
     public function test_synchronize_channel_members() {
         set_config('background_add_instance', 0, 'mod_mattermost');
         $this->create_instance();
@@ -179,6 +208,9 @@ class mod_mattermost_tools_testcase extends advanced_testcase {
         $this->check_mattermost_channel_members($mattermostmembers);
     }
 
+    /**
+     * Test for synchronize channel members function with background enabled
+     */
     public function test_synchronize_channel_members_with_background_task() {
         set_config('background_add_instance', 1, 'mod_mattermost');
         $this->create_instance();
@@ -208,6 +240,8 @@ class mod_mattermost_tools_testcase extends advanced_testcase {
     }
 
     /**
+     * Checks if the given array contains the users which were created in the course during setup.
+     *
      * @param array $mattermostmembers
      */
     protected function check_mattermost_channel_members($mattermostmembers): void {

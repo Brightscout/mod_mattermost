@@ -27,14 +27,23 @@ defined('MOODLE_INTERNAL') || die();
 use \mod_mattermost\api\manager\mattermost_api_manager;
 use \mod_mattermost\tools\mattermost_tools;
 
+/**
+ * Class for mattermost api manager testcases
+ */
 class mod_mattermost_api_manager_testcase extends advanced_testcase{
     /**
      * @var mattermost_api_manager
      */
     private $mattermostapimanager;
 
+    /**
+     * A constant mattermost instance id to be used while enrolling/unenrolling users or other functions
+     */
     const MATTERMOST_INSTANCE_ID = 1;
 
+    /**
+     * A function to setup the test environment and initialize the variables
+     */
     public function setUp() : void {
         global $DB;
         parent::setUp();
@@ -47,6 +56,9 @@ class mod_mattermost_api_manager_testcase extends advanced_testcase{
         $this->initiate_test_environment();
     }
 
+    /**
+     * A function for testing the construct of mattermost api manager
+     */
     public function test_construct() {
         $this->initiate_test_environment();
         $this->mattermostapimanager = new mattermost_api_manager();
@@ -54,21 +66,33 @@ class mod_mattermost_api_manager_testcase extends advanced_testcase{
         $this->assertNotNull($this->mattermostapimanager->get_client());
     }
 
+    /**
+     * Function for initiating the test environment
+     */
     private function initiate_test_environment() {
         $this->resetAfterTest(true);
         $this->load_mattermost_test_config();
     }
 
+    /**
+     * Function for initiating the test environment and connection with Mattermost
+     */
     private function initiate_environment_and_connection() {
         $this->initiate_test_environment();
         $this->mattermostapimanager = new mattermost_api_manager();
     }
 
+    /**
+     * Function for loading the test configuration
+     */
     private function load_mattermost_test_config() {
         global $CFG;
         require($CFG->dirroot.'/mod/mattermost/config-test.php');
     }
 
+    /**
+     * Test for creating a mattermost channel
+     */
     public function test_create_mattermost_channel() {
         $this->initiate_environment_and_connection();
         $channelname = 'moodletestchannel' . time();
@@ -77,6 +101,9 @@ class mod_mattermost_api_manager_testcase extends advanced_testcase{
         $this->mattermostapimanager->archive_mattermost_channel($channelid);
     }
 
+    /**
+     * Test for creating a mattermost channel with invalid channel name
+     */
     public function test_create_channel_invalid_channelname() {
         $this->initiate_environment_and_connection();
         $channelname = 'moodletestchannel/'.time();
@@ -89,6 +116,10 @@ class mod_mattermost_api_manager_testcase extends advanced_testcase{
         $this->mattermostapimanager->archive_mattermost_channel($channelid);
     }
 
+
+    /**
+     * Test for creating a mattermost channel with whitespace in channel name
+     */
     public function test_create_channel_channelname_with_whitespace() {
         $this->initiate_environment_and_connection();
         $channelname = 'moodletestchannel '.time();
@@ -98,6 +129,9 @@ class mod_mattermost_api_manager_testcase extends advanced_testcase{
         $this->mattermostapimanager->archive_mattermost_channel($channelid);
     }
 
+    /**
+     * Test for creating channels with same names
+     */
     public function test_create_channels_with_same_names() {
         $this->initiate_environment_and_connection();
         $channelname = 'moodletestchannel'.time();
@@ -111,6 +145,9 @@ class mod_mattermost_api_manager_testcase extends advanced_testcase{
         $this->mattermostapimanager->archive_mattermost_channel($channelid);
     }
 
+    /**
+     * Test for getting enriched channel members in a mattermost channel
+     */
     public function test_get_enriched_channel_members() {
         $this->initiate_environment_and_connection();
         list($channeladmin, $user, $channelid) = $this->create_channel_with_users();
@@ -127,7 +164,9 @@ class mod_mattermost_api_manager_testcase extends advanced_testcase{
     }
 
     /**
-     * @return array
+     * Utility function to create a channel with two users as members
+     *
+     * @return array channeladmin user, member user, created channel id
      * @throws dml_exception
      */
     protected function create_channel_with_users() {
@@ -163,6 +202,9 @@ class mod_mattermost_api_manager_testcase extends advanced_testcase{
         return array($channeladmin, $user, $channelid);
     }
 
+    /**
+     * Function for testing enrol and unenrol user function
+     */
     public function test_enrol_unenrol_user_to_channel() {
         $this->initiate_environment_and_connection();
         list($channeladmin, $user, $channelid) = $this->create_channel_with_users();

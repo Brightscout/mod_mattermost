@@ -268,7 +268,7 @@ class mattermost_api_manager
 
     /**
      * Function to delete a mattermost user
-     * 
+     *
      * @param object $moodleuser
      * @param int $mattermostinstanceid
      */

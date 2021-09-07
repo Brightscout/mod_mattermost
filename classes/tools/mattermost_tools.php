@@ -258,15 +258,15 @@ class mattermost_tools
      * Fetches mattermost module instances from database with given course module id
      *
      * @param int $cmid Id of the course module
-     * @return array all mattermost module instances in the course
+     * @return object mattermost module instance in the course
      */
     public static function get_mattermost_module_instance_from_course_module($cmid) {
         global $DB;
         $sql = 'select cm.*, mat.mattermostid, mat.channeladminroles, mat.userroles'
             .' from {course_modules} cm inner join {modules} m on m.id=cm.module inner join {mattermost} mat on mat.id=cm.instance '
             .'where m.name=:mattermost and cm.id=:cmid';
-        $moduleinstances = $DB->get_record_sql($sql , array('cmid' => $cmid, 'mattermost' => 'mattermost'));
-        return $moduleinstances;
+        $moduleinstance = $DB->get_record_sql($sql , array('cmid' => $cmid, 'mattermost' => 'mattermost'));
+        return $moduleinstance;
     }
 
     /**

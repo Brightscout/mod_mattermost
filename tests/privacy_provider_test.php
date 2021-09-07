@@ -36,17 +36,54 @@ use \mod_mattermost\tools\mattermost_tools;
 
 require_once($CFG->libdir . '/tests/fixtures/events.php');
 
+/**
+ * Class for privacy provider testcases
+ */
 class mod_mattermost_privacy_testcase extends provider_testcase {
 
+    /**
+     * @var stdClass course record
+     */
     private $course1;
+
+    /**
+     * @var stdClass course record
+     */
     private $course2;
+
+    /**
+     * @var stdClass mattermost activity record
+     */
     private $mattermost1;
+
+    /**
+     * @var stdClass mattermost activity record
+     */
     private $mattermost2;
+
+    /**
+     * @var context_module
+     */
     private $mattermostcontext1;
+
+    /**
+     * @var context_module
+     */
     private $mattermostcontext2;
+
+    /**
+     * @var stdClass user record
+     */
     private $userstudent;
+
+    /**
+     * @var stdClass user record
+     */
     private $usereditingteacher;
 
+    /**
+     * A function to setup the test environment
+     */
     public function setUp() : void {
         $domainmail = get_config('mod_mattermost', 'domainmail');
         global $DB, $CFG;
@@ -91,6 +128,9 @@ class mod_mattermost_privacy_testcase extends provider_testcase {
         $this->mattermostcontext2 = context_module::instance($this->mattermost2->cmid);
     }
 
+    /**
+     * Function to tear down everything after all the tests are complete
+     */
     public function tearDown() : void {
         ob_start();
         if (!empty($this->mattermost1)) {
@@ -112,7 +152,7 @@ class mod_mattermost_privacy_testcase extends provider_testcase {
     }
 
     /**
-     * test get_users_in_context function
+     * Test get_users_in_context function
      */
     public function test_get_users_in_context() {
         // Setup in setUp function.
@@ -125,7 +165,7 @@ class mod_mattermost_privacy_testcase extends provider_testcase {
     }
 
     /**
-     * Tets get_contexts_for_userid function.
+     * Tests get_contexts_for_userid function.
      * Function that get the list of contexts that contain user information for the specified user.
      * @throws coding_exception
      */
