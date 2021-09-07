@@ -136,11 +136,11 @@ class mattermost_api_manager
 
     /**
      * Archives Mattermost channel
-     * also triggers archiving of all Mattermost group channels of the course
+     * also triggers archiving of all Mattermost channels corresponding to the groups inside the course
      *
      * @param string $id - Mattermost channel id
      * @param int $courseid - Course id
-     *  exists only if groups are to be deleted alongwith parent channel
+     *  exists only if groups are to be deleted along with parent channel
      */
     public function archive_mattermost_channel($id, $courseid = null) {
         if ($courseid) {
@@ -159,6 +159,7 @@ class mattermost_api_manager
 
     /**
      * Archives all the Mattermost group channels of a course
+     * also triggers unarchiving of all Mattermost group channels of the course
      *
      * @param int $courseid - id of Moodle course whose groups are to be deleted
      */
@@ -171,8 +172,10 @@ class mattermost_api_manager
                 try {
                     $this->client->archive_channel($group->channelid);
                 } catch (Exception $e) {
-                    self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
-                    debugging("Mattermost api Error ".$e->getCode()." : ".$e->getMessage(), DEBUG_DEVELOPER);
+                    self::moodle_debugging_message(
+                        "Mattermost api Error " .$e->getCode()." : ".
+                        $e->getMessage(), $e, DEBUG_DEVELOPER
+                    );
                 }
             }
         }
@@ -180,7 +183,7 @@ class mattermost_api_manager
 
     /**
      * Unarchives Mattermost channel
-     * also triggers unarchiving of all Mattermost group channels of the course
+     * also triggers unarchiving of all Mattermost channels corresponding to the groups inside the course
      *
      * @param string $id - Mattermost channel id
      * @param int $courseid - Id of course
@@ -220,14 +223,18 @@ class mattermost_api_manager
             return;
         }
 
-        if (!empty($groups)) {
-            foreach ($groups as $group) {
-                try {
-                    $this->client->unarchive_channel($group->channelid);
-                } catch (Exception $e) {
-                    self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
-                    debugging("Mattermost api Error ".$e->getCode()." : ".$e->getMessage(), DEBUG_DEVELOPER);
-                }
+        if (empty($groups)) {
+            return;
+        }
+
+        foreach ($groups as $group) {
+            try {
+                $this->client->unarchive_channel($group->channelid);
+            } catch (Exception $e) {
+                self::moodle_debugging_message(
+                    "Mattermost api Error " .$e->getCode()." : ".
+                    $e->getMessage(), $e, DEBUG_DEVELOPER
+                );
             }
         }
     }
