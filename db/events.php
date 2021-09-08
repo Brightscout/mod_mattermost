@@ -45,6 +45,10 @@ $observers = array(
         'callback' => '\mod_mattermost\observers::group_created',
     ),
     array(
+        'eventname' => '\core\event\group_deleted',
+        'callback' => '\mod_mattermost\observers::group_deleted'
+    ),
+    array(
         'eventname' => '\core\event\group_member_added',
         'callback' => '\mod_mattermost\observers::group_member_added',
     ),

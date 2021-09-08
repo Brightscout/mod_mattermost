@@ -136,33 +136,93 @@ class mattermost_api_manager
 
     /**
      * Archives Mattermost channel
+     * also triggers archiving of all Mattermost channels corresponding to the groups inside the course
      *
      * @param string $id - Mattermost channel id
+     * @param int $courseid - Course id
+     *  exists only if groups are to be deleted along with parent channel
      */
-    public function archive_mattermost_channel($id) {
+    public function archive_mattermost_channel($id, $courseid = null) {
+        if ($courseid) {
+            $this->archive_mattermost_group_channels($courseid);
+        }
+
         try {
             $this->client->archive_channel($id);
         } catch (Exception $e) {
-            self::moodle_debugging_message(
-                "Mattermost api Error " .$e->getCode()." : ".
-                $e->getMessage(), $e, DEBUG_DEVELOPER
-            );
+            self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
+        }
+    }
+
+    /**
+     * Archives all the Mattermost group channels of a course
+     * Archiving of group channels are done in two ways:
+     *  1. using courseid, when instace visibility changes or restored from course bin
+     *  2. using binid, when course is deleted and restored from category bin
+     *
+     * @param int $courseid - id of Moodle course whose groups are to be deleted
+     */
+    public function archive_mattermost_group_channels($courseid) {
+        global $DB;
+
+        $groups = $DB->get_records('mattermostxgroups', array('courseid' => $courseid));
+        if (!empty($groups)) {
+            foreach ($groups as $group) {
+                try {
+                    $this->client->archive_channel($group->channelid);
+                } catch (Exception $e) {
+                    self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
+                }
+            }
         }
     }
 
     /**
      * Unarchives Mattermost channel
+     * also triggers unarchiving of all Mattermost channels corresponding to the groups inside the course
      *
      * @param string $id - Mattermost channel id
+     * @param int $courseid - Id of course
+     * @param int $binid - Bin Id of recycled group
      */
-    public function unarchive_mattermost_channel($id) {
+    public function unarchive_mattermost_channel($id, $courseid, $binid) {
+        $this->unarchive_mattermost_group_channels($courseid, $binid);
+
         try {
             $this->client->unarchive_channel($id);
         } catch (Exception $e) {
-            self::moodle_debugging_message(
-                "Mattermost api Error " .$e->getCode()." : ".
-                $e->getMessage(), $e, DEBUG_DEVELOPER
-            );
+            self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
+        }
+    }
+
+    /**
+     * Unarchives all the Mattermost group channels of a course
+     *
+     * @param int $courseid - id of Moodle course whose groups are to be restored
+     * @param int $binid - bin id of Moodle deleted course whose groups are to be restored
+     */
+    public function unarchive_mattermost_group_channels($courseid, $binid) {
+        global $DB;
+
+        $groups = null;
+        if ($courseid) {
+            $groups = $DB->get_records('mattermostxgroups', array('courseid' => $courseid));
+        } else if ($binid) {
+            $groups = $DB->get_records('mattermostxgroups', array('categorybinid' => $binid));
+        } else {
+            return;
+        }
+
+        if (empty($groups)) {
+            return;
+        }
+
+        foreach ($groups as $group) {
+            try {
+                $this->client->unarchive_channel($group->channelid);
+            } catch (Exception $e) {
+                self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
+            }
         }
     }
 
