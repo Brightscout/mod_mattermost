@@ -25,6 +25,7 @@
 
 namespace mod_mattermost;
 
+use Exception;
 use mod_mattermost\tools\mattermost_tools;
 use mod_mattermost\api\manager\mattermost_api_manager;
 use moodle_exception;
@@ -195,7 +196,20 @@ class observers
                 $group = $DB->get_record('groups', array('id' => $event->objectid));
                 $channelname = mattermost_tools::get_mattermost_channel_name_for_group($course, $group);
                 $mattermostapimanager = new mattermost_api_manager();
-                $mattermostchannelid = $mattermostapimanager->create_mattermost_channel($channelname);
+
+                try {
+                    $mattermostchannelid = $mattermostapimanager->create_mattermost_channel($channelname);
+                } catch (Exception $e) {
+                    // If a group with same name already existed before on Mattermost, then add a timestamp.
+                    // At end of the channel name.
+                    if (strpos($e->getMessage(), 'A channel with that name already exists on the same team.')) {
+                        $timsestamp = time();
+                        $mattermostchannelid =
+                            $mattermostapimanager->create_mattermost_channel($channelname . '_' . $timsestamp);
+                    } else {
+                        throw new moodle_exception('mmchannelcreationerror', 'mod_mattermost', '', $e->getMessage());
+                    }
+                }
 
                 $DB->insert_record('mattermostxgroups', array(
                     'groupid' => $group->id,
@@ -346,16 +360,36 @@ class observers
             if ($mattermostrecyclebin) {
                 $mattermostapimanager = new mattermost_api_manager();
                 $mattermost = $DB->get_record('mattermost', array('mattermostid' => $mattermostrecyclebin->mattermostid));
-                $mattermostapimanager->unarchive_mattermost_channel($mattermostrecyclebin->mattermostid, $mattermost->course, null);
-                $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id));
+
+                $coursemodule = $DB->get_record('course_modules', array('instance' => $mattermost->id));
+                if (!empty($mattermost)) {
+                    // Unarchive channel only if intance is not hidden.
+                    if ($coursemodule->visible) {
+                        $mattermostapimanager->unarchive_mattermost_channel(
+                            $mattermostrecyclebin->mattermostid,
+                            $mattermost->course,
+                            null
+                        );
+                    }
+                }
 
                 // Update binid for mattermost groups after deleted instance is restored.
                 $DB->execute("UPDATE {mattermostxgroups} SET binid=null WHERE binid=?",
                     array($event->objectid));
-                // To Do: Confirm if this is required.
-                // Synchronise members.
-                // mattermost_tools::synchronize_channel_members($mattermostrecyclebin->mattermostid.
-                // get_config('mod_mattermost', 'background_synchronize')).
+
+                // Synchronise course channel members.
+                mattermost_tools::synchronize_channel_members($mattermostrecyclebin->mattermostid,
+                    (boolean)get_config('mod_mattermost', 'background_synchronize'));
+
+                // Synchronise course's group channel members.
+                $groups = $DB->get_records('mattermostxgroups', array('courseid' => $mattermost->course));
+                foreach ($groups as $group) {
+                    mattermost_tools::synchronize_channel_members($group->channelid,
+                        (boolean)get_config('mod_mattermost', 'background_synchronize'));
+                }
+
+                // Delete record from recyclebin, when restored.
+                $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id));
             }
         }
     }
