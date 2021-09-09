@@ -45,6 +45,10 @@ $observers = array(
         'callback' => '\mod_mattermost\observers::group_created',
     ),
     array(
+        'eventname' => '\core\event\group_deleted',
+        'callback' => '\mod_mattermost\observers::group_deleted'
+    ),
+    array(
         'eventname' => '\core\event\group_member_added',
         'callback' => '\mod_mattermost\observers::group_member_added',
     ),
@@ -53,12 +57,20 @@ $observers = array(
         'callback' => '\mod_mattermost\observers::group_member_removed',
     ),
     array(
+        'eventname' => 'tool_recyclebin\event\course_bin_item_restored',
+        'callback' => '\mod_mattermost\observers::course_bin_item_restored',
+    ),
+    array(
         'eventname' => 'tool_recyclebin\event\course_bin_item_created',
         'callback' => '\mod_mattermost\observers::course_bin_item_created',
     ),
     array(
         'eventname' => 'tool_recyclebin\event\course_bin_item_deleted',
         'callback' => '\mod_mattermost\observers::course_bin_item_deleted',
+    ),
+    array(
+        'eventname' => 'tool_recyclebin\event\category_bin_item_restored',
+        'callback' => '\mod_mattermost\observers::category_bin_item_restored',
     ),
     array(
         'eventname' => 'tool_recyclebin\event\category_bin_item_created',
