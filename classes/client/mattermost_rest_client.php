@@ -138,15 +138,25 @@ class mattermost_rest_client
     }
 
     /**
-     * Client function to get a user by email from Mattermost
+     * Client function to get a user using username from Mattermost
      *
-     * @param string $email
+     * @param string $username
      * @throws Exception
      */
-    public function get_user_by_email($email) {
-        return $this->do_get($this->pluginapiurl . '/users/' . $email);
+    public function get_user_by_username($username) {
+        return $this->do_get($this->pluginapiurl . '/users/' . $username);
     }
 
+    /**
+     * Client function to get a channel using channel id from Mattermost
+     *
+     * @param string $channelid
+     * @throws Exception
+     */
+    public function get_channel($channelid) {
+        return $this->do_get($this->pluginapiurl . '/channels/' . $channelid);
+    }
+         
     /**
      * Client function to add a user to a channel
      *
