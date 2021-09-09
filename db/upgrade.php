@@ -119,37 +119,7 @@ function xmldb_mattermost_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2021083100, 'mattermost');
     }
 
-    if ($oldversion < 2021090200) {
-
-        // Define field binid to be added to mattermostxgroups.
-        $table = new xmldb_table('mattermostxgroups');
-        $field = new xmldb_field('binid', XMLDB_TYPE_INTEGER, '10');
-
-        // Conditionally launch add field courseid.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        // Mattermost savepoint reached.
-        upgrade_mod_savepoint(true, 2021090200, 'mattermost');
-    }
-
-    if ($oldversion < 2021090201) {
-
-        // Define field name to be added to mattermostxgroups.
-        $table = new xmldb_table('mattermostxgroups');
-        $field = new xmldb_field('name', XMLDB_TYPE_CHAR, '254', null, XMLDB_NOTNULL);
-
-        // Conditionally launch add field courseid.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        // Mattermost savepoint reached.
-        upgrade_mod_savepoint(true, 2021090201, 'mattermost');
-    }
-
-    if ($oldversion < 2021090300) {
+    if ($oldversion < 2021090901) {
 
         // Define table mattermostxusers to be dropped.
         $usertable = new xmldb_table('mattermostxusers');
@@ -177,7 +147,7 @@ function xmldb_mattermost_upgrade($oldversion) {
         }
 
         // Define table mattermostxusers to be dropped.
-        $groupstable = new xmldb_table('mattermostxusers');
+        $groupstable = new xmldb_table('mattermostxgroups');
 
         // Conditionally launch drop table for mattermostxusers.
         if ($dbman->table_exists($groupstable)) {
@@ -189,6 +159,9 @@ function xmldb_mattermost_upgrade($oldversion) {
         $groupstable->add_field('groupid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
         $groupstable->add_field('channelid', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, null);
         $groupstable->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $groupstable->add_field('name', XMLDB_TYPE_CHAR, '254', null, XMLDB_NOTNULL);
+        $groupstable->add_field('categorybinid', XMLDB_TYPE_INTEGER, '10');
+        $groupstable->add_field('binid', XMLDB_TYPE_INTEGER, '10');
 
         // Adding keys to table mattermostxgroups.
         $groupstable->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
@@ -201,22 +174,7 @@ function xmldb_mattermost_upgrade($oldversion) {
         }
 
         // Mattermost savepoint reached.
-        upgrade_mod_savepoint(true, 2021090300, 'mattermost');
-    }
-
-    if ($oldversion < 2021090300) {
-
-        // Define field categorybinid to be added to mattermostxgroups.
-        $table = new xmldb_table('mattermostxgroups');
-        $field = new xmldb_field('categorybinid', XMLDB_TYPE_INTEGER, '10');
-
-        // Conditionally launch add field courseid.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        // Mattermost savepoint reached.
-        upgrade_mod_savepoint(true, 2021090300, 'mattermost');
+        upgrade_mod_savepoint(true, 2021090901, 'mattermost');
     }
 
     return true;
