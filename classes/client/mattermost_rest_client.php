@@ -156,7 +156,7 @@ class mattermost_rest_client
     public function get_channel($channelid) {
         return $this->do_get($this->pluginapiurl . '/channels/' . $channelid);
     }
-         
+
     /**
      * Client function to add a user to a channel
      *

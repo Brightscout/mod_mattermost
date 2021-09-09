@@ -474,7 +474,7 @@ class mattermost_api_manager
     /**
      * Checks if user exists
      *
-     * @param $username username of user
+     * @param string $username - username of user
      * @return bool
      */
     public function user_exists($username) {
@@ -496,7 +496,7 @@ class mattermost_api_manager
     /**
      * Checks if channel exists
      *
-     * @param $channelid id of channel
+     * @param string $channelid - id of channel
      * @return object of channel
      */
     public function channel_exists($channelid) {
