@@ -32,6 +32,9 @@ require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
 use \mod_mattermost\api\manager\mattermost_api_manager;
 use \mod_mattermost\tools\mattermost_tools;
 
+/**
+ * Class for channel and user delete testcases
+ */
 class mod_mattermost_observer_testcase extends advanced_testcase{
     /**
      * @var stdClass course record
