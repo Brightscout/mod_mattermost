@@ -31,6 +31,9 @@ require_once($CFG->dirroot.'/enrol/manual/externallib.php');
 use \mod_mattermost\api\manager\mattermost_api_manager;
 use \mod_mattermost\tools\mattermost_tools;
 
+/**
+ * Class for recycle bin testcases
+ */
 class mod_mattermost_recyclebin_testcase extends advanced_testcase{
 
     /**
@@ -365,6 +368,8 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
 
     /**
      * Delete mattermost test users.
+     *
+     * @param string $mattermostapimanager - instance of mattermost api manager
      */
     protected function delete_mattermost_test_users($mattermostapimanager) {
         $mattermostapimanager->delete_mattermost_user($this->userstudent1, $this->mattermost->id);
