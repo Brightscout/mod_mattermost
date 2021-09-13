@@ -494,15 +494,33 @@ class mattermost_api_manager
     }
 
     /**
-     * Checks if channel exists
+     * Checks if channel is deleted/archived
      *
      * @param string $channelid - id of channel
      * @return object of channel
      */
-    public function channel_exists($channelid) {
+    public function channel_archived($channelid) {
         try {
             $channel = $this->client->get_channel($channelid);
             if ($channel['delete_at'] != 0) {
+                return true;
+            }
+        } catch (Exception $e) {
+            self::moodle_debugging_message("channel exists: ", $e);
+        }
+        return false;
+    }
+
+    /**
+     * Checks if channel object exists
+     *
+     * @param string $channelid - id of channel
+     * @return object of channel
+     */
+    public function channel_object_exists($channelid) {
+        try {
+            $channel = $this->client->get_channel($channelid);
+            if (!empty($channel)) {
                 return true;
             }
         } catch (Exception $e) {

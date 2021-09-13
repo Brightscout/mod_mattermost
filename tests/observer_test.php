@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Data provider tests.
+ * mod_mattermost event observers test.
  *
  * @package   mod_mattermost
  * @copyright 2021 Brightscout <hello@brightscout.com>
@@ -135,7 +135,7 @@ class mod_mattermost_observer_testcase extends advanced_testcase{
         $this->assertCount(2, $members);
         course_delete_module($this->mattermost->cmid);
         $this->assertTrue($this->mattermostapimanager->user_exists($this->userstudent->username));
-        $this->assertTrue($this->mattermostapimanager->channel_exists($this->mattermost->mattermostid));
+        $this->assertTrue($this->mattermostapimanager->channel_archived($this->mattermost->mattermostid));
         $this->assertDebuggingCalledCount(0);
     }
 
@@ -145,26 +145,26 @@ class mod_mattermost_observer_testcase extends advanced_testcase{
     public function test_module_visibility() {
         // Structure created in setUp.
         list($course, $cm) = get_course_and_cm_from_cmid($this->mattermost->cmid);
-        $this->assertFalse($this->mattermostapimanager->channel_exists($this->mattermost->mattermostid));
+        $this->assertFalse($this->mattermostapimanager->channel_archived($this->mattermost->mattermostid));
         set_coursemodule_visible($this->mattermost->cmid, 0, 1);
         // Need to trigger event manually.
         \core\event\course_module_updated::create_from_cm($cm)->trigger();
         rebuild_course_cache($cm->course, true);
-        $this->assertTrue($this->mattermostapimanager->channel_exists($this->mattermost->mattermostid));
+        $this->assertTrue($this->mattermostapimanager->channel_archived($this->mattermost->mattermostid));
         set_coursemodule_visible($this->mattermost->cmid, 1, 1);
         \core\event\course_module_updated::create_from_cm($cm)->trigger();
         rebuild_course_cache($cm->course, true);
-        $this->assertFalse($this->mattermostapimanager->channel_exists($this->mattermost->mattermostid));
+        $this->assertFalse($this->mattermostapimanager->channel_archived($this->mattermost->mattermostid));
         set_coursemodule_visible($this->mattermost->cmid, 0, 0);
         \core\event\course_module_updated::create_from_cm($cm)->trigger();
         rebuild_course_cache($cm->course, true);
-        $this->assertTrue($this->mattermostapimanager->channel_exists($this->mattermost->mattermostid));
+        $this->assertTrue($this->mattermostapimanager->channel_archived($this->mattermost->mattermostid));
         set_coursemodule_visible($this->mattermost->cmid, 1, 1);
         \core\event\course_module_updated::create_from_cm($cm)->trigger();
         rebuild_course_cache($cm->course, true);
         set_coursemodule_visible($this->mattermost->cmid, 1, 0);
         \core\event\course_module_updated::create_from_cm($cm)->trigger();
         rebuild_course_cache($cm->course, true);
-        $this->assertTrue($this->mattermostapimanager->channel_exists($this->mattermost->mattermostid));
+        $this->assertTrue($this->mattermostapimanager->channel_archived($this->mattermost->mattermostid));
     }
 }
