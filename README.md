@@ -64,7 +64,7 @@ patch -p1 /your_moodle_path/admin/tool/recyclebin/classes/category_bin.php < /yo
 patch -p1 /your_moodle_path/user/classes/output/user_roles_editable.php  < /your_moodle_path/mod/mattermost/patch/user_classes_output_user_roles_editable.patch
 
 ```
-* Once these patches are applied check "Is recyclebin moodle core patch installed" in Mattermost plugin setting to enable this feature
+* Once these patches are applied check "Is recyclebin moodle core patch installed" in Mattermost plugin settings to enable this feature.
 
 ## Specials capabilities
 the following capabilities define if a role is able to perform some setting in the module instance : 
