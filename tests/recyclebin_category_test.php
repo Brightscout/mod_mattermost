@@ -104,7 +104,7 @@ class mod_mattermost_recyclebin_category_testcase extends advanced_testcase{
 
         $mattermostxrecyclebin = $DB->get_record('mattermostxrecyclebin', array('mattermostid' => $this->mattermost->mattermostid));
         $this->assertEmpty($mattermostxrecyclebin);
-        
+
         // Check if remote mattermost private channel exists.
         $mattermostapimanager = new mattermost_api_manager();
         $this->assertTrue($mattermostapimanager->channel_object_exists($this->mattermost->mattermostid));
@@ -132,7 +132,7 @@ class mod_mattermost_recyclebin_category_testcase extends advanced_testcase{
         // Check if remote mattermost private channel exists.
         $mattermostapimanager = new mattermost_api_manager();
         $this->assertTrue($mattermostapimanager->channel_object_exists($this->mattermost->mattermostid));
-        
+
         // Delete mattermost test user.
         $mattermostapimanager->delete_mattermost_user($this->user, $this->mattermost->id);
 
