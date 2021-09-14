@@ -166,7 +166,7 @@ class mod_mattermost_backup_restore_testcase extends advanced_testcase{
 
     /**
      * Function to perform Mattermost channel backup and restore for test
-     * 
+     *
      * @param object $course - object of course
      */
     protected function backup_and_restore($course) {

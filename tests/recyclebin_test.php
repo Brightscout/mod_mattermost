@@ -115,6 +115,9 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
         $this->assertTrue($mattermostapimanager->channel_archived($this->mattermost->mattermostid));
     }
 
+    /**
+     * Function to test course deletion without recyclebin enabled
+     */
     public function test_deletion_without_recyclebin() {
         global $DB;
         set_config('recyclebin_patch', 1, 'mod_mattermost');
@@ -138,6 +141,9 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
         $this->delete_mattermost_test_users($mattermostapimanager);
     }
 
+    /**
+     * Function to test course restoration with recyclebin enabled
+     */
     public function test_restoration_with_recyclebin() {
         global $DB;
         set_config('recyclebin_patch', 1, 'mod_mattermost');
@@ -195,6 +201,9 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
         $this->delete_mattermost_test_users($mattermostapimanager);
     }
 
+    /**
+     * Function to test course restoration with recyclebin enabled as a background task
+     */
     public function test_restoration_with_recyclebin_with_background() {
         global $DB;
         set_config('recyclebin_patch', 1, 'mod_mattermost');
@@ -257,6 +266,9 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
         $this->delete_mattermost_test_users($mattermostapimanager);
     }
 
+    /**
+     * Function to test course deletion with recyclebin enabled and without recyclebin patch applied
+     */
     public function test_deletion_with_recyclebin_without_patch() {
         global $DB;
         set_config('recyclebin_patch', 0, 'mod_mattermost');
@@ -299,6 +311,9 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
         $this->delete_mattermost_test_users($mattermostapimanager);
     }
 
+    /**
+     * Function to test course deletion with recyclebin enabled and recyclebin patch applied
+     */
     public function test_deletion_without_recyclebin_without_patch() {
         global $DB;
         set_config('recyclebin_patch', 0, 'mod_mattermost');
@@ -324,6 +339,9 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
         $this->delete_mattermost_test_users($mattermostapimanager);
     }
 
+    /**
+     * Function to test course restoration with recyclebin enabled and without recyclebin patch applied
+     */
     public function test_restoration_with_recyclebin_without_patch() {
         global $DB;
         set_config('recyclebin_patch', 0, 'mod_mattermost');
@@ -377,7 +395,7 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
     }
 
     /**
-     * A function to initialize the variables
+     * A function to initialize the variables, each time before performing a test
      */
     protected function set_up_moodle_datas() {
         global $DB;
