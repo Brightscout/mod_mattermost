@@ -64,7 +64,7 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
         $modulerecord = $DB->get_record('modules', ['name' => 'mattermost']);
         $modulerecord->visible = 1;
         $DB->update_record('modules', $modulerecord);
-        $this->initiate_test_environment();
+        $this->resetAfterTest();
 
         $domainmail = get_config('mod_mattermost', 'domainmail');
         if (!$this->datagenerator) {
@@ -86,22 +86,6 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
         $client = $this->createMock(mattermost_rest_client::class);
         $mattermostapimanager = new mattermost_api_manager($client);
         $this->assertNotNull($mattermostapimanager->get_client());
-    }
-
-    /**
-     * Function for initiating the test environment
-     */
-    private function initiate_test_environment() {
-        $this->resetAfterTest();
-        $this->load_mattermost_test_config();
-    }
-
-    /**
-     * Function for loading the test configuration
-     */
-    private function load_mattermost_test_config() {
-        global $CFG;
-        require($CFG->dirroot . '/mod/mattermost/config-test.php');
     }
 
     /**
