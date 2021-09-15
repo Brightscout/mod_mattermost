@@ -130,6 +130,23 @@ class mattermost_api_manager
     }
 
     /**
+     * Returns error message based on error code
+     *
+     * @param Exception $error
+     */
+    public static function get_error_message($error, $message = null) {
+        if ($error->getCode() == 404) {
+            return "Not found ".$error->getCode()." : ".$error->getMessage();
+        }
+
+        if ($message) {
+            return $message."\n"."Mattermost api Error ".$error->getCode()." : ".$error->getMessage();
+        }
+
+        return "Mattermost api Error ".$error->getCode()." : ".$error->getMessage();
+    }
+
+    /**
      * A function for debugging
      *
      * @param string $message
@@ -137,11 +154,52 @@ class mattermost_api_manager
      * @param mixed $level - Debug level
      */
     public static function moodle_debugging_message($message, $e, $level = DEBUG_DEVELOPER) {
-        if (!empty($message)) {
-            debugging($message."\n"."Mattermost api Error ".$e->getCode()." : ".$e->getMessage(), $level);
-        } else {
-            debugging("Mattermost api Error ".$e->getCode()." : ".$e->getMessage(), DEBUG_DEVELOPER);
+        debugging(self::get_error_message($e, $message), $level);
+    }
+
+    /**
+     * Debug and returns error message and code
+     *
+     * @param Exception $error
+     */
+    public function get_error_message_and_code($error) {
+        if (!$error) {
+            return null;
         }
+        // Debugg error
+        self::moodle_debugging_message('', $error);
+
+        // Return error message and code to be used at required place
+        $message = self::get_error_message($error);
+        return array(
+            'message' => $message,
+            'code' => $error->getCode()
+        );
+    }
+
+    /**
+     * TODO: Modify this for all other Mattermost API calls
+     *
+     * Function to call Mattermost API
+     * Returns response and error separately in an array
+     *
+     * @param callable $apifunction - API function to be called
+     * @param string $payload - payload to be passed
+     */
+    public function call_mattermost_api(callable $apifunction, $payload) {
+        $result = null;
+        $error = null;
+
+        try {
+            $result = $apifunction($payload);
+        } catch (Exception $e) {
+            $error = $e;
+        }
+
+        return array(
+            'result' => $result,
+            'error' => $this->get_error_message_and_code($error)
+        );
     }
 
     /**
@@ -477,18 +535,14 @@ class mattermost_api_manager
      * @param string $username - username of user
      * @return bool
      */
-    public function user_exists($username) {
-        try {
-            $user = $this->client->get_user_by_username($username);
-            if (!empty($user)) {
-                return true;
-            }
-        } catch (Exception $e) {
-            self::moodle_debugging_message(
-                "Error while retrieving user ",
-                $e
-            );
-            return false;
+    public function is_user_exists($username) {
+        $response = $this->call_mattermost_api(
+            array($this->client, 'get_user_by_username'),
+            $username
+        );
+
+        if ($response['result'] && !empty($response['result'])) {
+            return true;
         }
         return false;
     }
@@ -499,14 +553,18 @@ class mattermost_api_manager
      * @param string $channelid - id of channel
      * @return object of channel
      */
-    public function channel_archived($channelid) {
-        try {
-            $channel = $this->client->get_channel($channelid);
-            if ($channel['delete_at'] != 0) {
-                return true;
-            }
-        } catch (Exception $e) {
-            self::moodle_debugging_message("channel exists: ", $e);
+    public function is_channel_archived($channelid) {
+        $response = $this->call_mattermost_api(
+            array($this->client, 'get_channel'),
+            $channelid
+        );
+
+        if(
+            $response['result'] &&
+            !empty($response['result']) &&
+            $response['result']['delete_at'] != 0
+        ) {
+            return true;
         }
         return false;
     }
@@ -517,14 +575,14 @@ class mattermost_api_manager
      * @param string $channelid - id of channel
      * @return object of channel
      */
-    public function channel_object_exists($channelid) {
-        try {
-            $channel = $this->client->get_channel($channelid);
-            if (!empty($channel)) {
-                return true;
-            }
-        } catch (Exception $e) {
-            self::moodle_debugging_message("channel exists: ", $e);
+    public function is_channel_exists($channelid) {
+        $response = $this->call_mattermost_api(
+            array($this->client, 'get_channel'),
+            $channelid
+        );
+
+        if($response['result'] && !empty($response['result'])) {
+            return true;
         }
         return false;
     }

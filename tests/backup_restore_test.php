@@ -135,7 +135,7 @@ class mod_mattermost_backup_restore_testcase extends advanced_testcase{
         // Initial Mattermost channel ID and restored channel ID should be same.
         $this->assertEquals($this->mattermost->mattermostid, $this->newmattermost->mattermostid);
         $mattermostapimanager = new mattermost_api_manager();
-        $this->assertTrue($mattermostapimanager->channel_object_exists($this->newmattermost->mattermostid));
+        $this->assertTrue($mattermostapimanager->is_channel_exists($this->newmattermost->mattermostid));
         $this->assertCount(2, $mattermostapimanager->get_enriched_channel_members($this->newmattermost->mattermostid));
     }
 
@@ -155,7 +155,7 @@ class mod_mattermost_backup_restore_testcase extends advanced_testcase{
         // Initial Mattermost channel ID and restored channel ID should be same.
         $this->assertEquals($this->mattermost->mattermostid, $this->newmattermost->mattermostid);
         $mattermostapimanager = new mattermost_api_manager();
-        $this->assertTrue($mattermostapimanager->channel_object_exists($this->newmattermost->mattermostid));
+        $this->assertTrue($mattermostapimanager->is_channel_exists($this->newmattermost->mattermostid));
         $this->assertCount(2, $mattermostapimanager->get_enriched_channel_members($this->newmattermost->mattermostid));
         ob_start();
         phpunit_util::run_all_adhoc_tasks();
