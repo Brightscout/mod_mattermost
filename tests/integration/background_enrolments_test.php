@@ -232,7 +232,8 @@ class mod_mattermost_background_enrolments_testcase extends advanced_testcase{
     }
 
     /**
-     * Test for testing that the current user in not enrolled in background even with configuration
+     * Test that all users get enrolled in the background but the currently logged in user doesn't
+     * when the configuration for background_enrolment_task is set to enrol_manual
      */
     public function test_add_instance_enrol_user_manual_background_currentuser() {
         set_config('background_enrolment_task', 'enrol_manual', 'mod_mattermost');

@@ -192,7 +192,7 @@ class mod_mattermost_tools_testcase extends advanced_testcase {
         // Manually enrol teacher3  and student3 to Mattermost.
         $this->mattermostapimanager->enrol_user_to_channel($mattermostid, $this->student3, $this->mattermost->id);
         $this->mattermostapimanager->enrol_user_to_channel($mattermostid, $this->teacher3, $this->mattermost->id, true);
-        // Remove student2 and teacher2 from Mattermost.
+        // Remove student2 and teacher2 from remote Mattermost channel.
         $this->mattermostapimanager->unenrol_user_from_channel($mattermostid, $this->student2, $this->mattermost->id);
         $this->mattermostapimanager->unenrol_user_from_channel($mattermostid, $this->teacher2, $this->mattermost->id);
         // Synchronize.
