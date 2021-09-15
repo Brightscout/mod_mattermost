@@ -49,6 +49,10 @@ jobs:
           ini-values: max_input_vars=5000
           coverage: none
 
+      # TODO: Remove this and use IGNORE_PATHS in moodle-plugin-ci env variables after the github issue is resolved.
+      - name: Remove integration tests
+        run: rm -rf plugin/tests/integration
+
       - name: Initialise moodle-plugin-ci
         run: |
           composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^3
