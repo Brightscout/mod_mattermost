@@ -133,6 +133,7 @@ class mattermost_api_manager
      * Returns error message based on error code
      *
      * @param Exception $error
+     * @param string $message
      */
     public static function get_error_message($error, $message = null) {
         if ($error->getCode() == 404) {
@@ -166,10 +167,10 @@ class mattermost_api_manager
         if (!$error) {
             return null;
         }
-        // Debugg error
+        // Debugg error.
         self::moodle_debugging_message('', $error);
 
-        // Return error message and code to be used at required place
+        // Return error message and code to be used at required place.
         $message = self::get_error_message($error);
         return array(
             'message' => $message,
@@ -559,7 +560,7 @@ class mattermost_api_manager
             $channelid
         );
 
-        if(
+        if (
             $response['result'] &&
             !empty($response['result']) &&
             $response['result']['delete_at'] != 0
@@ -581,7 +582,7 @@ class mattermost_api_manager
             $channelid
         );
 
-        if($response['result'] && !empty($response['result'])) {
+        if ($response['result'] && !empty($response['result'])) {
             return true;
         }
         return false;

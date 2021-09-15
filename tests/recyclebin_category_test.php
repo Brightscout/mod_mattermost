@@ -102,9 +102,6 @@ class mod_mattermost_recyclebin_category_testcase extends advanced_testcase{
         ob_get_contents();
         ob_end_clean();
 
-        $mattermostxrecyclebin = $DB->get_record('mattermostxrecyclebin', array('mattermostid' => $this->mattermost->mattermostid));
-        $this->assertEmpty($mattermostxrecyclebin);
-
         // Check if remote mattermost private channel exists.
         $mattermostapimanager = new mattermost_api_manager();
         $this->assertTrue($mattermostapimanager->is_channel_exists($this->mattermost->mattermostid));
@@ -117,7 +114,7 @@ class mod_mattermost_recyclebin_category_testcase extends advanced_testcase{
         global $DB;
         set_config('recyclebin_patch', 1, 'mod_mattermost');
 
-        // We want the category bin to be enabled.
+        // We want the category bin to be disabled.
         set_config('categorybinenable', 0, 'tool_recyclebin');
         $this->set_up_moodle_datas();
         delete_course($this->course->id, false);
@@ -192,7 +189,7 @@ class mod_mattermost_recyclebin_category_testcase extends advanced_testcase{
         global $DB;
         set_config('recyclebin_patch', 0, 'mod_mattermost');
 
-        // We want the category bin no to be enabled.
+        // We want the category bin no to be disabled.
         set_config('categorybinenable', 0, 'tool_recyclebin');
         $this->set_up_moodle_datas();
         delete_course($this->course->id, false);
@@ -207,6 +204,7 @@ class mod_mattermost_recyclebin_category_testcase extends advanced_testcase{
         // Check if remote mattermost private channel is archived.
         $mattermostapimanager = new mattermost_api_manager();
         $this->assertTrue($mattermostapimanager->is_channel_exists($this->mattermost->mattermostid));
+        $this->assertTrue($mattermostapimanager->is_channel_archived($this->mattermost->mattermostid));
         $mattermostapimanager->delete_mattermost_user($this->user, $this->mattermost->id);
 
     }

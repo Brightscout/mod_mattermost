@@ -55,7 +55,7 @@ class mod_mattermost_backup_restore_testcase extends advanced_testcase{
     /**
      * @var stdClass user record
      */
-    private $userstudent;
+    private $studentrole;
 
     /**
      * A function to setup the test environment and initialize the variables
@@ -82,15 +82,15 @@ class mod_mattermost_backup_restore_testcase extends advanced_testcase{
         $generator = $this->getDataGenerator();
         $this->course = $generator->create_course();
         $studentusername = 'moodleuser'.time();
-        $this->userstudent = $generator->create_user(array('username' => $studentusername,
+        $this->studentrole = $generator->create_user(array('username' => $studentusername,
             'firstname' => $studentusername, 'lastname' => $studentusername));
-        $student = $DB->get_record('role', array('shortname' => 'student'));
-        $generator->enrol_user($this->userstudent->id, $this->course->id, $student->id);
+        $studentrole = $DB->get_record('role', array('shortname' => 'student'));
+        $generator->enrol_user($this->studentrole->id, $this->course->id, $studentrole->id);
         $edititingteacherusername = 'moodleusertest'.(time() + 1);
-        $this->usereditingteacher = $generator->create_user(array('username' => $edititingteacherusername,
+        $this->editingteacher = $generator->create_user(array('username' => $edititingteacherusername,
             'firstname' => $edititingteacherusername, 'lastname' => $edititingteacherusername));
-        $editingteacher = $DB->get_record('role', array('shortname' => 'editingteacher'));
-        $generator->enrol_user($this->usereditingteacher->id, $this->course->id, $editingteacher->id);
+        $editingteacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
+        $generator->enrol_user($this->editingteacher->id, $this->course->id, $editingteacherrole->id);
 
         // Set a channelname for tests.
         set_config('channelnametoformat',
@@ -115,7 +115,7 @@ class mod_mattermost_backup_restore_testcase extends advanced_testcase{
             ob_end_clean();
         }
         $mattermostapimanager = new mattermost_api_manager();
-        $mattermostapimanager->delete_mattermost_user($this->userstudent, $this->mattermost->id);
+        $mattermostapimanager->delete_mattermost_user($this->studentrole, $this->mattermost->id);
         parent::tearDown();
     }
 
