@@ -59,7 +59,7 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
      */
     public function setUp(): void {
         global $DB, $CFG;
-        require($CFG->dirroot.'/mod/mattermost/config-test_example.php');
+        require($CFG->dirroot.'/mod/mattermost/config-test.php');
 
         parent::setUp();
         // Enable mattermost module.

@@ -54,6 +54,9 @@ jobs:
       - name: Remove integration tests
         run: rm -rf plugin/tests/integration
 
+      - name: Make config-test.php file from config-test_example.php
+        run: cp plugin/config-test_example.php plugin/config-test.php
+
       - name: Initialise moodle-plugin-ci
         run: |
           composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^3
