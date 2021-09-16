@@ -181,11 +181,12 @@ class mod_mattermost_tools_testcase extends advanced_testcase {
     }
 
     /**
-     * Test for synchronize channel members function
+     * Function to manually enrol and unenrol some users from Mattermost channel
+     * and then test if synchronize_channel_members function works as expected.
+     *
+     * @param bool $background
      */
-    public function test_synchronize_channel_members() {
-        set_config('background_add_instance', 0, 'mod_mattermost');
-        $this->create_instance();
+    public function manually_enrol_unenrol_users_and_test_synchronize($background = false) {
         $mattermostid = $this->mattermost->mattermostid;
         $mattermostmembers = $this->mattermostapimanager->get_enriched_channel_members($mattermostid);
         $this->check_mattermost_channel_members($mattermostmembers);
@@ -196,9 +197,29 @@ class mod_mattermost_tools_testcase extends advanced_testcase {
         $this->mattermostapimanager->unenrol_user_from_channel($mattermostid, $this->student2, $this->mattermost->id);
         $this->mattermostapimanager->unenrol_user_from_channel($mattermostid, $this->teacher2, $this->mattermost->id);
         // Synchronize.
-        mattermost_tools::synchronize_channel_members($this->mattermost);
+        mattermost_tools::synchronize_channel_members($this->mattermost, $background);
         $mattermostmembers = $this->mattermostapimanager->get_enriched_channel_members($mattermostid);
-        $this->check_mattermost_channel_members($mattermostmembers);
+        if (!$background) {
+            $this->check_mattermost_channel_members($mattermostmembers);
+        } else {
+            $this->assertCount(4, $mattermostmembers);
+            $this->assertTrue(array_key_exists($this->student3->email, $mattermostmembers));
+            $this->assertTrue(array_key_exists($this->teacher3->email, $mattermostmembers));
+            $this->assertTrue($mattermostmembers[$this->teacher3->email]['is_channel_admin']);
+            $this->assertFalse(array_key_exists($this->teacher2->email, $mattermostmembers));
+            $this->assertFalse(array_key_exists($this->student2->email, $mattermostmembers));
+        }
+    }
+
+    /**
+     * Test for synchronize channel members function
+     */
+    public function test_synchronize_channel_members() {
+        set_config('background_add_instance', 0, 'mod_mattermost');
+        $this->create_instance();
+        $this->manually_enrol_unenrol_users_and_test_synchronize();
+        $mattermostid = $this->mattermost->mattermostid;
+
         // Play with channel admin status in Mattermost.
         $this->mattermostapimanager->update_role_in_channel($mattermostid, $this->student1, true, $this->mattermost->id);
         $this->mattermostapimanager->update_role_in_channel($mattermostid, $this->teacher1, false, $this->mattermost->id);
@@ -216,24 +237,8 @@ class mod_mattermost_tools_testcase extends advanced_testcase {
         $this->create_instance();
         // Need to trigger adhoc tasks to enrol.
         phpunit_util::run_all_adhoc_tasks();
+        $this->manually_enrol_unenrol_users_and_test_synchronize(true);
         $mattermostid = $this->mattermost->mattermostid;
-        $mattermostmembers = $this->mattermostapimanager->get_enriched_channel_members($mattermostid);
-        $this->check_mattermost_channel_members($mattermostmembers);
-        // Manually enrol teacher3  and student3 to Rocket.Chat.
-        $this->mattermostapimanager->enrol_user_to_channel($mattermostid, $this->student3, $this->mattermost->id);
-        $this->mattermostapimanager->enrol_user_to_channel($mattermostid, $this->teacher3, $this->mattermost->id, true);
-        // Remove student2 and teacher2 from Mattermost.
-        $this->mattermostapimanager->unenrol_user_from_channel($mattermostid, $this->student2, $this->mattermost->id);
-        $this->mattermostapimanager->unenrol_user_from_channel($mattermostid, $this->teacher2, $this->mattermost->id);
-        // Synchronize in backgroud.
-        mattermost_tools::synchronize_channel_members($this->mattermost, true);
-        $mattermostmembers = $this->mattermostapimanager->get_enriched_channel_members($mattermostid);
-        $this->assertCount(4, $mattermostmembers);
-        $this->assertTrue(array_key_exists($this->student3->email, $mattermostmembers));
-        $this->assertTrue(array_key_exists($this->teacher3->email, $mattermostmembers));
-        $this->assertTrue($mattermostmembers[$this->teacher3->email]['is_channel_admin']);
-        $this->assertFalse(array_key_exists($this->teacher2->email, $mattermostmembers));
-        $this->assertFalse(array_key_exists($this->student2->email, $mattermostmembers));
         phpunit_util::run_all_adhoc_tasks();
         $mattermostmembers = $this->mattermostapimanager->get_enriched_channel_members($mattermostid);
         $this->check_mattermost_channel_members($mattermostmembers);
