@@ -30,4 +30,4 @@ set_config('teamslugname', 'your_team_on_mattermost', 'mod_mattermost');
 set_config('authservice', '0', 'mod_mattermost');
 set_config('authdata', '0', 'mod_mattermost');
 // Fake config test to avoid email domain troubles.
-set_config('domainmail', 'your_domain_mail_if_necessary', 'mod_mattermost'); // Optional argument line.
+set_config('domainmail', 'your_domain_mail', 'mod_mattermost'); // Optional argument line.

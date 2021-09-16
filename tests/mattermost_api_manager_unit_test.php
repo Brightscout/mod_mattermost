@@ -58,7 +58,9 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
      * A function to setup the test environment and initialize the variables
      */
     public function setUp(): void {
-        global $DB;
+        global $DB, $CFG;
+        require($CFG->dirroot.'/mod/mattermost/config-test_example.php');
+
         parent::setUp();
         // Enable mattermost module.
         $modulerecord = $DB->get_record('modules', ['name' => 'mattermost']);
@@ -460,6 +462,15 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
                         $this->equalTo(0),
                         $this->equalTo(60),
                     )->willReturn(get_mattermost_channel_members());
+                    return $client;
+                },
+                'getexpectedresult' => function() {
+                    $mattermostmembers = get_mattermost_channel_members();
+                    $expected = array();
+                    foreach ($mattermostmembers as $mattermostmember) {
+                        $expected[$mattermostmember['email']] = $mattermostmember;
+                    }
+                    return $expected;
                 },
                 'debuggingcalled' => false,
             ],
@@ -470,7 +481,11 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
                         $this->equalTo(get_mattermost_id()),
                         $this->equalTo(0),
                         $this->equalTo(60),
-                    )->willThrowException(new Exception());
+                    )->willThrowException(new Exception);
+                    return $client;
+                },
+                'getexpectedresult' => function() {
+                    return array();
                 },
                 'debuggingcalled' => true,
             ],
@@ -482,13 +497,15 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
      *
      * @dataProvider get_enriched_channel_members_provider
      * @param callable $getclient Function to get the client
+     * @param callable $getexpectedresult Function to get the expected result to match with actual result
      * @param bool $debuggingcalled
      */
-    public function test_get_enriched_channel_members($getclient, $debuggingcalled) {
+    public function test_get_enriched_channel_members($getclient, $getexpectedresult, $debuggingcalled) {
         $channelid = get_mattermost_id();
         $mattermostapimanager = new mattermost_api_manager($getclient());
         $enrichedmembers = $mattermostapimanager->get_enriched_channel_members($channelid);
-        $this->assertIsArray($enrichedmembers);
+        $expectedmembers = $getexpectedresult();
+        $this->assertEquals($expectedmembers, $enrichedmembers);
         if ($debuggingcalled) {
             $this->assertdebuggingcalled();
         } else {
