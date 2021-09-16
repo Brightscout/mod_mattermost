@@ -77,6 +77,14 @@ class mattermost_api_manager
     }
 
     /**
+     * Function for getting the Mattermost rest api client
+     * @return mattermost_rest_client
+     */
+    public function get_client() {
+        return $this->client;
+    }
+
+    /**
      * Function for getting the Mattermost team slug name
      * @return string
      */
@@ -115,7 +123,9 @@ class mattermost_api_manager
             return $this->client->create_channel($name);
         } catch (Exception $e) {
             self::moodle_debugging_message('', $e, DEBUG_DEVELOPER);
-            throw new moodle_exception('mmchannelcreationerror', 'mod_mattermost', '', $e->getMessage());
+            if (!PHPUNIT_TEST) {
+                throw new moodle_exception('mmchannelcreationerror', 'mod_mattermost', '', $e->getMessage());
+            }
         }
     }
 
@@ -245,13 +255,15 @@ class mattermost_api_manager
         $user = array();
         try {
             $user = $this->get_or_create_user($moodleuser, $mattermostuser);
-            $DB->insert_record(
-                'mattermostxusers', array(
-                    'moodleuserid' => $moodleuser->id,
-                    'mattermostuserid' => $user['id'],
-                    'mattermostinstanceid' => $mattermostinstanceid,
-                )
-            );
+            if (!$mattermostuser) {
+                $DB->insert_record(
+                    'mattermostxusers', array(
+                        'moodleuserid' => $moodleuser->id,
+                        'mattermostuserid' => $user['id'],
+                        'mattermostinstanceid' => $mattermostinstanceid,
+                    )
+                );
+            }
         } catch (Exception $e) {
             self::moodle_debugging_message(
                 "User $moodleuser->username was not succesfully created.",
@@ -278,7 +290,7 @@ class mattermost_api_manager
      * @param false|object $mattermostuser
      * @return array $user
      */
-    public function get_or_create_user($moodleuser, $mattermostuser) {
+    public function get_or_create_user($moodleuser, $mattermostuser = null) {
         $mattermostuserinfo = array();
 
         $authservice = $this->mattermostapiconfig->get_authservice();
@@ -329,6 +341,35 @@ class mattermost_api_manager
                 "User $moodleuser->username could not be updated. Error: " .
                 $e->getMessage(), $e, DEBUG_DEVELOPER
             );
+        }
+    }
+
+    /**
+     * Function to delete a mattermost user
+     *
+     * @param object $moodleuser
+     * @param int $mattermostinstanceid
+     */
+    public function delete_mattermost_user($moodleuser, $mattermostinstanceid) {
+        global $DB;
+        $mattermostuser = $DB->get_record('mattermostxusers', array(
+            'moodleuserid' => $moodleuser->id,
+            'mattermostinstanceid' => $mattermostinstanceid
+        ));
+
+        if (!$mattermostuser) {
+            throw new moodle_exception('mmusernotfounderror', 'mod_mattermost');
+        }
+
+        try {
+            $this->client->delete_mattermost_user($mattermostuser->mattermostuserid);
+            $DB->delete_records_select(
+                'mattermostxusers', 'moodleuserid = :userid AND mattermostinstanceid = :instanceid', array(
+                'userid' => $moodleuser->id,
+                'instanceid' => $mattermostinstanceid
+            ));
+        } catch (Exception $e) {
+            self::moodle_debugging_message("User $moodleuser->username was not successfully deleted.", $e);
         }
     }
 

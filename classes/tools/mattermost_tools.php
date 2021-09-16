@@ -160,7 +160,7 @@ class mattermost_tools
      * @return string|string[]|null
      * @throws moodle_exception
      */
-    private static function sanitize_channelname($channelname) {
+    public static function sanitize_channelname($channelname) {
         // Replace white spaces anyway.
         $channelname = preg_replace('/\/s/', '_', $channelname);
         $channelname =
@@ -258,7 +258,7 @@ class mattermost_tools
      * Fetches mattermost module instance from database with given course module id
      *
      * @param int $cmid Id of the course module
-     * @return array all mattermost module instances in the course
+     * @return object mattermost module instance in the course
      */
     public static function get_mattermost_module_instance_from_course_module($cmid) {
         global $DB;

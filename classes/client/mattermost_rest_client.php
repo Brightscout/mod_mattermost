@@ -210,6 +210,16 @@ class mattermost_rest_client
     }
 
     /**
+     * Client function to delete/deactivate a user in Mattermost
+     *
+     * @param string $userid - Id of the user in Mattermost
+     * @throws Exception
+     */
+    public function delete_mattermost_user($userid) {
+        return $this->do_delete($this->pluginapiurl . '/users/' . $userid);
+    }
+
+    /**
      * Client function which calls the endpoint with a GET method using curl
      *
      * @param string $url - The url of the API endpoint
