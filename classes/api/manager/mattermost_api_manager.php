@@ -185,14 +185,14 @@ class mattermost_api_manager
      * Returns response and error separately in an array
      *
      * @param callable $apifunction - API function to be called
-     * @param string $param - param to be passed
+     * @param array $params - param to be passed
      */
-    public function call_mattermost_api(callable $apifunction, $param) {
+    public function call_mattermost_api(callable $apifunction, $params) {
         $result = null;
         $error = null;
 
         try {
-            $result = $apifunction($param);
+            $result = $apifunction(...array_values($params));
         } catch (Exception $e) {
             $error = $e;
         }
@@ -539,7 +539,7 @@ class mattermost_api_manager
     public function user_exists($username) {
         $response = $this->call_mattermost_api(
             array($this->client, 'get_user_by_username'),
-            $username
+            [$username]
         );
 
         if ($response['result'] && !empty($response['result'])) {
@@ -557,7 +557,7 @@ class mattermost_api_manager
     public function is_channel_archived($channelid) {
         $response = $this->call_mattermost_api(
             array($this->client, 'get_channel'),
-            $channelid
+            [$channelid]
         );
 
         if (
@@ -571,7 +571,7 @@ class mattermost_api_manager
     }
 
     /**
-     * Checks if channel object exists
+     * Checks if channel exists
      *
      * @param string $channelid - id of channel
      * @return object of channel
@@ -579,7 +579,7 @@ class mattermost_api_manager
     public function channel_exists($channelid) {
         $response = $this->call_mattermost_api(
             array($this->client, 'get_channel'),
-            $channelid
+            [$channelid]
         );
 
         if ($response['result'] && !empty($response['result'])) {
