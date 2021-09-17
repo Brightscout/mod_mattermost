@@ -901,4 +901,48 @@ class mattermost_tools
         $mattermostapimanager = new mattermost_api_manager();
         $mattermostapimanager->unenrol_user_from_channel($channelid, $user, $mattermostinstanceid);
     }
+
+    /**
+     * Synchronise course's group channel
+     * to create Mattermost channel for groups that are newly created in a course
+     * when course's Mattermost instance was in recyclebin
+     *
+     * @param int $courseid - Id of course
+     */
+    public static function synchronize_groups($courseid) {
+        global $DB;
+        if (self::mattermost_enabled()) {
+            $course = $DB->get_record('course', array('id' => $courseid));
+            $groups = $DB->get_records('groups', array('courseid' => $courseid));
+
+            foreach ($groups as $group) {
+                $mattermostgroup = $DB->get_record('mattermostxgroups', array('groupid' => $group->id));
+
+                if (empty($mattermostgroup)) {
+                    $channelname = self::get_mattermost_channel_name_for_group($course, $group);
+                    $mattermostapimanager = new mattermost_api_manager();
+
+                    try {
+                        $mattermostchannelid = $mattermostapimanager->create_mattermost_channel($channelname);
+                    } catch (Exception $e) {
+                        // If a group with same name already existed before on Mattermost, then add a timestamp.
+                        // At end of the channel name.
+                        if (strpos($e->getMessage(), 'A channel with that name already exists on the same team.')) {
+                            $mattermostchannelid =
+                                $mattermostapimanager->create_mattermost_channel($channelname . '_' . time());
+                        } else {
+                            throw new moodle_exception('mmchannelcreationerror', 'mod_mattermost', '', $e->getMessage());
+                        }
+                    }
+
+                    $DB->insert_record('mattermostxgroups', array(
+                        'groupid' => $group->id,
+                        'channelid' => $mattermostchannelid,
+                        'courseid' => $course->id,
+                        'name' => $group->name
+                    ));
+                }
+            }
+        }
+    }
 }
