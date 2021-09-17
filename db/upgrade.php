@@ -146,10 +146,10 @@ function xmldb_mattermost_upgrade($oldversion) {
             $dbman->create_table($usertable);
         }
 
-        // Define table mattermostxusers to be dropped.
+        // Define table mattermostxgroups to be dropped.
         $groupstable = new xmldb_table('mattermostxgroups');
 
-        // Conditionally launch drop table for mattermostxusers.
+        // Conditionally launch drop table for mattermostxgroups.
         if ($dbman->table_exists($groupstable)) {
             $dbman->drop_table($groupstable);
         }
