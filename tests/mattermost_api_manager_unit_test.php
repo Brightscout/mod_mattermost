@@ -137,7 +137,9 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
         $channelid = $mattermostapimanager->create_mattermost_channel($channelname);
         $this->assertEquals($expected, $channelid);
         if ($debuggingcalled) {
-            $this->assertdebuggingcalled();
+            $this->assertDebuggingCalled();
+        } else {
+            $this->assertDebuggingNotCalled();
         }
     }
 
@@ -206,7 +208,9 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
         $user = $mattermostapimanager->enrol_user_to_channel($channelid, $this->user, $this::MATTERMOST_INSTANCE_ID, false);
         $this->assertEquals($expected, $user);
         if ($debuggingcalled) {
-            $this->assertdebuggingcalled();
+            $this->assertDebuggingCalled();
+        } else {
+            $this->assertDebuggingNotCalled();
         }
     }
 
@@ -275,7 +279,7 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
         $mattermostapimanager = new mattermost_api_manager($getclient());
         $mattermostapimanager->delete_mattermost_user($this->user, $this::MATTERMOST_INSTANCE_ID);
         if ($debuggingcalled) {
-            $this->assertdebuggingcalled();
+            $this->assertDebuggingCalled();
         } else {
             $this->assertDebuggingNotCalled();
         }
@@ -354,7 +358,7 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
         $mattermostapimanager->update_role_in_channel($channelid, $this->user,
             $updatetochanneladmin, $this::MATTERMOST_INSTANCE_ID);
         if ($debuggingcalled) {
-            $this->assertdebuggingcalled();
+            $this->assertDebuggingCalled();
         } else {
             $this->assertDebuggingNotCalled();
         }
@@ -442,7 +446,7 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
                 $this::MATTERMOST_INSTANCE_ID, get_mattermost_user());
         }
         if ($debuggingcalled) {
-            $this->assertdebuggingcalled();
+            $this->assertDebuggingCalled();
         } else {
             $this->assertDebuggingNotCalled();
         }
@@ -507,7 +511,7 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
         $expectedmembers = $getexpectedresult();
         $this->assertEquals($expectedmembers, $enrichedmembers);
         if ($debuggingcalled) {
-            $this->assertdebuggingcalled();
+            $this->assertDebuggingCalled();
         } else {
             $this->assertDebuggingNotCalled();
         }
@@ -583,7 +587,7 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
         }
 
         if ($debuggingcalled) {
-            $this->assertdebuggingcalled();
+            $this->assertDebuggingCalled();
         } else {
             $this->assertDebuggingNotCalled();
         }
