@@ -94,14 +94,20 @@ class mattermost_api_manager
 
     /**
      * Constructor for the mattermost_api_manager class
+     *
+     * @param mattermost_rest_client $client
      */
-    public function __construct() {
+    public function __construct($client = null) {
         $this->mattermostapiconfig = new mattermost_api_config();
-        $this->client = new mattermost_rest_client(
-            $this->mattermostapiconfig->get_instanceurl(),
-            $this->mattermostapiconfig->get_secret(),
-            $this->mattermostapiconfig->get_teamslugname()
-        );
+        if ($client) {
+            $this->client = $client;
+        } else {
+            $this->client = new mattermost_rest_client(
+                $this->mattermostapiconfig->get_instanceurl(),
+                $this->mattermostapiconfig->get_secret(),
+                $this->mattermostapiconfig->get_teamslugname()
+            );
+        }
     }
 
     /**
@@ -331,11 +337,13 @@ class mattermost_api_manager
         }
 
         try {
-            $payload = array('user_id' => $user['id']);
-            if ($ischanneladmin) {
-                $payload['role'] = static::MATTERMOST_CHANNEL_ADMIN_ROLE;
+            if (array_key_exists('id', $user)) {
+                $payload = array('user_id' => $user['id']);
+                if ($ischanneladmin) {
+                    $payload['role'] = static::MATTERMOST_CHANNEL_ADMIN_ROLE;
+                }
+                $this->client->add_user_to_channel($channelid, $payload);
             }
-            $this->client->add_user_to_channel($channelid, $payload);
         } catch (Exception $e) {
             self::moodle_debugging_message("User $moodleuser->username not added to remote Mattermost channel", $e);
         }
