@@ -50,6 +50,22 @@ git clone https://github.com/Brightscout/mod_mattermost MOODLE_ROOT_DIRECTORY/mo
 
 * Mattermost auth service is the setting to specify the sign-in method for the new users which will be created in Mattermost.
 * Mattermost auth data is the Moodle user field which will be mapped to the Mattermost user and used for authentication on Mattemrost with the respective auth service.
+
+### Recycle bin patch
+* This patch must be applied to enable features of archiving and unarchiving Mattermost channels corresponding to a Moodle course or course's groups.
+
+#### Applying patch
+* Check if this patch is already applied to core moodle file admin/tool/recyclebin/classes/course_bin.php
+* Patches are available in patch subdirectory
+* You can apply them with following patch command
+```bash
+patch -p1 /your_moodle_path/admin/tool/recyclebin/classes/course_bin.php < /your_moodle_path/mod/mattermost/patch/admin_tool_recyclebin_classes_course_bin.patch
+patch -p1 /your_moodle_path/admin/tool/recyclebin/classes/category_bin.php < /your_moodle_path/mod/mattermost/patch/admin_tool_recyclebin_classes_category_bin.patch
+patch -p1 /your_moodle_path/user/classes/output/user_roles_editable.php  < /your_moodle_path/mod/mattermost/patch/user_classes_output_user_roles_editable.patch
+
+```
+* Once these patches are applied check "Is recyclebin moodle core patch installed" in Mattermost plugin settings to enable this feature.
+
 ## Specials capabilities
 the following capabilities define if a role is able to perform some setting in the module instance : 
 * mod/mattermost:candefineroles : enable a user to change defaults roles mapping while editing the module instance

@@ -203,9 +203,8 @@ class observers
                     // If a group with same name already existed before on Mattermost, then add a timestamp.
                     // At end of the channel name.
                     if (strpos($e->getMessage(), 'A channel with that name already exists on the same team.')) {
-                        $timsestamp = time();
                         $mattermostchannelid =
-                            $mattermostapimanager->create_mattermost_channel($channelname . '_' . $timsestamp);
+                            $mattermostapimanager->create_mattermost_channel($channelname . '_' . time());
                     } else {
                         throw new moodle_exception('mmchannelcreationerror', 'mod_mattermost', '', $e->getMessage());
                     }
@@ -370,6 +369,9 @@ class observers
                             $mattermost->course,
                             null
                         );
+                        // After Mattermost instance restored from course recyclebin.
+                        // Synchronise course's group channel, if any new one is created.
+                        mattermost_tools::synchronize_groups($coursemodule->course);
                     }
                 }
 
