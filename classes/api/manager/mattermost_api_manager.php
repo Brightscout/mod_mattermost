@@ -167,7 +167,7 @@ class mattermost_api_manager
         if (!$error) {
             return null;
         }
-        // Debugg error.
+        // Debug error.
         self::moodle_debugging_message('', $error);
 
         // Return error message and code to be used at required place.
@@ -185,14 +185,14 @@ class mattermost_api_manager
      * Returns response and error separately in an array
      *
      * @param callable $apifunction - API function to be called
-     * @param string $payload - payload to be passed
+     * @param string $param - param to be passed
      */
-    public function call_mattermost_api(callable $apifunction, $payload) {
+    public function call_mattermost_api(callable $apifunction, $param) {
         $result = null;
         $error = null;
 
         try {
-            $result = $apifunction($payload);
+            $result = $apifunction($param);
         } catch (Exception $e) {
             $error = $e;
         }
@@ -536,7 +536,7 @@ class mattermost_api_manager
      * @param string $username - username of user
      * @return bool
      */
-    public function is_user_exists($username) {
+    public function user_exists($username) {
         $response = $this->call_mattermost_api(
             array($this->client, 'get_user_by_username'),
             $username
@@ -576,7 +576,7 @@ class mattermost_api_manager
      * @param string $channelid - id of channel
      * @return object of channel
      */
-    public function is_channel_exists($channelid) {
+    public function channel_exists($channelid) {
         $response = $this->call_mattermost_api(
             array($this->client, 'get_channel'),
             $channelid

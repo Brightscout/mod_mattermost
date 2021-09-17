@@ -93,7 +93,7 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
         ob_get_contents();
         ob_end_clean();
         $mattermostapimanager = new mattermost_api_manager();
-        $this->assertTrue($mattermostapimanager->is_channel_exists($this->mattermost->mattermostid));
+        $this->assertTrue($mattermostapimanager->channel_exists($this->mattermost->mattermostid));
         $this->assertTrue($mattermostapimanager->is_channel_archived($this->mattermost->mattermostid));
         $mattermostxrecyclebin = $DB->get_record('mattermostxrecyclebin', array('mattermostid' => $this->mattermost->mattermostid));
         $this->assertNotEmpty($mattermostxrecyclebin);
@@ -160,7 +160,7 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
         $mattermostapimanager = new mattermost_api_manager();
 
         // Remote mattermost private group exists and is archived.
-        $this->assertTrue($mattermostapimanager->is_channel_exists($this->mattermost->mattermostid));
+        $this->assertTrue($mattermostapimanager->channel_exists($this->mattermost->mattermostid));
         $this->assertTrue($mattermostapimanager->is_channel_archived($this->mattermost->mattermostid));
         $mattermostxrecyclebin = $DB->get_record('mattermostxrecyclebin', array('mattermostid' => $this->mattermost->mattermostid));
         $this->assertNotEmpty($mattermostxrecyclebin);
@@ -190,7 +190,7 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
         $this->assertEmpty($mattermostxrecyclebin);
 
         // Check if remote mattermost private channel exists and is not archived.
-        $this->assertTrue($mattermostapimanager->is_channel_exists($this->mattermost->mattermostid));
+        $this->assertTrue($mattermostapimanager->channel_exists($this->mattermost->mattermostid));
         $this->assertFalse($mattermostapimanager->is_channel_archived($this->mattermost->mattermostid));
         $this->assertCount(1, $mattermostapimanager->get_enriched_channel_members($this->mattermost->mattermostid));
 
@@ -219,7 +219,7 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
         $mattermostapimanager = new mattermost_api_manager();
 
         // Check if remote mattermost private channel objct exists and channel is archived.
-        $this->assertTrue($mattermostapimanager->is_channel_exists($this->mattermost->mattermostid));
+        $this->assertTrue($mattermostapimanager->channel_exists($this->mattermost->mattermostid));
         $this->assertTrue($mattermostapimanager->is_channel_archived($this->mattermost->mattermostid));
         $mattermostxrecyclebin = $DB->get_record('mattermostxrecyclebin', array('mattermostid' => $this->mattermost->mattermostid));
         $this->assertNotEmpty($mattermostxrecyclebin);
@@ -249,7 +249,7 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
         $this->assertEmpty($mattermostxrecyclebin);
 
         // Check if remote mattermost private channel exists.
-        $this->assertTrue($mattermostapimanager->is_channel_exists($this->mattermost->mattermostid));
+        $this->assertTrue($mattermostapimanager->channel_exists($this->mattermost->mattermostid));
         $this->assertFalse($mattermostapimanager->is_channel_archived($this->mattermost->mattermostid));
         $this->assertCount(2, $mattermostapimanager->get_enriched_channel_members($this->mattermost->mattermostid));
         ob_start();
@@ -280,7 +280,7 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
         ob_get_contents();
         ob_end_clean();
         $mattermostapimanager = new mattermost_api_manager();
-        $this->assertTrue($mattermostapimanager->is_channel_exists($this->mattermost->mattermostid));
+        $this->assertTrue($mattermostapimanager->channel_exists($this->mattermost->mattermostid));
         $this->assertTrue($mattermostapimanager->is_channel_archived($this->mattermost->mattermostid));
         $mattermostxrecyclebin = $DB->get_record('mattermostxrecyclebin', array('mattermostid' => $this->mattermost->mattermostid));
         $this->assertEmpty($mattermostxrecyclebin);
@@ -299,7 +299,7 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
         $this->assertEmpty($mattermostxrecyclebin);
 
         // Check if remote mattermost private channel is deleted.
-        $this->assertTrue($mattermostapimanager->is_channel_exists($this->mattermost->mattermostid));
+        $this->assertTrue($mattermostapimanager->channel_exists($this->mattermost->mattermostid));
         $this->assertTrue($mattermostapimanager->is_channel_archived($this->mattermost->mattermostid));
 
         // Delete mattermost test users.
@@ -353,7 +353,7 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
         $mattermostapimanager = new mattermost_api_manager();
 
         // Remote mattermost private channel exists and is archived.
-        $this->assertTrue($mattermostapimanager->is_channel_exists($this->mattermost->mattermostid));
+        $this->assertTrue($mattermostapimanager->channel_exists($this->mattermost->mattermostid));
         $this->assertTrue($mattermostapimanager->is_channel_archived($this->mattermost->mattermostid));
         $mattermostxrecyclebin = $DB->get_record('mattermostxrecyclebin', array('mattermostid' => $this->mattermost->mattermostid));
         $this->assertEmpty($mattermostxrecyclebin);
@@ -372,7 +372,7 @@ class mod_mattermost_recyclebin_testcase extends advanced_testcase{
         $this->assertEmpty($mattermostxrecyclebin);
 
         // Check if remote mattermost private channel exists.
-        $this->assertTrue($mattermostapimanager->is_channel_exists($this->mattermost->mattermostid));
+        $this->assertTrue($mattermostapimanager->channel_exists($this->mattermost->mattermostid));
         $this->assertTrue($mattermostapimanager->is_channel_archived($this->mattermost->mattermostid));
 
         // Delete mattermost test users.
