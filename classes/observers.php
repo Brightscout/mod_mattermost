@@ -197,7 +197,7 @@ class observers
                 $channelname = mattermost_tools::get_mattermost_channel_name_for_group($course, $group);
                 $mattermostapimanager = new mattermost_api_manager();
 
-                ["result" => $result, "error" => $error] = $mattermostapimanager->call_mattermost_api(
+                [$result, $error] = $mattermostapimanager->call_mattermost_api(
                     array($mattermostapimanager, 'create_mattermost_channel'),
                     [$channelname]
                 );
