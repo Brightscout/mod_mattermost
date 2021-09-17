@@ -91,8 +91,8 @@ class mod_mattermost_observer_testcase extends advanced_testcase{
         $edititingteacherusername = 'moodleusertest'.(time() + 1);
         $this->usereditingteacher = $generator->create_user(array('username' => $edititingteacherusername,
             'firstname' => $edititingteacherusername, 'lastname' => $edititingteacherusername));
-        $editingteacher = $DB->get_record('role', array('shortname' => 'editingteacher'));
-        $generator->enrol_user($this->usereditingteacher->id, $this->course->id, $editingteacher->id);
+        $editingteacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
+        $generator->enrol_user($this->usereditingteacher->id, $this->course->id, $editingteacherrole->id);
         // Set a channelname for tests.
         set_config('channelnametoformat',
             'moodleunittest_{$a->courseshortname}_{$a->moduleid}_'.time(),
@@ -123,7 +123,10 @@ class mod_mattermost_observer_testcase extends advanced_testcase{
         $this->assertCount(2, $members);
         delete_user($this->studentrole);
         $this->assertTrue($this->mattermostapimanager->user_exists($this->studentrole->username));
-        $this->assertCount(2, $members);
+
+        // Get the list of members after deleting studentrole.
+        $members = $this->mattermostapimanager->get_enriched_channel_members($this->mattermost->mattermostid);
+        $this->assertCount(1, $members);
     }
 
     /**
