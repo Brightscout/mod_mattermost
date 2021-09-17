@@ -83,8 +83,8 @@ set_config('secret', 'secret_from_the_mattermost_plugin', 'mod_mattermost');
 set_config('teamslugname', 'your_team_on_mattermost', 'mod_mattermost');
 set_config('authservice', '0', 'mod_mattermost');
 set_config('authdata', '0', 'mod_mattermost');
-// fake config test to avoidd email domain troubles
-set_config('domainmail','your_domain_mail_if_necessary','mod_mattermost'); // Optional argument.line.
+// fake config test to avoid email domain troubles
+set_config('domainmail','your_domain_mail','mod_mattermost'); // Optional argument line.
 ```
 * The `0` in `authservice` setting stands for "LDAP". Put `1` for "SAML".
 * Similarly, `0` in `authdata` setting stands for "Email", Put `1` for "Username".
