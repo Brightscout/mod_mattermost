@@ -197,18 +197,23 @@ class observers
                 $channelname = mattermost_tools::get_mattermost_channel_name_for_group($course, $group);
                 $mattermostapimanager = new mattermost_api_manager();
 
-                try {
-                    $mattermostchannelid = $mattermostapimanager->create_mattermost_channel($channelname);
-                } catch (Exception $e) {
+                [$result, $error] = $mattermostapimanager->call_mattermost_api(
+                    array($mattermostapimanager, 'create_mattermost_channel'),
+                    [$channelname]
+                );
+
+                if ($error) {
+                    $errormessage = $error['message'];
+                    if (!strpos($errormessage, 'A channel with that name already exists on the same team.')) {
+                        throw new moodle_exception('mmchannelcreationerror', 'mod_mattermost', '', $errormessage);
+                    }
                     // If a group with same name already existed before on Mattermost, then add a timestamp.
                     // At end of the channel name.
-                    if (strpos($e->getMessage(), 'A channel with that name already exists on the same team.')) {
-                        $mattermostchannelid =
-                            $mattermostapimanager->create_mattermost_channel($channelname . '_' . time());
-                    } else {
-                        throw new moodle_exception('mmchannelcreationerror', 'mod_mattermost', '', $e->getMessage());
-                    }
+                    $mattermostchannelid =
+                        $mattermostapimanager->create_mattermost_channel($channelname . '_' . time());
                 }
+
+                $mattermostchannelid = $result;
 
                 $DB->insert_record('mattermostxgroups', array(
                     'groupid' => $group->id,

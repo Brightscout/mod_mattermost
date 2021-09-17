@@ -185,7 +185,7 @@ class mattermost_api_manager
      * Returns response and error separately in an array
      *
      * @param callable $apifunction - API function to be called
-     * @param array $params - param to be passed
+     * @param array $params - params to be passed
      */
     public function call_mattermost_api(callable $apifunction, $params) {
         $result = null;
@@ -198,8 +198,8 @@ class mattermost_api_manager
         }
 
         return array(
-            'result' => $result,
-            'error' => $this->get_error_message_and_code($error)
+            $result,
+            $this->get_error_message_and_code($error)
         );
     }
 
@@ -537,12 +537,12 @@ class mattermost_api_manager
      * @return bool
      */
     public function user_exists($username) {
-        $response = $this->call_mattermost_api(
+        [$result] = $this->call_mattermost_api(
             array($this->client, 'get_user_by_username'),
             [$username]
         );
 
-        if ($response['result'] && !empty($response['result'])) {
+        if ($result && !empty($result)) {
             return true;
         }
         return false;
@@ -555,15 +555,15 @@ class mattermost_api_manager
      * @return object of channel
      */
     public function is_channel_archived($channelid) {
-        $response = $this->call_mattermost_api(
+        [$result] = $this->call_mattermost_api(
             array($this->client, 'get_channel'),
             [$channelid]
         );
 
         if (
-            $response['result'] &&
-            !empty($response['result']) &&
-            $response['result']['delete_at'] != 0
+            $result &&
+            !empty($result) &&
+            $result['delete_at'] != 0
         ) {
             return true;
         }
@@ -577,12 +577,12 @@ class mattermost_api_manager
      * @return object of channel
      */
     public function channel_exists($channelid) {
-        $response = $this->call_mattermost_api(
+        [$result] = $this->call_mattermost_api(
             array($this->client, 'get_channel'),
             [$channelid]
         );
 
-        if ($response['result'] && !empty($response['result'])) {
+        if ($result && !empty($result)) {
             return true;
         }
         return false;
