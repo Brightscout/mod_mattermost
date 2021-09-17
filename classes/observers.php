@@ -544,7 +544,7 @@ class observers
                 if (!$coursemodule->visible or !$coursemodule->visibleoncoursepage) {
                     // It detects the change in instance visibility on course.
                     // Can't detect the change in course visibility here.
-                    $mattermostapimanager->archive_mattermost_channel($mattermost->mattermostid);
+                    $mattermostapimanager->archive_mattermost_channel($mattermost->mattermostid, $mattermost->course);
                 } else {
                     $mattermostapimanager->unarchive_mattermost_channel($mattermost->mattermostid, $coursemodule->course, null);
                 }
