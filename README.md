@@ -1,4 +1,4 @@
-# Mattermost activity for Moodle #
+# Mattermost Sync for Moodle #
 
 This plugin allows teachers to keep synchronized users enrolled in a Moodle course into a dedicated Mattermost private channel.
 
