@@ -17,7 +17,7 @@ Php 7.1 or higher
 * Users are created in Mattermost by the Moodle plugin with their sign-in method configured as LDAP or SAML.
 
 ### Mattermost plugin setup
-* Install the plugin [Mattermost plugin moodle sync](https://github.com/Brightscout/x-mattermost-plugin-moodle-sync) in Mattermost.
+* Install the plugin [Mattermost plugin moodle sync](https://github.com/Brightscout/mattermost-plugin-moodle-sync) in Mattermost.
 * Enable the plugin and configure it. The webhook secret generated in this plugin's configuration is used in Moodle to send requests.
 
 ## Installation
