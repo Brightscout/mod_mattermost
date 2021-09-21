@@ -1,4 +1,4 @@
-# Mattermost activity for Moodle #
+# Mattermost Sync for Moodle #
 
 This plugin allows teachers to keep synchronized users enrolled in a Moodle course into a dedicated Mattermost private channel.
 
@@ -17,7 +17,7 @@ Php 7.1 or higher
 * Users are created in Mattermost by the Moodle plugin with their sign-in method configured as LDAP or SAML.
 
 ### Mattermost plugin setup
-* Install the plugin [Mattermost plugin moodle sync](https://github.com/Brightscout/x-mattermost-plugin-moodle-sync) in Mattermost.
+* Install the plugin [mattermost-plugin-moodle-sync](https://github.com/Brightscout/mattermost-plugin-moodle-sync) in Mattermost.
 * Enable the plugin and configure it. The webhook secret generated in this plugin's configuration is used in Moodle to send requests.
 
 ## Installation
@@ -70,9 +70,40 @@ patch -p1 /your_moodle_path/user/classes/output/user_roles_editable.php  < /your
 the following capabilities define if a role is able to perform some setting in the module instance : 
 * mod/mattermost:candefineroles : enable a user to change defaults roles mapping while editing the module instance
 
-## License ##
+## Unit tests
+### Settings
+* In Mattermost, you may have to change the config to increase the maximum number of channels allowed per team and maximum number of users allowed per team if these values are very low. These are defined by variables `MaxChannelsPerTeam` and `MaxUsersPerTeam` in the Mattermost config file.
+* To run unit tests, just create a config-test.php file in the module mattermost root directory.
+* Fill in with following parameters. You can take a reference from `config-test_example.php` if you want.
 
-2021 Brightscout (https://www.brightscout.com)
+```php
+<?php
+set_config('instanceurl','https://mattermost-server_url','mod_mattermost');
+set_config('secret', 'secret_from_the_mattermost_plugin', 'mod_mattermost');
+set_config('teamslugname', 'your_team_on_mattermost', 'mod_mattermost');
+set_config('authservice', '0', 'mod_mattermost');
+set_config('authdata', '0', 'mod_mattermost');
+// fake config test to avoid email domain troubles
+set_config('domainmail','your_domain_mail','mod_mattermost'); // Optional argument line.
+```
+* The `0` in `authservice` setting stands for "LDAP". Put `1` for "SAML".
+* Similarly, `0` in `authdata` setting stands for "Email", Put `1` for "Username".
+* There are two kinds of unit tests - 
+    * Those which require a remote Mattermost server (which are located in tests/integration directory)
+    * Those which do not require a remote Mattermost server (which are located in tests directory). These tests also need a config-test.php file to run but they don't affect the remote server at all. To run these tests, you can even put dummy values in config-test.php.
+### Requirements
+* See [moodle documentation](https://docs.moodle.org/dev/PHPUnit).
+
+### Provided tests
+* Don't forget to init phpunit moodle tests environment (which is explained in the Requirements).
+* Below is an example of how to run a unit test.
+```bash
+cd /moodle_path
+/moodle_path/vendor/bin/phpunit --filter "mod_mattermost_background_enrolments_testcase"
+```
+* You can also use other methods to run the tests. All the methods are explained in the Requirements section.
+
+## License ##
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -88,3 +119,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 If you need some help, you can contact us via this email address : hello@brightscout.com
+
+---
+
+Made with &#9829; by [Brightscout](http://www.brightscout.com)
+
