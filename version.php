@@ -30,4 +30,4 @@ $plugin->requires = 2018050800; // Moodle version!
 
 $plugin->component = 'mod_mattermost';
 $plugin->release = '1.0.0';
-$plugin->maturity = MATURITY_STABLE;
+$plugin->maturity = MATURITY_BETA;
