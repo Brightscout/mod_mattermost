@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - master
+      - test-ci
 
 jobs:
   test:
@@ -49,11 +50,6 @@ jobs:
           ini-values: max_input_vars=5000
           coverage: none
 
-      # TODO: Remove this and use IGNORE_PATHS in moodle-plugin-ci env variables after the github issue is resolved.
-      # https://github.com/moodlehq/moodle-plugin-ci/issues/133
-      - name: Remove integration tests
-        run: rm -rf plugin/tests/integration
-
       - name: Make config-test.php file from config-test_example.php
         run: cp plugin/config-test_example.php plugin/config-test.php
 
@@ -70,6 +66,7 @@ jobs:
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
+          PHPUNIT_IGNORE_PATHS: tests/integration
 
       - name: PHP Lint
         if: ${{ always() }}
