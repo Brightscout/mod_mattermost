@@ -56,15 +56,67 @@ function get_mattermost_user() {
 }
 
 /**
+ * Generates a random string of specified length.
+ *
+ * @param int $length
+ * @return string
+ */
+function generate_random_string($length = 10) {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $characterslength = strlen($characters);
+    $randomstring = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomstring .= $characters[rand(0, $characterslength - 1)];
+    }
+    return $randomstring;
+}
+
+/**
+ * Generates a random email.
+ *
+ * @return string random email
+ */
+function get_random_email() {
+    return generate_random_string(3).'@gmail.com';
+}
+
+/**
  * Function to get a list of mattermost channel members
  * with only email field
  *
+ * @param int $dummycount - Count of the dummy members required
+ * @param array $emails to be included in the return value
+ * @param bool $isrolechanneladmin - Role for the given emails
  * @return array
  */
-function get_mattermost_channel_members() {
-    return [
-        array('email' => 'abc@gmail.com'),
-        array('email' => 'def@gmail.com'),
-        array('email' => 'ghi@gmail.com'),
-    ];
+function get_mattermost_channel_members($dummycount, $emails = array(), $isrolechanneladmin = false) {
+    $members = array();
+    foreach ($emails as $email) {
+        $members[] = array(
+            'email' => $email,
+            'is_channel_admin' => $isrolechanneladmin,
+        );
+    }
+    for ($i = 0; $i < $dummycount; $i++) {
+        $members[] = array(
+            'email' => get_random_email(),
+            'is_channel_admin' => false
+        );
+    }
+
+    return $members;
+}
+
+/**
+ * Returns an array with email as key and mattermost member as value.
+ *
+ * @param array $mattermostmembers - Mattermost channel members
+ * @return array Array with email as key and mattermost member as value
+ */
+function get_enriched_mattermost_channel_members($mattermostmembers) {
+    $enriched = array();
+    foreach ($mattermostmembers as $mattermostmember) {
+        $enriched[$mattermostmember['email']] = $mattermostmember;
+    }
+    return $enriched;
 }

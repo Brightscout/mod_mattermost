@@ -42,27 +42,7 @@ class mod_mattermost_tools_unit_testcase extends advanced_testcase
     /**
      * @var stdClass user record
      */
-    private $student2;
-
-    /**
-     * @var stdClass user record
-     */
-    private $student3;
-
-    /**
-     * @var stdClass user record
-     */
     private $teacher1;
-
-    /**
-     * @var stdClass user record
-     */
-    private $teacher2;
-
-    /**
-     * @var stdClass user record
-     */
-    private $teacher3;
 
     /**
      * @var stdClass course record
@@ -85,11 +65,6 @@ class mod_mattermost_tools_unit_testcase extends advanced_testcase
     private $editingteacherrole;
 
     /**
-     * @var int count of users enrolled in the course
-     */
-    private $usersenrolled;
-
-    /**
      * A constant mattermost instance id to be used while enrolling/unenrolling users or other functions
      */
     const MATTERMOST_INSTANCE_ID = 1;
@@ -107,41 +82,22 @@ class mod_mattermost_tools_unit_testcase extends advanced_testcase
         $this->resetAfterTest();
 
         $domainmail = get_config('mod_mattermost', 'domainmail');
-        // if (!$this->generator) {
+        if (!$this->generator) {
             $this->generator = $this->getDataGenerator();
             $this->course = $this->generator->create_course();
             $this->studentrole = $DB->get_record('role', array('shortname' => 'student'));
             $this->editingteacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
             $studentusername1 = 'moodleuserteststudent1_'.time();
-            $studentusername2 = 'moodleuserteststudent2_'.time();
-            $studentusername3 = 'moodleuserteststudent3_'.time();
             $studentemail1 = $studentusername1 . '@' . (!empty($domainmail) ? $domainmail : 'moodle.test');
-            $studentemail2 = $studentusername2 . '@' . (!empty($domainmail) ? $domainmail : 'moodle.test');
-            $studentemail3 = $studentusername3 . '@' . (!empty($domainmail) ? $domainmail : 'moodle.test');
             $this->student1 = $this->generator->create_user(array('username' => $studentusername1,
                 'firstname' => $studentusername1, 'lastname' => $studentusername1, 'email' => $studentemail1));
-            $this->student2 = $this->generator->create_user(array('username' => $studentusername2,
-                'firstname' => $studentusername2, 'lastname' => $studentusername2, 'email' => $studentemail2));
-            $this->student3 = $this->generator->create_user(array('username' => $studentusername3,
-                'firstname' => $studentusername3, 'lastname' => $studentusername3, 'email' => $studentemail3));
             $this->generator->enrol_user($this->student1->id, $this->course->id, $this->studentrole->id);
-            // $this->generator->enrol_user($this->student2->id, $this->course->id, $this->studentrole->id);
             $teacherusername1 = 'moodleusertestteachert1_'.time();
-            $teacherusername2 = 'moodleusertestteachert2_'.time();
-            $teacherusername3 = 'moodleusertestteachert3_'.time();
             $teacheremail1 = $teacherusername1 . '@' . (!empty($domainmail) ? $domainmail : 'moodle.test');
-            $teacheremail2 = $teacherusername2 . '@' . (!empty($domainmail) ? $domainmail : 'moodle.test');
-            $teacheremail3 = $teacherusername3 . '@' . (!empty($domainmail) ? $domainmail : 'moodle.test');
             $this->teacher1 = $this->generator->create_user(array('username' => $teacherusername1,
                 'firstname' => $teacherusername1, 'lastname' => $teacherusername1, 'email' => $teacheremail1));
-            $this->teacher2 = $this->generator->create_user(array('username' => $teacherusername2,
-                'firstname' => $teacherusername2, 'lastname' => $teacherusername2, 'email' => $teacheremail2));
-            $this->teacher3 = $this->generator->create_user(array('username' => $teacherusername3,
-                'firstname' => $teacherusername3, 'lastname' => $teacherusername3, 'email' => $teacheremail3));
             $this->generator->enrol_user($this->teacher1->id, $this->course->id, $this->editingteacherrole->id);
-            // $this->generator->enrol_user($this->teacher2->id, $this->course->id, $this->editingteacherrole->id);
-            $this->usersenrolled = 2;
-        // }
+        }
     }
 
     public function test_get_channel_link() {
@@ -153,10 +109,17 @@ class mod_mattermost_tools_unit_testcase extends advanced_testcase
         $this->assertEquals('localhost/test/channels/'.get_mattermost_id(), $link);
     }
 
+    /**
+     * Function to get a mattermost module instance
+     * containing this class property course info
+     *
+     * @return stdClass
+     */
     public function get_mattermost_module_instance() {
         $mattermostmoduleinstance = new stdClass();
         $mattermostmoduleinstance->id = $this::MATTERMOST_INSTANCE_ID;
         $mattermostmoduleinstance->course = $this->course->id;
+        $mattermostmoduleinstance->courseid = $this->course->id;
         $mattermostmoduleinstance->mattermostid = get_mattermost_id();
         $mattermostmoduleinstance->channeladminroles = strval($this->editingteacherrole->id);
         $mattermostmoduleinstance->userroles = strval($this->studentrole->id);
@@ -168,12 +131,17 @@ class mod_mattermost_tools_unit_testcase extends advanced_testcase
         $apimanager = $this->createMock(mattermost_api_manager::class);
 
         $channelid = get_mattermost_id();
-        $apimanager->expects($this->exactly($this->usersenrolled))->method('enrol_user_to_channel')->with(
+        $apimanager->expects($this->exactly(2))->method('enrol_user_to_channel')->withConsecutive([
             $this->equalTo($channelid),
-            $this->logicalOr($this->equalTo($this->student1), $this->equalTo($this->teacher1)),
+            $this->equalTo($this->student1),
             $this->equalTo($this::MATTERMOST_INSTANCE_ID),
-            $this->logicalOr($this->isTrue(), $this->isEmpty())
-        );
+            $this->isEmpty()
+        ], [
+            $this->equalTo($channelid),
+            $this->equalTo($this->teacher1),
+            $this->equalTo($this::MATTERMOST_INSTANCE_ID),
+            $this->isTrue()
+        ]);
 
         $mattermosttools = new mattermost_tools($apimanager);
         $mattermostmoduleinstance = $this->get_mattermost_module_instance();
@@ -181,11 +149,17 @@ class mod_mattermost_tools_unit_testcase extends advanced_testcase
         $this->assertDebuggingNotCalled();
     }
 
+    /**
+     * Data provider for role_assign which is being used without the @dataProvider
+     * annotation because data providers can't access the class variables
+     *
+     * @return array
+     */
     public function role_assign_provider(): array {
         $mattermostmoduleinstance = $this->get_mattermost_module_instance();
         return [
             'role assigned is channel admin type' => [
-                'user' => $this->student2,
+                'user' => $this->student1,
                 'roleid' => $this->editingteacherrole->id,
                 'getapimanager' => function() use ($mattermostmoduleinstance) {
                     global $DB;
@@ -201,14 +175,14 @@ class mod_mattermost_tools_unit_testcase extends advanced_testcase
                         $this->isType('string'),
                         $this->equalTo(array(
                             'courseid' => $this->course->id,
-                            'userid' => $this->student2->id,
+                            'userid' => $this->student1->id,
                         ))
                     )->willReturn(array());
 
                     $channelid = get_mattermost_id();
                     $apimanager->expects($this->once())->method('enrol_user_to_channel')->with(
                         $this->equalTo($channelid),
-                        $this->objectEquals($this->student2),
+                        $this->equalTo($this->student1),
                         $this->equalTo($mattermostmoduleinstance->id),
                         $this->isTrue()
                     );
@@ -217,7 +191,7 @@ class mod_mattermost_tools_unit_testcase extends advanced_testcase
                 }
             ],
             'role assigned is student type' => [
-                'user' => $this->teacher2,
+                'user' => $this->teacher1,
                 'roleid' => $this->studentrole->id,
                 'getapimanager' => function() use ($mattermostmoduleinstance) {
                     global $DB;
@@ -233,14 +207,14 @@ class mod_mattermost_tools_unit_testcase extends advanced_testcase
                         $this->isType('string'),
                         $this->equalTo(array(
                         'courseid' => $this->course->id,
-                        'userid' => $this->teacher2->id,
+                        'userid' => $this->teacher1->id,
                         ))
-                    )->willReturn([]);
+                    )->willReturn(array());
 
                     $channelid = get_mattermost_id();
                     $apimanager->expects($this->once())->method('enrol_user_to_channel')->with(
                         $this->equalTo($channelid),
-                        $this->objectEquals($this->teacher2),
+                        $this->equalTo($this->teacher1),
                         $this->equalTo($mattermostmoduleinstance->id),
                     );
 
@@ -251,12 +225,175 @@ class mod_mattermost_tools_unit_testcase extends advanced_testcase
     }
 
     public function test_role_assign() {
+        global $DB;
+        $originaldb = $DB;
         $testdata = array_values($this->role_assign_provider());
         foreach ($testdata as $testcase) {
             $apimanager = $testcase['getapimanager']();
             $mattermosttools = new mattermost_tools($apimanager);
             $mattermosttools->role_assign($this->course->id, $testcase['roleid'],
                 $testcase['user'], context_course::instance($this->course->id));
+            $DB = $originaldb;
+            $this->assertDebuggingNotCalled();
         }
+    }
+
+    /**
+     * Data provider for synchronize_channel_members which is being used without the
+     * @dataProvider annotation because data providers can't access the class variables
+     *
+     * @return array
+     */
+    public function synchronize_channel_members_provider(): array {
+        $mattermostmoduleinstance = $this->get_mattermost_module_instance();
+        return [
+            'no moodle user is present in Mattermost channel' => [
+                'getapimanager' => function() use ($mattermostmoduleinstance) {
+                    $apimanager = $this->createMock(mattermost_api_manager::class);
+                    $channelid = get_mattermost_id();
+                    $channelmembers = get_mattermost_channel_members(3);
+                    $apimanager->method('get_enriched_channel_members')->with(
+                        $this->equalTo($channelid)
+                    )->willReturn(get_enriched_mattermost_channel_members($channelmembers));
+
+                    $apimanager->expects($this->exactly(2))->method('enrol_user_to_channel')->withConsecutive([
+                        $this->equalTo($channelid),
+                        $this->equalTo($this->student1),
+                        $this->equalTo($mattermostmoduleinstance->id),
+                    ], [
+                        $this->equalTo($channelid),
+                        $this->equalTo($this->teacher1),
+                        $this->equalTo($mattermostmoduleinstance->id),
+                        $this->isTrue()
+                    ]);
+
+                    $apimanager->expects($this->exactly(count($channelmembers)))->method('unenrol_user_from_channel')->with(
+                        $this->equalTo($channelid),
+                        $this->isNull(),
+                        $this->equalTo($mattermostmoduleinstance->id),
+                        $this->logicalAnd($this->isType('array'), $this->arrayHasKey('email'))
+                    );
+
+                    return $apimanager;
+                },
+            ],
+            'one moodle user is present in Mattermost with wrong member role' => [
+                'getapimanager' => function() use ($mattermostmoduleinstance) {
+                    $apimanager = $this->createMock(mattermost_api_manager::class);
+                    $channelid = get_mattermost_id();
+                    $channelmembers = get_mattermost_channel_members(2, array(
+                        $this->teacher1->email
+                    ));
+
+                    $apimanager->method('get_enriched_channel_members')->with(
+                        $this->equalTo($channelid)
+                    )->willReturn(get_enriched_mattermost_channel_members($channelmembers));
+
+                    $apimanager->expects($this->once())->method('update_role_in_channel')->with(
+                        $this->equalTo($channelid),
+                        $this->equalTo($this->teacher1),
+                        $this->isTrue(),
+                        $this->equalTo($mattermostmoduleinstance->id)
+                    );
+
+                    // One enrolled user is being returned from get_mattermost_channel_members so enrol_user_to_channel
+                    // will be called only once.
+                    $apimanager->expects($this->once())->method('enrol_user_to_channel')->with(
+                        $this->equalTo($channelid),
+                        $this->equalTo($this->student1),
+                        $this->equalTo($mattermostmoduleinstance->id),
+                    );
+
+                    $apimanager->expects($this->exactly(2))->method('unenrol_user_from_channel')->with(
+                        $this->equalTo($channelid),
+                        $this->isNull(),
+                        $this->equalTo($mattermostmoduleinstance->id),
+                        $this->logicalAnd($this->isType('array'), $this->arrayHasKey('email'))
+                    );
+
+                    return $apimanager;
+                },
+            ],
+            'both moodle users are present in Mattermost but one has wrong channel admin role' => [
+                'getapimanager' => function() use ($mattermostmoduleinstance) {
+                    $apimanager = $this->createMock(mattermost_api_manager::class);
+                    $channelid = get_mattermost_id();
+                    $channelmembers = get_mattermost_channel_members(0, array(
+                        $this->teacher1->email, $this->student1->email
+                    ), true);
+
+                    $apimanager->method('get_enriched_channel_members')->with(
+                        $this->equalTo($channelid)
+                    )->willReturn(get_enriched_mattermost_channel_members($channelmembers));
+
+                    $apimanager->expects($this->once())->method('update_role_in_channel')->with(
+                        $this->equalTo($channelid),
+                        $this->equalTo($this->student1),
+                        $this->isFalse(),
+                        $this->equalTo($mattermostmoduleinstance->id)
+                    );
+
+                    $apimanager->expects($this->never())->method('enrol_user_to_channel');
+                    $apimanager->expects($this->never())->method('unenrol_user_from_channel');
+
+                    return $apimanager;
+                },
+            ],
+        ];
+    }
+
+    public function test_synchronize_channel_members() {
+        $mattermostmoduleinstance = $this->get_mattermost_module_instance();
+        $testdata = array_values($this->synchronize_channel_members_provider());
+        foreach ($testdata as $testcase) {
+            $apimanager = $testcase['getapimanager']();
+            $mattermosttools = new mattermost_tools($apimanager);
+            $mattermosttools->synchronize_channel_members($mattermostmoduleinstance);
+            $this->assertDebuggingNotCalled();
+        }
+    }
+
+    public function test_unenrol_user_everywhere() {
+        global $DB;
+        $DB = $this->createMock(get_class($DB));
+        $apimanager = $this->createMock(mattermost_api_manager::class);
+
+        $DB->expects($this->once())->method('get_record')->with(
+            $this->equalTo('user'),
+            $this->equalTo(array('id' => $this->student1->id))
+        )->willReturn($this->student1);
+
+        $mattermostmoduleinstance = $this->get_mattermost_module_instance();
+        $DB->expects($this->once())->method('get_records_sql')->with(
+            $this->isType('string'),
+            $this->equalTo(array(
+                'userid' => $this->student1->id,
+                'modulename' => 'mattermost'
+            ))
+        )->willReturn(array($mattermostmoduleinstance));
+
+        $DB->expects($this->once())->method('record_exists')->with(
+            $this->equalTo('mattermostxusers'),
+            $this->equalTo(array(
+                'moodleuserid' => $this->student1->id,
+                'mattermostinstanceid' => $mattermostmoduleinstance->id
+            ))
+        )->willReturn(true);
+
+        $group = new stdClass();
+        $group->channelid = get_mattermost_id();
+        $DB->expects($this->once())->method('get_records')->with(
+            $this->equalTo('mattermostxgroups'),
+            $this->equalTo(array('courseid' => $this->course->id))
+        )->willReturn(array($group));
+
+        $apimanager->expects($this->exactly(2))->method('unenrol_user_from_channel')->with(
+            $this->equalTo($mattermostmoduleinstance->mattermostid),
+            $this->equalTo($this->student1),
+            $this->equalTo($mattermostmoduleinstance->id)
+        );
+
+        $mattermosttools = new mattermost_tools($apimanager);
+        $mattermosttools->unenrol_user_everywhere($this->student1->id);
     }
 }
