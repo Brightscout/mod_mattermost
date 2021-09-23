@@ -366,21 +366,21 @@ class observers
 
                 $coursemodule = $DB->get_record('course_modules', array('instance' => $mattermost->id));
 
-                if (!empty($mattermost)) {
+                if (empty($mattermost)) {
                     return;
                 }
 
                 // Unarchive channel only if intance is not hidden.
                 if ($coursemodule->visible) {
-                    // After Mattermost instance restored from course recyclebin.
-                    // Synchronise course's group channels, if any new one is created.
-                    mattermost_tools::synchronize_groups($coursemodule->course);
-
                     $mattermostapimanager->unarchive_mattermost_channel(
                         $mattermostrecyclebin->mattermostid,
                         $mattermost->course,
                         null
                     );
+
+                    // After Mattermost instance restored from course recyclebin.
+                    // Synchronise course's group channels, if any new one is created.
+                    mattermost_tools::synchronize_groups($coursemodule->course);
                 }
 
                 // Update binid for mattermost groups after deleted instance is restored.
@@ -390,14 +390,6 @@ class observers
                 // Synchronise course channel members.
                 mattermost_tools::synchronize_channel_members($mattermostrecyclebin->mattermostid,
                     (boolean)get_config('mod_mattermost', 'background_synchronize'));
-
-                // Synchronise course's group channel members.
-                $groups = $DB->get_records('mattermostxgroups', array('courseid' => $mattermost->course));
-                foreach ($groups as $group) {
-                    $mattermost->mattermostid = $group->channelid;
-                    mattermost_tools::synchronize_channel_members($mattermost,
-                        (boolean)get_config('mod_mattermost', 'background_synchronize'));
-                }
 
                 // Delete record from recyclebin, when restored.
                 $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id));
@@ -562,6 +554,12 @@ class observers
         }
     }
 
+    /**
+     * Event handler for the user enrolment updated event. It unenrols/enrols the user
+     * from mattermost channels when the user is suspended or made active in the course
+     *
+     * @param \core\event\user_enrolment_updated $event
+     */
     public static function user_enrolment_updated(\core\event\user_enrolment_updated $event) {
         global $DB;
         $userenrolmentid = $event->objectid;

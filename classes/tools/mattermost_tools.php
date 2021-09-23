@@ -670,6 +670,9 @@ class mattermost_tools
 
         foreach ($groups as $group) {
             $groupmembers = self::get_group_members($group->groupid);
+            $groupmembers = array_filter($groupmembers, function($groupmember) use ($moodlemembers) {
+                return array_key_exists($groupmember->id, $moodlemembers);
+            });
             if ($background) {
                 $tasksynchronize = new \mod_mattermost\task\synchronize_channel();
                 $tasksynchronize->set_custom_data(
