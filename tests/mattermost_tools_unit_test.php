@@ -32,8 +32,7 @@ use \mod_mattermost\tools\mattermost_tools;
 /**
  * Class for mattermost api manager unit testcases
  */
-class mod_mattermost_tools_unit_testcase extends advanced_testcase
-{
+class mod_mattermost_tools_unit_testcase extends advanced_testcase {
     /**
      * @var stdClass user record
      */
