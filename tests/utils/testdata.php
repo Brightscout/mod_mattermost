@@ -111,7 +111,7 @@ function get_mattermost_channel_members($dummycount, $emails = array(), $isrolec
  * Returns an array with email as key and mattermost member as value.
  *
  * @param array $mattermostmembers - Mattermost channel members
- * @return array Array with email as key and mattermost member as value
+ * @return array - Array with email as key and mattermost member as value
  */
 function get_enriched_mattermost_channel_members($mattermostmembers) {
     $enriched = array();
