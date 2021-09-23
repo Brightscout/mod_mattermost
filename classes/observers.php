@@ -25,7 +25,6 @@
 
 namespace mod_mattermost;
 
-use Exception;
 use mod_mattermost\tools\mattermost_tools;
 use mod_mattermost\api\manager\mattermost_api_manager;
 use moodle_exception;
@@ -366,18 +365,22 @@ class observers
                 $mattermost = $DB->get_record('mattermost', array('mattermostid' => $mattermostrecyclebin->mattermostid));
 
                 $coursemodule = $DB->get_record('course_modules', array('instance' => $mattermost->id));
+
                 if (!empty($mattermost)) {
-                    // Unarchive channel only if intance is not hidden.
-                    if ($coursemodule->visible) {
-                        $mattermostapimanager->unarchive_mattermost_channel(
-                            $mattermostrecyclebin->mattermostid,
-                            $mattermost->course,
-                            null
-                        );
-                        // After Mattermost instance restored from course recyclebin.
-                        // Synchronise course's group channel, if any new one is created.
-                        mattermost_tools::synchronize_groups($coursemodule->course);
-                    }
+                    return;
+                }
+
+                // Unarchive channel only if intance is not hidden.
+                if ($coursemodule->visible) {
+                    // After Mattermost instance restored from course recyclebin.
+                    // Synchronise course's group channels, if any new one is created.
+                    mattermost_tools::synchronize_groups($coursemodule->course);
+
+                    $mattermostapimanager->unarchive_mattermost_channel(
+                        $mattermostrecyclebin->mattermostid,
+                        $mattermost->course,
+                        null
+                    );
                 }
 
                 // Update binid for mattermost groups after deleted instance is restored.
@@ -391,12 +394,14 @@ class observers
                 // Synchronise course's group channel members.
                 $groups = $DB->get_records('mattermostxgroups', array('courseid' => $mattermost->course));
                 foreach ($groups as $group) {
-                    mattermost_tools::synchronize_channel_members($group->channelid,
+                    $mattermost->mattermostid = $group->channelid;
+                    mattermost_tools::synchronize_channel_members($mattermost,
                         (boolean)get_config('mod_mattermost', 'background_synchronize'));
                 }
 
                 // Delete record from recyclebin, when restored.
                 $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id));
+
             }
         }
     }
@@ -553,6 +558,44 @@ class observers
                 } else {
                     $mattermostapimanager->unarchive_mattermost_channel($mattermost->mattermostid, $coursemodule->course, null);
                 }
+            }
+        }
+    }
+
+    public static function user_enrolment_updated(\core\event\user_enrolment_updated $event) {
+        global $DB;
+        $userenrolmentid = $event->objectid;
+        $userid = $event->relateduserid;
+        $courseid = $event->courseid;
+        $userenrolment = $DB->get_record('user_enrolments', array('id' => $userenrolmentid));
+        if (!$userenrolment) {
+            throw new moodle_exception('userenrolmentnotfounderror', 'mod_mattermost');
+        }
+
+        $mattermostinstance = $DB->get_record('mattermost', array('course' => $courseid));
+        if (!$mattermostinstance) {
+            return;
+        }
+
+        $channelids = array($mattermostinstance->mattermostid);
+        $groups = $DB->get_records('mattermostxgroups', array('courseid' => $courseid));
+        foreach ($groups as $group) {
+            array_push($channelids, $group->channelid);
+        }
+
+        $coursecontext = \context_course::instance($courseid);
+        foreach ($channelids as $channelid) {
+            if ($userenrolment->status == 1) {
+                mattermost_tools::unenrol_user_from_mattermost_channel($channelid, $userid, $mattermostinstance->id);
+            } else {
+                mattermost_tools::enrol_user_to_mattermost_channel(
+                    $channelid,
+                    $mattermostinstance->channeladminroles,
+                    $mattermostinstance->userroles,
+                    $userid,
+                    $coursecontext->id,
+                    $mattermostinstance->id
+                );
             }
         }
     }

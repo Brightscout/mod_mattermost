@@ -399,7 +399,7 @@ class mattermost_tools
         global $USER;
         $courseid = $mattermostmoduleinstance->course;
         $coursecontext = context_course::instance($courseid);
-        $users = get_enrolled_users($coursecontext);
+        $users = get_enrolled_users($coursecontext, '', 0, 'u.*', null, 0, 0, true);
         foreach ($users as $user) {
             if (!$background || ($forcecreator && $user->id == $USER->id && !\core\session\manager::is_loggedinas())) {
                 self::enrol_user_to_mattermost_channel(
@@ -635,7 +635,7 @@ class mattermost_tools
         }
         $courseid = $mattermostmoduleinstance->course;
         $coursecontext = context_course::instance($courseid);
-        $moodlemembers = get_enrolled_users($coursecontext);
+        $moodlemembers = get_enrolled_users($coursecontext, '', 0, 'u.*', null, 0, 0, true);
         $mattermostid = $mattermostmoduleinstance->mattermostid;
 
         $channeladminroles = $mattermostmoduleinstance->channeladminroles;
