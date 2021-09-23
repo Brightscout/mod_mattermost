@@ -211,9 +211,9 @@ class observers
                     // At end of the channel name.
                     $mattermostchannelid =
                         $mattermostapimanager->create_mattermost_channel($channelname . '_' . time());
+                } else {
+                    $mattermostchannelid = $result;
                 }
-
-                $mattermostchannelid = $result;
 
                 $DB->insert_record('mattermostxgroups', array(
                     'groupid' => $group->id,

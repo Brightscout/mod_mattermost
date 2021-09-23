@@ -963,10 +963,17 @@ class mattermost_tools
                     [$channelname]
                 );
 
-                if ($error) {
-                    $errormessage = $error['message'];
-                    if (!strpos($errormessage, 'A channel with that name already exists on the same team.')) {
-                        throw new moodle_exception('mmchannelcreationerror', 'mod_mattermost', '', $errormessage);
+                    if ($error) {
+                        $errormessage = $error['message'];
+                        if (!strpos($errormessage, 'A channel with that name already exists on the same team.')) {
+                            throw new moodle_exception('mmchannelcreationerror', 'mod_mattermost', '', $errormessage);
+                        }
+                        // If a group with same name already existed before on Mattermost, then add a timestamp.
+                        // At end of the channel name.
+                        $mattermostchannelid =
+                            $mattermostapimanager->create_mattermost_channel($channelname . '_' . time());
+                    } else {
+                        $mattermostchannelid = $result;
                     }
                     // If a group with same name already existed before on Mattermost, then add a timestamp.
                     // At end of the channel name.
@@ -974,14 +981,13 @@ class mattermost_tools
                         self::$mattermostapimanager->create_mattermost_channel($channelname . '_' . time());
                 }
 
-                $mattermostchannelid = $result;
-
-                $DB->insert_record('mattermostxgroups', array(
-                    'groupid' => $group->id,
-                    'channelid' => $mattermostchannelid,
-                    'courseid' => $course->id,
-                    'name' => $group->name
-                ));
+                    $DB->insert_record('mattermostxgroups', array(
+                        'groupid' => $group->id,
+                        'channelid' => $mattermostchannelid,
+                        'courseid' => $course->id,
+                        'name' => $group->name
+                    ));
+                }
             }
         }
     }
