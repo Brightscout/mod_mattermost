@@ -962,10 +962,6 @@ class mattermost_tools
                 } else {
                     $mattermostchannelid = $result;
                 }
-                // If a group with same name already existed before on Mattermost, then add a timestamp.
-                // At end of the channel name.
-                $mattermostchannelid =
-                    self::$mattermostapimanager->create_mattermost_channel($channelname . '_' . time());
 
                 $DB->insert_record('mattermostxgroups', array(
                     'groupid' => $group->id,
