@@ -457,25 +457,19 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
      * @return array
      */
     public function get_enriched_channel_members_provider(): array {
+        $channelmembers = get_mattermost_channel_members(3);
         return [
             'success' => [
-                'getclient' => function() {
+                'getclient' => function() use ($channelmembers) {
                     $client = $this->createMock(mattermost_rest_client::class);
                     $client->expects($this->once())->method('get_channel_members')->with(
                         $this->equalTo(get_mattermost_id()),
                         $this->equalTo(0),
                         $this->equalTo(60),
-                    )->willReturn(get_mattermost_channel_members());
+                    )->willReturn($channelmembers);
                     return $client;
                 },
-                'getexpectedresult' => function() {
-                    $mattermostmembers = get_mattermost_channel_members();
-                    $expected = array();
-                    foreach ($mattermostmembers as $mattermostmember) {
-                        $expected[$mattermostmember['email']] = $mattermostmember;
-                    }
-                    return $expected;
-                },
+                'expected' => get_enriched_mattermost_channel_members($channelmembers),
                 'debuggingcalled' => false,
             ],
             'get_channel_members api failed' => [
@@ -488,9 +482,7 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
                     )->willThrowException(new Exception);
                     return $client;
                 },
-                'getexpectedresult' => function() {
-                    return array();
-                },
+                'expected' => array(),
                 'debuggingcalled' => true,
             ],
         ];
@@ -501,15 +493,14 @@ class mod_mattermost_api_manager_unit_testcase extends advanced_testcase
      *
      * @dataProvider get_enriched_channel_members_provider
      * @param callable $getclient Function to get the client
-     * @param callable $getexpectedresult Function to get the expected result to match with actual result
+     * @param callable $expected Expected result to match with actual result
      * @param bool $debuggingcalled
      */
-    public function test_get_enriched_channel_members($getclient, $getexpectedresult, $debuggingcalled) {
+    public function test_get_enriched_channel_members($getclient, $expected, $debuggingcalled) {
         $channelid = get_mattermost_id();
         $mattermostapimanager = new mattermost_api_manager($getclient());
         $enrichedmembers = $mattermostapimanager->get_enriched_channel_members($channelid);
-        $expectedmembers = $getexpectedresult();
-        $this->assertEquals($expectedmembers, $enrichedmembers);
+        $this->assertEquals($expected, $enrichedmembers);
         if ($debuggingcalled) {
             $this->assertDebuggingCalled();
         } else {
