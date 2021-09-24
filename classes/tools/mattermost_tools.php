@@ -66,6 +66,15 @@ class mattermost_tools
     }
 
     /**
+     * Function to initialize mattermost api manager if not initialized yet
+     */
+    public static function initialize_api_manager() {
+        if (!self::$mattermostapimanager) {
+            self::$mattermostapimanager = new mattermost_api_manager();
+        }
+    }
+
+    /**
      * Construct display options.
      *
      * @return array
@@ -192,9 +201,7 @@ class mattermost_tools
      * @return string url for the mattermost channel
      */
     public static function get_channel_link($mattermostchannelid) {
-        if (!self::$mattermostapimanager) {
-            self::$mattermostapimanager = new mattermost_api_manager();
-        }
+        self::initialize_api_manager();
         return self::$mattermostapimanager->get_instance_url() . '/'. self::$mattermostapimanager->get_team_slugname() .
             '/channels/' . $mattermostchannelid;
     }
@@ -507,9 +514,7 @@ class mattermost_tools
         $mattermostinstanceid
     ) {
         global $DB;
-        if (!self::$mattermostapimanager) {
-            self::$mattermostapimanager = new mattermost_api_manager();
-        }
+        self::initialize_api_manager();
         $user = $DB->get_record('user', array('id' => $userid));
         if ($user) {
             $channeladminroleids = array_filter(explode(',', $channeladminroles));
@@ -543,9 +548,7 @@ class mattermost_tools
         if (empty($mattermostmoduleinstance)) {
             return;
         }
-        if (!self::$mattermostapimanager) {
-            self::$mattermostapimanager = new mattermost_api_manager();
-        }
+        self::initialize_api_manager();
 
         $channelids = self::get_mattermost_channelids_for_groups_with_given_member(
             $mattermostmoduleinstance->course, $moodleuser->id
@@ -612,9 +615,7 @@ class mattermost_tools
             }
         }
 
-        if (!self::$mattermostapimanager) {
-            self::$mattermostapimanager = new mattermost_api_manager();
-        }
+        self::initialize_api_manager();
         foreach ($channelids as $channelid) {
             if (in_array($roleid, array_filter($channeladminroles))) {
                 if (!$hasotherchanneladminrole) {
@@ -727,9 +728,7 @@ class mattermost_tools
     public static function synchronize_channel($mattermostid, $moodlemembers,
         $channeladminroleids, $userroleids, context_course $coursecontext, $mattermostinstanceid
     ): void {
-        if (!self::$mattermostapimanager) {
-            self::$mattermostapimanager = new mattermost_api_manager();
-        }
+        self::initialize_api_manager();
         $mattermostmembers = self::$mattermostapimanager->get_enriched_channel_members(
             $mattermostid
         );
@@ -770,9 +769,7 @@ class mattermost_tools
     private static function synchronize_mattermost_user($mattermostid, $coursecontext, $moodleuser, $channeladminroleids,
         $userroleids, $mattermostmembers, $mattermostinstanceid
     ) {
-        if (!self::$mattermostapimanager) {
-            self::$mattermostapimanager = new mattermost_api_manager();
-        }
+        self::initialize_api_manager();
         $moodleemail = $moodleuser->email;
         $mattermostuser = null;
 
@@ -819,9 +816,7 @@ class mattermost_tools
             throw new moodle_exception('moodleusernotfounderror', 'mod_mattermost', '', $userid);
         }
         $courseenrolments = self::course_enrolments($userid);
-        if (!self::$mattermostapimanager) {
-            self::$mattermostapimanager = new mattermost_api_manager();
-        }
+        self::initialize_api_manager();
         foreach ($courseenrolments as $courseenrolment) {
             if ($DB->record_exists('mattermostxusers', array(
                 'moodleuserid' => $userid,
@@ -854,9 +849,7 @@ class mattermost_tools
         }
 
         $courseenrolments = self::course_enrolments($userid);
-        if (!self::$mattermostapimanager) {
-            self::$mattermostapimanager = new mattermost_api_manager();
-        }
+        self::initialize_api_manager();
         foreach ($courseenrolments as $courseenrolment) {
             $channeladminrolesids = array_filter(explode(',', $courseenrolment->channeladminroles));
             $userrolesids = array_filter(explode(',', $courseenrolment->userroles));
@@ -894,9 +887,7 @@ class mattermost_tools
         global $DB;
         $user = $DB->get_record('user', array('id' => $userid));
         $mattermostuser = $DB->get_record('mattermostxusers', array('moodleuserid' => $userid));
-        if (!self::$mattermostapimanager) {
-            self::$mattermostapimanager = new mattermost_api_manager();
-        }
+        self::initialize_api_manager();
         self::$mattermostapimanager->update_user($user, $mattermostuser);
     }
 
@@ -932,9 +923,7 @@ class mattermost_tools
     public static function unenrol_user_from_mattermost_channel($channelid, $userid, $mattermostinstanceid) {
         global $DB;
         $user = $DB->get_record('user', array('id' => $userid));
-        if (!self::$mattermostapimanager) {
-            self::$mattermostapimanager = new mattermost_api_manager();
-        }
+        self::initialize_api_manager();
         self::$mattermostapimanager->unenrol_user_from_channel($channelid, $user, $mattermostinstanceid);
     }
 
@@ -950,10 +939,7 @@ class mattermost_tools
         $course = $DB->get_record('course', array('id' => $courseid));
         $groups = $DB->get_records('groups', array('courseid' => $courseid));
 
-        if (!self::$mattermostapimanager) {
-            self::$mattermostapimanager = new mattermost_api_manager();
-        }
-
+        self::initialize_api_manager();
         foreach ($groups as $group) {
             $mattermostgroup = $DB->get_record('mattermostxgroups', array('groupid' => $group->id));
 
