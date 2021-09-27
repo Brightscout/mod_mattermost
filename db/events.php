@@ -84,4 +84,8 @@ $observers = array(
         'eventname' => '\core\event\course_module_updated',
         'callback' => '\mod_mattermost\observers::course_module_updated',
     ),
+    array(
+        'eventname' => '\core\event\user_enrolment_updated',
+        'callback' => '\mod_mattermost\observers::user_enrolment_updated',
+    ),
 );

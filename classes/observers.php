@@ -25,7 +25,6 @@
 
 namespace mod_mattermost;
 
-use Exception;
 use mod_mattermost\tools\mattermost_tools;
 use mod_mattermost\api\manager\mattermost_api_manager;
 use moodle_exception;
@@ -366,18 +365,22 @@ class observers
                 $mattermost = $DB->get_record('mattermost', array('mattermostid' => $mattermostrecyclebin->mattermostid));
 
                 $coursemodule = $DB->get_record('course_modules', array('instance' => $mattermost->id));
-                if (!empty($mattermost)) {
-                    // Unarchive channel only if intance is not hidden.
-                    if ($coursemodule->visible) {
-                        $mattermostapimanager->unarchive_mattermost_channel(
-                            $mattermostrecyclebin->mattermostid,
-                            $mattermost->course,
-                            null
-                        );
-                        // After Mattermost instance restored from course recyclebin.
-                        // Synchronise course's group channel, if any new one is created.
-                        mattermost_tools::synchronize_groups($coursemodule->course);
-                    }
+
+                if (empty($mattermost)) {
+                    return;
+                }
+
+                // Unarchive channel only if the instance is not hidden.
+                if ($coursemodule->visible) {
+                    $mattermostapimanager->unarchive_mattermost_channel(
+                        $mattermostrecyclebin->mattermostid,
+                        $mattermost->course,
+                        null
+                    );
+
+                    // After Mattermost instance restored from course recyclebin.
+                    // Synchronise course's group channels, if any new one is created.
+                    mattermost_tools::synchronize_groups($coursemodule->course);
                 }
 
                 // Update binid for mattermost groups after deleted instance is restored.
@@ -388,15 +391,9 @@ class observers
                 mattermost_tools::synchronize_channel_members($mattermostrecyclebin->mattermostid,
                     (boolean)get_config('mod_mattermost', 'background_synchronize'));
 
-                // Synchronise course's group channel members.
-                $groups = $DB->get_records('mattermostxgroups', array('courseid' => $mattermost->course));
-                foreach ($groups as $group) {
-                    mattermost_tools::synchronize_channel_members($group->channelid,
-                        (boolean)get_config('mod_mattermost', 'background_synchronize'));
-                }
-
                 // Delete record from recyclebin, when restored.
                 $DB->delete_records('mattermostxrecyclebin', array('id' => $mattermostrecyclebin->id));
+
             }
         }
     }
@@ -553,6 +550,53 @@ class observers
                 } else {
                     $mattermostapimanager->unarchive_mattermost_channel($mattermost->mattermostid, $coursemodule->course, null);
                 }
+            }
+        }
+    }
+
+    /**
+     * Event handler for the user enrolment updated event. It unenrols/enrols the user
+     * from mattermost channels when the user is suspended or made active in the course
+     *
+     * @param \core\event\user_enrolment_updated $event
+     */
+    public static function user_enrolment_updated(\core\event\user_enrolment_updated $event) {
+        global $DB;
+        $userenrolmentid = $event->objectid;
+        $userid = $event->relateduserid;
+        $courseid = $event->courseid;
+        $userenrolment = $DB->get_record('user_enrolments', array('id' => $userenrolmentid));
+        if (!$userenrolment) {
+            throw new moodle_exception('userenrolmentnotfounderror', 'mod_mattermost');
+        }
+
+        $mattermostinstance = $DB->get_record('mattermost', array('course' => $courseid));
+        if (!$mattermostinstance) {
+            return;
+        }
+
+        $channelids = array($mattermostinstance->mattermostid);
+        $groups = $DB->get_records('mattermostxgroups', array('courseid' => $courseid));
+        foreach ($groups as $group) {
+            array_push($channelids, $group->channelid);
+        }
+
+        // If the user enrolment status is equal to 1, it means that the user is suspended in the course.
+        if ($userenrolment->status == 1) {
+            foreach ($channelids as $channelid) {
+                mattermost_tools::unenrol_user_from_mattermost_channel($channelid, $userid, $mattermostinstance->id);
+            }
+        } else {
+            $coursecontext = \context_course::instance($courseid);
+            foreach ($channelids as $channelid) {
+                mattermost_tools::enrol_user_to_mattermost_channel(
+                    $channelid,
+                    $mattermostinstance->channeladminroles,
+                    $mattermostinstance->userroles,
+                    $userid,
+                    $coursecontext->id,
+                    $mattermostinstance->id
+                );
             }
         }
     }

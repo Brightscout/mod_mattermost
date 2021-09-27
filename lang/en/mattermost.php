@@ -111,6 +111,7 @@ $string['mmteamslugnamemissingerror'] = 'Error: Mattermost team slug name is emp
 $string['mmchannelnameerror'] = 'Error: sanitized Mattermost channelname can\'t be empty';
 $string['mminstancenotfounderror'] = 'Error: can\'t find mattermost instance {$a} in Moodle';
 $string['moodleusernotfounderror'] = 'Error: Moodle user {$a} not found';
+$string['userenrolmentnotfounderror'] = 'Error: user enrolment not found on user_enrolment_updated event in mod_mattermost';
 
 $string['mattermost:addinstance'] = 'Add a Mattermost module instance';
 $string['nomattermosts'] = 'No Mattermost module instances.';
