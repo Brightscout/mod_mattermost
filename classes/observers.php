@@ -370,7 +370,7 @@ class observers
                     return;
                 }
 
-                // Unarchive channel only if intance is not hidden.
+                // Unarchive channel only if the instance is not hidden.
                 if ($coursemodule->visible) {
                     $mattermostapimanager->unarchive_mattermost_channel(
                         $mattermostrecyclebin->mattermostid,
@@ -581,11 +581,14 @@ class observers
             array_push($channelids, $group->channelid);
         }
 
-        $coursecontext = \context_course::instance($courseid);
-        foreach ($channelids as $channelid) {
-            if ($userenrolment->status == 1) {
+        // If the user enrolment status is equal to 1, it means that the user is suspended in the course.
+        if ($userenrolment->status == 1) {
+            foreach ($channelids as $channelid) {
                 mattermost_tools::unenrol_user_from_mattermost_channel($channelid, $userid, $mattermostinstance->id);
-            } else {
+            }
+        } else {
+            $coursecontext = \context_course::instance($courseid);
+            foreach ($channelids as $channelid) {
                 mattermost_tools::enrol_user_to_mattermost_channel(
                     $channelid,
                     $mattermostinstance->channeladminroles,
