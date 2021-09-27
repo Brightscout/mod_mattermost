@@ -422,7 +422,7 @@ class mattermost_tools
         global $USER;
         $courseid = $mattermostmoduleinstance->course;
         $coursecontext = context_course::instance($courseid);
-        $users = get_enrolled_users($coursecontext);
+        $users = get_enrolled_users($coursecontext, '', 0, 'u.*', null, 0, 0, true);
         foreach ($users as $user) {
             if (!$background || ($forcecreator && $user->id == $USER->id && !\core\session\manager::is_loggedinas())) {
                 self::enrol_user_to_mattermost_channel(
@@ -659,7 +659,7 @@ class mattermost_tools
         }
         $courseid = $mattermostmoduleinstance->course;
         $coursecontext = context_course::instance($courseid);
-        $moodlemembers = get_enrolled_users($coursecontext);
+        $moodlemembers = get_enrolled_users($coursecontext, '', 0, 'u.*', null, 0, 0, true);
         $mattermostid = $mattermostmoduleinstance->mattermostid;
 
         $channeladminroles = $mattermostmoduleinstance->channeladminroles;
@@ -694,6 +694,9 @@ class mattermost_tools
 
         foreach ($groups as $group) {
             $groupmembers = self::get_group_members($group->groupid);
+            $groupmembers = array_filter($groupmembers, function($groupmember) use ($moodlemembers) {
+                return array_key_exists($groupmember->id, $moodlemembers);
+            });
             if ($background) {
                 $tasksynchronize = new \mod_mattermost\task\synchronize_channel();
                 $tasksynchronize->set_custom_data(
