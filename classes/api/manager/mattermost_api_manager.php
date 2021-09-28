@@ -258,10 +258,10 @@ class mattermost_api_manager
      *
      * @param string $id - Mattermost channel id
      * @param int $courseid - Id of course
-     * @param int $binid - Bin Id of recycled group
+     * @param int $categorybinid - Category bin Id of recycled group/course
      */
-    public function unarchive_mattermost_channel($id, $courseid, $binid) {
-        $this->unarchive_mattermost_group_channels($courseid, $binid);
+    public function unarchive_mattermost_channel($id, $courseid, $categorybinid) {
+        $this->unarchive_mattermost_group_channels($courseid, $categorybinid);
 
         try {
             $this->client->unarchive_channel($id);
@@ -274,16 +274,16 @@ class mattermost_api_manager
      * Unarchives all the Mattermost group channels of a course
      *
      * @param int $courseid - id of Moodle course whose groups are to be restored
-     * @param int $binid - bin id of Moodle deleted course whose groups are to be restored
+     * @param int $categorybinid - Category bin id of Moodle deleted course whose groups are to be restored
      */
-    public function unarchive_mattermost_group_channels($courseid, $binid) {
+    public function unarchive_mattermost_group_channels($courseid, $categorybinid) {
         global $DB;
 
         $groups = null;
         if ($courseid) {
             $groups = $DB->get_records('mattermostxgroups', array('courseid' => $courseid));
-        } else if ($binid) {
-            $groups = $DB->get_records('mattermostxgroups', array('categorybinid' => $binid));
+        } else if ($categorybinid) {
+            $groups = $DB->get_records('mattermostxgroups', array('categorybinid' => $categorybinid));
         } else {
             return;
         }
