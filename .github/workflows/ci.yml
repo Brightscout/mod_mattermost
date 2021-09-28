@@ -66,7 +66,6 @@ jobs:
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
-          PHPUNIT_IGNORE_PATHS: tests/integration
 
       - name: PHP Lint
         if: ${{ always() }}
@@ -108,7 +107,9 @@ jobs:
 
       - name: PHPUnit tests
         if: ${{ always() }}
-        run: moodle-plugin-ci phpunit
+        run: |
+          vendor/bin/phpunit --filter mod_mattermost_api_manager_unit_testcase
+          vendor/bin/phpunit --filter mod_mattermost_tools_unit_testcase
 
       - name: Behat features
         if: ${{ always() }}
